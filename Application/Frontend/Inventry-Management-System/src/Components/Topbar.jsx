@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { logOut, isLoggedIn } from '../api/authApi.js';
+import { logOut, isLoggedIn, getUserRole, isAdmin } from '../Api/authApi.js';
 import { toast } from 'react-toastify';
 
 const Topbar = ({ onSidebarToggle }) => {
 
     const navigate = useNavigate();
+    const userRole = getUserRole();
 
     async function handleLogout() {
         await logOut();
@@ -54,17 +55,23 @@ const Topbar = ({ onSidebarToggle }) => {
                     {/* <!-- Start menu --> */}
                     <div className="d-flex justify-content-between menu-sm px-3 ms-auto">
                         <div className="d-flex align-items-center gap-2">
-                            {/* <div className="dropdown d-none d-lg-block"> */}
-                            <button className="btn btn-primary btn-sm fs-14"
-                                onClick={() => navigate('/signup')}>
-                                SignUp
-                            </button>
-
-                            <div className="dropdown d-none d-lg-block">
-                                <button className="btn btn-primary btn-sm fs-14"
-                                    onClick={() => navigate('/signin')}>
-                                    SignIn
+                            {isLoggedIn() ? (
+                                <button className="btn btn-danger btn-sm fs-14"
+                                    onClick={handleLogout}>
+                                    Logout
                                 </button>
+                            ) : (
+                                <>
+                                    <button className="btn btn-primary btn-sm fs-14"
+                                        onClick={() => navigate('/signup')}>
+                                        SignUp
+                                    </button>
+
+                                    <div className="dropdown d-none d-lg-block">
+                                        <button className="btn btn-primary btn-sm fs-14"
+                                            onClick={() => navigate('/signin')}>
+                                            SignIn
+                                        </button>
                                 {/* <div className="dropdown-menu dropdown-menu-start dropdown-menu-lg-widest dropdown-menu-widest dropdown-menu-animated bg-primary-subtle overflow-hidden">
                                     <div className="dropdown-row justify-content-center">
                                         <div className="p-2 menu-image">
@@ -124,6 +131,8 @@ const Topbar = ({ onSidebarToggle }) => {
                                     </div>
                                 </div> */}
                             </div>
+                                    </>
+                                )}
                         </div>
 
                         <div className="d-flex align-items-center gap-2">
@@ -285,10 +294,16 @@ const Topbar = ({ onSidebarToggle }) => {
                                                     </div>
                                                 </div>
                                                 <div className="rich-list-content">
-                                                    <h3 className="rich-list-title text-white">Charlie Stone</h3>
-                                                    <span className="rich-list-subtitle text-white">admin@codubucks.in</span>
+                                                    <h3 className="rich-list-title text-white">User Profile</h3>
+                                                    <span className="rich-list-subtitle text-white">
+                                                        {userRole && (
+                                                            <span className="badge bg-warning text-dark">
+                                                                {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                                                            </span>
+                                                        )}
+                                                    </span>
                                                 </div>
-                                                <div className="rich-list-append"><span className="badge badge-label-light fs-6">6+</span></div>
+                                                <div className="rich-list-append"><span className="badge badge-label-light fs-6">{isAdmin() ? '⭐' : '👤'}</span></div>
                                             </div>
                                         </div>
                                         <div className="card-body p-0">

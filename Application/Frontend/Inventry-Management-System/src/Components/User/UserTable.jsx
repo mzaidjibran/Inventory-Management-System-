@@ -1,8 +1,9 @@
 import { useState } from "react";
-import UserHook from "../../hook/UserHook.jsx"
+import UserHook from "../../Hook/UserHook.jsx"
 import UserForm from "./UserForm.jsx";
-import { deleteUser } from "../../api/UserApi.js";
+import { deleteUser } from "../../Api/UserApi.js";
 import { toast } from "react-toastify";
+import { isLoggedIn, isAdmin } from "../../Api/authApi.js";
 
 const UserTable = () => {
     const { users, loadUser } = UserHook();
@@ -59,11 +60,13 @@ const UserTable = () => {
                 <div className="card">
                     <div className="card-header">
                         <h4 className="card-title">Users</h4>
-                        <button type="button" className="btn btn-primary btn-sm ms-2"
-                            data-bs-toggle="modal" data-bs-target="#modalDeptForm"
-                            onClick={() => setEditData(null)}>
-                            Add User
-                        </button>
+                        {isAdmin() && (
+                            <button type="button" className="btn btn-primary btn-sm ms-2"
+                                data-bs-toggle="modal" data-bs-target="#modalDeptForm"
+                                onClick={() => setEditData(null)}>
+                                Add User
+                            </button>
+                        )}
                     </div>
 
                     <UserForm
@@ -139,14 +142,18 @@ const UserTable = () => {
                                                 onClick={() => handleView(use)}>
                                                 <i className="mdi mdi-eye"></i>
                                             </button>
-                                            <button className="btn btn-sm btn-warning me-1" title="Edit"
-                                                onClick={() => handleEdit(use)}>
-                                                <i className="mdi mdi-pencil"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-danger" title="Delete"
-                                                onClick={() => handleDelete(use._id)}>
-                                                <i className="mdi mdi-delete"></i>
-                                            </button>
+                                            {isAdmin() && (
+                                                <>
+                                                    <button className="btn btn-sm btn-warning me-1" title="Edit"
+                                                        onClick={() => handleEdit(use)}>
+                                                        <i className="mdi mdi-pencil"></i>
+                                                    </button>
+                                                    <button className="btn btn-sm btn-danger" title="Delete"
+                                                        onClick={() => handleDelete(use._id)}>
+                                                        <i className="mdi mdi-delete"></i>
+                                                    </button>
+                                                </>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

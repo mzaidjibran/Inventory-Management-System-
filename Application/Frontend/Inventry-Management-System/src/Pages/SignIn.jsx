@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signIn } from '../api/authApi.js';
+import { signIn } from '../Api/authApi.js';
 import { toast } from 'react-toastify';
 
 export default function SignInPage() {

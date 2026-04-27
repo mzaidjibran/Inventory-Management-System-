@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import addUser from '../api/UserApi.js';
+import { signUp } from '../Api/authApi.js';
 import { toast } from 'react-toastify';
 
 export default function SignUpPage() {
@@ -14,7 +14,7 @@ export default function SignUpPage() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            await addUser(form);
+            await signUp(form);
             toast.success('Account ban gaya! Ab login karo.');
             navigate('/signin');
         } catch (err) {

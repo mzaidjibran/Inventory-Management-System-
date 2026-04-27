@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import addUser from "../../api/UserApi.js"
+import addUser from "../../Api/UserApi.js"
 import { toast } from "react-toastify";
+import { isAdmin } from "../../Api/authApi.js";
 
 const UserForm = ({ onSaved, editData, onClearEdit }) => {
     const empty = { User_Name: "", email: "", password: "", role: "employee" };
@@ -25,6 +26,13 @@ const UserForm = ({ onSaved, editData, onClearEdit }) => {
 
     async function SaveUser(e) {
         e.preventDefault();
+        
+        // Check if user is admin
+        if (!isAdmin()) {
+            toast.error("Only admins can add or edit users");
+            return;
+        }
+        
         try {
             // Validate required fields
             if (!value.User_Name || value.User_Name.trim() === "") {
@@ -45,7 +53,7 @@ const UserForm = ({ onSaved, editData, onClearEdit }) => {
             }
 
             if (editData) {
-                const { updateUser } = await import("../../api/UserApi.js");
+                const { updateUser } = await import("../../Api/UserApi.js");
                 await updateUser(editData._id, value);
                 toast.success("User updated successfully");
             } else {
@@ -112,9 +120,8 @@ const UserForm = ({ onSaved, editData, onClearEdit }) => {
                                     onChange={handleChange("role")}
                                     required>
                                     <option value="">-- Select Role --</option>
-                                    <option value="employee">Employee</option>
                                     <option value="admin">Admin</option>
-                                    <option value="manager">Manager</option>
+                                    <option value="user">User</option>
                                 </select>
                             </div>
                         </div>

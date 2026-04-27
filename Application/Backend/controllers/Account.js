@@ -4,6 +4,34 @@ import { generateAccessToken, generateRefreshToken } from "../utils/generateToke
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+
+export const SignUp = async (request, response) => {
+    try {
+        const { User_Name, email, password } = request.body;
+        const existingUser = await UserModel.findOne({ email });
+        if (existingUser) {
+            return response.status(400).json({
+                success: false,
+                message: "Email already registered"
+            })
+        }
+        const hashpassword = await bcrypt.hash(password, 10);
+        const newUser = await UserModel.create({
+            User_Name,
+            email,
+            password: hashpassword,
+            role: "user"  // Default user role
+        });
+        return response.status(201).json({
+            success: true,
+            message: "Registered successfully",
+            data: newUser
+        })
+    } catch (error) {
+        response.status(500).json({ message: error.message })
+    }
+}
+
 export const SignIn = async (request, response) => {
     try {
         const { email, password } = request.body;
@@ -27,7 +55,7 @@ export const SignIn = async (request, response) => {
             })
         }
 
-        const accessToken = await generateAccessToken(findUser._id)
+        const accessToken = await generateAccessToken(findUser._id, findUser.role)
         const refreshToken = await generateRefreshToken(findUser._id)
 
         await RefreshToken.create({
@@ -92,7 +120,11 @@ export const refresh = async (request, response) => {
         jwt.verify(storedRefreshToken.token, process.env.JWT_REFRESH_SECRET)
         await RefreshToken.deleteOne({ refreshToken: refreshToken })
 
-        const newAccessToken = await generateAccessToken(storedRefreshToken.userId)
+        // Get user role
+        const user = await UserModel.findById(storedRefreshToken.userId)
+        const userRole = user ? user.role : "user"
+
+        const newAccessToken = await generateAccessToken(storedRefreshToken.userId, userRole)
         const newRefreshToken = await generateRefreshToken(storedRefreshToken.userId)
 
         await RefreshToken.create({

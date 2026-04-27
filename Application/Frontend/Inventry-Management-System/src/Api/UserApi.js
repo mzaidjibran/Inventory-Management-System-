@@ -1,11 +1,16 @@
 const API_BASE = 'http://localhost:3000'
 
+const getHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+}); // ← Token added here
+
 // add user
 
 const addUser = async (data) => {
     const response = await fetch(`${API_BASE}/api/user/createUser`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) {
@@ -21,9 +26,9 @@ export default addUser;
 //get all users
 
 export const getAllUsers = async () => {
-    const response = await fetch(`${API_BASE}/api/user/getAllUsers`, {
+    const response = await fetch(`${API_BASE}/api/user/getAllusers`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders()
     });
     if (!response.ok) throw new Error(`Get all failed: ${response.status}`);
     return response.json();
@@ -34,7 +39,7 @@ export const getAllUsers = async () => {
 export const updateUser = async (id, data) => {
     const response = await fetch(`${API_BASE}/api/user/updateuser/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) {
@@ -50,7 +55,7 @@ export const updateUser = async (id, data) => {
 export const deleteUser = async (id) => {
     const response = await fetch(`${API_BASE}/api/user/deleteuser/${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders()
     });
     if (!response.ok) {
         const errorText = await response.text();

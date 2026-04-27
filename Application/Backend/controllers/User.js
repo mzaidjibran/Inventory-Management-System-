@@ -18,9 +18,6 @@ export const createUser = async (request, response) => {
 export const getAllusers = async (request, response) => {
     try {
         const allusers = await UserModel.find()
-
-
-
         response.status(200).json({
             success: true,
             error: false,
