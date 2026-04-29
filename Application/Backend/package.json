@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Inventry Management System Backend",
   "license": "ISC",
-  "author": "Muhammad Zaid Jibran",
+  "author": "Muhammad Zaid Jibran, Muhammad Zain Sajjad",
   "type": "module",
   "main": "index.js",
   "scripts": {

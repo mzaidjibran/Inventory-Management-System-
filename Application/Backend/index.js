@@ -4,8 +4,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
 import dotenv from "dotenv";
-import UserRoutes from "./routes/User.js";
-import AccountRoutes from "./routes/Account.js";
+import UserRoutes from "./routes/Userroute.js";
+import AccountRoutes from "./routes/Accountroute.js";
+import EmployeeRoutes from "./routes/Epolyeeroute.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
@@ -29,6 +30,7 @@ await connectDB();
 // Routes
 app.use("/api/user", UserRoutes);
 app.use("/api/account", AccountRoutes);
+app.use("/api/employee", EmployeeRoutes);
 
 // test route
 app.get("/", (req, res) => {
