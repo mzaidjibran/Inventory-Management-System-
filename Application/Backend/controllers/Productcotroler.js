@@ -1,110 +1,108 @@
 import EmployeeDesignation from "../models/EmployeeDesignation.js";
-const createDesignation = async (request, response) => {
+const createproduct = async (request, response) => {
   try {
-    const designation = await EmployeeDesignation.create(request.body);
-    response.status(201).json(designation);
+    const product = await Product.create(request.body);
+    response.status(201).json(product);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
-export { createDesignation };
-//get all designation
-export const getAllDesignations = async (request, response) => {
+export { createproduct };
+//get all product
+export const getAllProducts = async (request, response) => {
   try {
-    const designations = await EmployeeDesignation.find();
+    const products = await Product.find();
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designations fetched successfully",
-      data: designations,
+      message: "Products fetched successfully",
+      data: products,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching designations",
+      message: "Error fetching products",
       data: null,
     });
   }
 };
-//get designation by id
-export const getSingleDesignation = async (request, response) => {
+//get product by id
+export const getSingleProduct = async (request, response) => {
   try {
-    const designation = await EmployeeDesignation.findById(request.params.id);
-    if (!designation) {
+    const product = await Product.findById(request.params.id);
+    if (!product) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Product not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation fetched successfully",
-      data: designation,
+      message: "Product fetched successfully",
+      data: product,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching designation",
+      message: "Error fetching product",
     });
   }
 };
-//update designation
-export const updateDesignation = async (request, response) => {
+//update product
+export const updateProduct = async (request, response) => {
   try {
-    const updatedesignation = await EmployeeDesignation.findByIdAndUpdate(
+    const updatedProduct = await Product.findByIdAndUpdate(
       request.params.id,
       request.body,
       { new: true },
     );
-    if (!updatedesignation) {
+    if (!updatedProduct) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Product not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation updated successfully",
-      data: updatedesignation,
+      message: "Product updated successfully",
+      data: updatedProduct,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error updating designation",
+      message: "Error updating product",
     });
   }
 };
-//delete designation
-export const deleteDesignation = async (request, response) => {
+//delete productexport const deleteProduct = async (request, response) => {
+export const deleteProduct = async (request, response) => {
   try {
-    const deletedesignation = await EmployeeDesignation.findByIdAndDelete(
-      request.params.id,
-    );
-    if (!deletedesignation) {
+    const deletedProduct = await Product.findByIdAndDelete(request.params.id);
+    if (!deletedProduct) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Product not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation deleted successfully",
-      data: deletedesignation,
+      message: "Product deleted successfully",
+      data: deletedProduct,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error deleting designation",
+      message: "Error deleting product",
     });
   }
 };
