@@ -5,7 +5,7 @@ import {
   getSinglePayout,
   updatePayout,
   deletePayout,
-} from "../controllers/payoutcontroller.js";
+} from "../controllers/payoutcontroler.js";
 import upload from "../middleware/multerniddleware.js";
 const router = express.Router();
 //payout routers

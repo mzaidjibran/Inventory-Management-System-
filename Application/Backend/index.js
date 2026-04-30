@@ -9,6 +9,8 @@ import AccountRoutes from "./routes/Accountroute.js";
 import EmployeeRoutes from "./routes/Epolyeeroute.js";
 import ProductRoutes from "./routes/Productsroot.js";
 import PurchaseRoutes from "./routes/Purchaseroot.js";
+import PayoutRoutes from "./routes/payoutroot.js";
+import ScanRoutes from "./routes/Scanerroot.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
@@ -41,6 +43,8 @@ app.use("/api/account", AccountRoutes);
 app.use("/api/employee", EmployeeRoutes);
 app.use("/api/product", ProductRoutes);
 app.use("/api/purchase", PurchaseRoutes);
+app.use("/api/payout", PayoutRoutes);
+app.use("/api/scan", ScanRoutes);
 // test route
 app.get("/", (req, res) => {
   res.send("API is running...");

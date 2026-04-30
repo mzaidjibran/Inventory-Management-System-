@@ -1,110 +1,108 @@
-import EmployeeDesignation from "../models/EmployeeDesignation.js";
-const createDesignation = async (request, response) => {
+import ScanSession from "../models/Scannermodal.js";
+const createScan = async (request, response) => {
   try {
-    const designation = await EmployeeDesignation.create(request.body);
-    response.status(201).json(designation);
+    const scan = await ScanSession.create(request.body);
+    response.status(201).json(scan);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
-export { createDesignation };
-//get all designation
-export const getAllDesignations = async (request, response) => {
+export { createScan };
+//get all scans
+export const getAllScans = async (request, response) => {
   try {
-    const designations = await EmployeeDesignation.find();
+    const scans = await ScanSession.find();
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designations fetched successfully",
-      data: designations,
+      message: "Scans fetched successfully",
+      data: scans,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching designations",
+      message: "Error fetching scans",
       data: null,
     });
   }
 };
-//get designation by id
-export const getSingleDesignation = async (request, response) => {
+//get scan by id
+export const getSingleScan = async (request, response) => {
   try {
-    const designation = await EmployeeDesignation.findById(request.params.id);
-    if (!designation) {
+    const scan = await ScanSession.findById(request.params.id);
+    if (!scan) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Scan not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation fetched successfully",
-      data: designation,
+      message: "Scan fetched successfully",
+      data: scan,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching designation",
+      message: "Error fetching scan",
     });
   }
 };
-//update designation
-export const updateDesignation = async (request, response) => {
+//update scan
+export const updateScan = async (request, response) => {
   try {
-    const updatedesignation = await EmployeeDesignation.findByIdAndUpdate(
+    const updatedScan = await ScanSession.findByIdAndUpdate(
       request.params.id,
       request.body,
       { new: true },
     );
-    if (!updatedesignation) {
+    if (!updatedScan) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Scan not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation updated successfully",
-      data: updatedesignation,
+      message: "Scan updated successfully",
+      data: updatedScan,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error updating designation",
+      message: "Error updating scan",
     });
   }
 };
-//delete designation
-export const deleteDesignation = async (request, response) => {
+//delete scanexport const deleteScan = async (request, response) => {
+export const deleteScan = async (request, response) => {
   try {
-    const deletedesignation = await EmployeeDesignation.findByIdAndDelete(
-      request.params.id,
-    );
-    if (!deletedesignation) {
+    const deletedScan = await ScanSession.findByIdAndDelete(request.params.id);
+    if (!deletedScan) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Scan not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation deleted successfully",
-      data: deletedesignation,
+      message: "Scan deleted successfully",
+      data: deletedScan,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error deleting designation",
+      message: "Error deleting scan",
     });
   }
 };

@@ -1,17 +1,17 @@
-import EmployeeDesignation from "../models/payoutmodal.js";
-const createpayout = async (request, response) => {
+import Payout from "../models/payoutmodal.js";
+export const createPayout = async (request, response) => {
   try {
-    const payout = await payout.create(request.body);
+    const payout = await Payout.create(request.body);
     response.status(201).json(payout);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
-export { createpayout };
+
 //get all payouts
-export const getAllPayouts = async (request, response) => {
+export const getAllpayouts = async (request, response) => {
   try {
-    const payouts = await payout.find();
+    const payouts = await Payout.find();
     response.status(200).json({
       success: true,
       error: false,
@@ -30,7 +30,7 @@ export const getAllPayouts = async (request, response) => {
 //get payout by id
 export const getSinglePayout = async (request, response) => {
   try {
-    const payout = await payout.findById(request.params.id);
+    const payout = await Payout.findById(request.params.id);
     if (!payout) {
       return response.status(404).json({
         success: false,
@@ -55,7 +55,7 @@ export const getSinglePayout = async (request, response) => {
 //update payout
 export const updatePayout = async (request, response) => {
   try {
-    const updatedPayout = await payout.findByIdAndUpdate(
+    const updatedPayout = await Payout.findByIdAndUpdate(
       request.params.id,
       request.body,
       { new: true },
@@ -81,10 +81,10 @@ export const updatePayout = async (request, response) => {
     });
   }
 };
-//delete payoutexport const deletePayout = async (request, response) => {
-export const del = async (request, response) => {
+//delete payout
+export const deletePayout = async (request, response) => {
   try {
-    const deletedPayout = await payout.findByIdAndDelete(request.params.id);
+    const deletedPayout = await Payout.findByIdAndDelete(request.params.id);
     if (!deletedPayout) {
       return response.status(404).json({
         success: false,
