@@ -1,9 +1,4 @@
-import {
-  Employee,
-  EmployeeDepartment,
-  EmployeeDesignation,
-  Shift,
-} from "../models/index.js";
+import { Employee } from "../models/index.js";
 const createEmployee = async (request, response) => {
   try {
     const employeeData = {
@@ -21,13 +16,7 @@ export { createEmployee };
 //get all employee
 export const getAllEmployees = async (request, response) => {
   try {
-    const employees = await Employee.findAll({
-      include: [
-        { model: EmployeeDepartment, as: "department", attributes: ["name"] },
-        { model: EmployeeDesignation, as: "designation", attributes: ["title"] },
-        { model: Shift, as: "shift", attributes: ["name"] },
-      ],
-    });
+    const employees = await Employee.findAll();
     response.status(200).json({
       success: true,
       error: false,
@@ -46,13 +35,7 @@ export const getAllEmployees = async (request, response) => {
 //get employee by id
 export const getSingleEmployee = async (request, response) => {
   try {
-    const employee = await Employee.findByPk(request.params.id, {
-      include: [
-        { model: EmployeeDepartment, as: "department", attributes: ["name"] },
-        { model: EmployeeDesignation, as: "designation", attributes: ["title"] },
-        { model: Shift, as: "shift", attributes: ["name"] },
-      ],
-    });
+    const employee = await Employee.findByPk(request.params.id);
     if (!employee) {
       return response.status(404).json({
         success: false,
@@ -92,13 +75,9 @@ export const updateEmployee = async (request, response) => {
 
     await updateemployee.update(updateData);
 
-    const updatedEmployeeWithRelations = await Employee.findByPk(request.params.id, {
-      include: [
-        { model: EmployeeDepartment, as: "department", attributes: ["name"] },
-        { model: EmployeeDesignation, as: "designation", attributes: ["title"] },
-        { model: Shift, as: "shift", attributes: ["name"] },
-      ],
-    });
+    const updatedEmployeeWithRelations = await Employee.findByPk(
+      request.params.id,
+    );
 
     response.status(200).json({
       success: true,

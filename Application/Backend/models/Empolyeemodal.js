@@ -66,17 +66,6 @@ const Employee = sequelize.define(
     address: {
       type: DataTypes.JSON,
     },
-    department: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    designation: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    shift: {
-      type: DataTypes.INTEGER,
-    },
     user: {
       type: DataTypes.INTEGER,
     },
