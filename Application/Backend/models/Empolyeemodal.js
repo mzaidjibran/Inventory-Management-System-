@@ -1,76 +1,86 @@
 import mongoose from "mongoose";
 
-const Employee = sequelize.define(
-  "Employee",
+const employeeSchema = new mongoose.Schema(
   {
     firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [2, 50],
-      },
+      type: String,
+      required: [true, "First name is required"],
+      trim: true,
+      minlength: [2, "First name must be at least 2 characters"],
+      maxlength: [50, "First name cannot exceed 50 characters"],
     },
     lastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [2, 50],
-      },
+      type: String,
+      required: [true, "Last name is required"],
+      trim: true,
+      minlength: [2, "Last name must be at least 2 characters"],
+      maxlength: [50, "Last name cannot exceed 50 characters"],
     },
+
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
-      validate: {
-        isEmail: true,
-        len: [0, 100],
-      },
-      set(value) {
-        this.setDataValue("email", value ? value.toLowerCase().trim() : value);
-      },
+      lowercase: true,
+      trim: true,
+      maxlength: [100, "Email cannot exceed 100 characters"],
     },
+
     phone: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [0, 20],
-      },
+      type: String,
+      required: [true, "Phone number is required"],
+      trim: true,
+      maxlength: [20, "Phone number cannot exceed 20 characters"],
     },
     CNIC: {
-      type: DataTypes.STRING,
+      type: String,
       unique: true,
-      validate: {
-        len: [0, 20],
-      },
+      trim: true,
+      maxlength: [20, "CNIC cannot exceed 20 characters"],
     },
+
     dateOfBirth: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      type: Date,
+      default: Date.now,
     },
+
     gender: {
-      type: DataTypes.ENUM("Male", "Female", "Other"),
+      type: String,
+      enum: ["Male", "Female", "Other"],
     },
+
     dateOfJoining: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      type: Date,
+      default: Date.now,
     },
+
     salary: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0,
+      type: Number,
+      default: 0,
     },
+
     status: {
-      type: DataTypes.ENUM("Active", "Inactive", "Terminated", "On Leave"),
-      defaultValue: "Active",
+      type: String,
+      enum: ["Active", "Inactive", "Terminated", "On Leave"],
+      default: "Active",
     },
+
     address: {
-      type: DataTypes.JSON,
+      street: String,
+      city: String,
+      state: String,
+      country: String,
+      zipCode: String,
     },
+
     user: {
-      type: DataTypes.INTEGER,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
+
     profileImage: {
-      type: DataTypes.STRING,
-      defaultValue: "",
+      type: String,
+      default: "",
     },
   },
   {
@@ -78,7 +88,4 @@ const Employee = sequelize.define(
   },
 );
 
-const Employee = mongoose.model("Employee", employeeSchema);
-
-const Employee = mongoose.model("Employee", EmployeeSchema);
-export default Employee;
+export default mongoose.model("Employee", employeeSchema);

@@ -57,18 +57,29 @@ export const getSingleuser = async (request, response) => {
 
 export const updatedUser = async (request, response) => {
   try {
-    const updatedUser = await UserModel.findByPk(request.params.id);
-    if (!updatedUser) {
-      return response.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+    const updateData = { ...request.body };
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
     }
-    response.status(200).json({
-      success: true,
-      data: updatedUser,
-      message: "User updated successfully",
-    });
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      request.params.id,
+      updateData,
+      {
+        new: true,
+      },
+    );
+    if (!updatedUser) {
+      return response
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    response
+      .status(200)
+      .json({
+        success: true,
+        data: updatedUser,
+        message: "User updated successfully",
+      });
   } catch (error) {
     response.status(500).json({
       success: false,

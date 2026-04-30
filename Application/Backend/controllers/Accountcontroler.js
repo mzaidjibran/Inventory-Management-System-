@@ -1,4 +1,5 @@
-import { RefreshToken, UserModel } from "../models/index.js";
+import UserModel from "../models/UserModel.js";
+import RefreshToken from "../models/refreshToken.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -9,7 +10,7 @@ import bcrypt from "bcrypt";
 export const SignUp = async (request, response) => {
   try {
     const { User_Name, email, password } = request.body;
-    const existingUser = await UserModel.findOne({ where: { email } });
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return response.status(400).json({
         success: false,
@@ -21,7 +22,7 @@ export const SignUp = async (request, response) => {
       User_Name,
       email: email.toLowerCase().trim(),
       password: hashpassword,
-      role: "user", // Default user role
+      role: "user",
     });
     return response.status(201).json({
       success: true,
@@ -37,7 +38,7 @@ export const SignIn = async (request, response) => {
   try {
     const { email, password } = request.body;
 
-    const findUser = await UserModel.findOne({ where: { email } });
+    const findUser = await UserModel.findOne({ email });
 
     if (!findUser) {
       return response.status(404).json({
@@ -83,7 +84,7 @@ export const logOut = async (request, response) => {
   try {
     const { refreshToken } = request.body;
 
-    await RefreshToken.destroy({ where: { token: refreshToken } });
+    await RefreshToken.deleteOne({ token: refreshToken });
 
     return response.status(200).json({
       success: true,
@@ -105,9 +106,8 @@ export const refresh = async (request, response) => {
     const { refreshToken } = request.body;
 
     const storedRefreshToken = await RefreshToken.findOne({
-      where: { token: refreshToken },
-      include: [{ model: UserModel, as: "user" }],
-    });
+      token: refreshToken,
+    }).populate("userId");
     if (!storedRefreshToken) {
       return response.status(400).json({
         success: false,
@@ -117,7 +117,7 @@ export const refresh = async (request, response) => {
     }
 
     jwt.verify(storedRefreshToken.token, process.env.JWT_REFRESH_SECRET);
-    await RefreshToken.destroy({ where: { token: refreshToken } });
+    await RefreshToken.deleteOne({ token: refreshToken });
 
     const userRole = storedRefreshToken.userId
       ? storedRefreshToken.userId.role

@@ -1,27 +1,19 @@
 import mongoose from "mongoose";
 
-const RefreshToken = sequelize.define(
-  "RefreshToken",
+const refreshTokenSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "UserModel",
       required: true,
     },
-    token: {
-      type: String,
-      required: true,
-    },
-    expiresIn: {
-      type: DataTypes.DATE,
-    },
+    token: { type: String, required: true },
+    expiresIn: { type: Date },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-const RefreshToken = mongoose.model("RefreshToken", refreshTokenSchema);
-
-const RefreshToken = mongoose.model("RefreshToken", RefreshTokenSchema);
+const RefreshToken =
+  mongoose.models.RefreshToken ||
+  mongoose.model("RefreshToken", refreshTokenSchema);
 export default RefreshToken;
