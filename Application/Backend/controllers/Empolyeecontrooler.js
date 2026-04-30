@@ -1,9 +1,5 @@
-import {
-  Employee,
-  EmployeeDepartment,
-  EmployeeDesignation,
-  Shift,
-} from "../models/index.js";
+import Employee from "../models/Empolyeemodal.js";
+
 const createEmployee = async (request, response) => {
   try {
     const employeeData = {
@@ -11,23 +7,22 @@ const createEmployee = async (request, response) => {
       profileImage: request.file ? request.file.path : "",
     };
     const employee = await Employee.create(employeeData);
-
     response.status(201).json(employee);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
+
 export { createEmployee };
-//get all employee
+
+// Get all employees
 export const getAllEmployees = async (request, response) => {
   try {
-    const employees = await Employee.findAll({
-      include: [
-        { model: EmployeeDepartment, as: "department", attributes: ["name"] },
-        { model: EmployeeDesignation, as: "designation", attributes: ["title"] },
-        { model: Shift, as: "shift", attributes: ["name"] },
-      ],
-    });
+    const employees = await Employee.find()
+      .populate("department", "name")
+      .populate("designation", "title")
+      .populate("shift", "name")
+      .populate("user", "User_Name email");
     response.status(200).json({
       success: true,
       error: false,
@@ -43,16 +38,15 @@ export const getAllEmployees = async (request, response) => {
     });
   }
 };
-//get employee by id
+
+// Get employee by id
 export const getSingleEmployee = async (request, response) => {
   try {
-    const employee = await Employee.findByPk(request.params.id, {
-      include: [
-        { model: EmployeeDepartment, as: "department", attributes: ["name"] },
-        { model: EmployeeDesignation, as: "designation", attributes: ["title"] },
-        { model: Shift, as: "shift", attributes: ["name"] },
-      ],
-    });
+    const employee = await Employee.findById(request.params.id)
+      .populate("department", "name")
+      .populate("designation", "title")
+      .populate("shift", "name")
+      .populate("user", "User_Name email");
     if (!employee) {
       return response.status(404).json({
         success: false,
@@ -74,37 +68,35 @@ export const getSingleEmployee = async (request, response) => {
     });
   }
 };
-//update employee
+
+// Update employee
 export const updateEmployee = async (request, response) => {
   try {
     const updateData = { ...request.body };
     if (request.file) {
       updateData.profileImage = request.file.path;
     }
-    const updateemployee = await Employee.findByPk(request.params.id);
-    if (!updateemployee) {
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      request.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    )
+      .populate("department", "name")
+      .populate("designation", "title")
+      .populate("shift", "name")
+      .populate("user", "User_Name email");
+    if (!updatedEmployee) {
       return response.status(404).json({
         success: false,
         error: true,
         message: "Employee not found",
       });
     }
-
-    await updateemployee.update(updateData);
-
-    const updatedEmployeeWithRelations = await Employee.findByPk(request.params.id, {
-      include: [
-        { model: EmployeeDepartment, as: "department", attributes: ["name"] },
-        { model: EmployeeDesignation, as: "designation", attributes: ["title"] },
-        { model: Shift, as: "shift", attributes: ["name"] },
-      ],
-    });
-
     response.status(200).json({
       success: true,
       error: false,
       message: "Employee updated successfully",
-      data: updatedEmployeeWithRelations,
+      data: updatedEmployee,
     });
   } catch (error) {
     response.status(500).json({
@@ -114,23 +106,23 @@ export const updateEmployee = async (request, response) => {
     });
   }
 };
-//delete employee
+
+// Delete employee
 export const deleteEmployee = async (request, response) => {
   try {
-    const deleteemployee = await Employee.findByPk(request.params.id);
-    if (!deleteemployee) {
+    const deletedEmployee = await Employee.findByIdAndDelete(request.params.id);
+    if (!deletedEmployee) {
       return response.status(404).json({
         success: false,
         error: true,
         message: "Employee not found",
       });
     }
-    await deleteemployee.destroy();
     response.status(200).json({
       success: true,
       error: false,
       message: "Employee deleted successfully",
-      data: deleteemployee,
+      data: deletedEmployee,
     });
   } catch (error) {
     response.status(500).json({

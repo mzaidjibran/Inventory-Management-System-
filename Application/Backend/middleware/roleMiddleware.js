@@ -3,7 +3,7 @@ import UserModel from "../models/UserModel.js";
 export const roleMiddleware = (role) => {
   return async (request, response, next) => {
     try {
-      const user = await UserModel.findByPk(request.userId);
+      const user = await UserModel.findById(request.userId);
       if (!user) {
         return response.status(404).json({
           success: false,

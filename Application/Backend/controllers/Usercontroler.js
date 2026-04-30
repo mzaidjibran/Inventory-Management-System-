@@ -16,7 +16,7 @@ export const createUser = async (request, response) => {
 
 export const getAllusers = async (request, response) => {
   try {
-    const allusers = await UserModel.findAll();
+    const allusers = await UserModel.find();
     response.status(200).json({
       success: true,
       error: false,
@@ -33,7 +33,7 @@ export const getAllusers = async (request, response) => {
 
 export const getSingleuser = async (request, response) => {
   try {
-    const singleuser = await UserModel.findByPk(request.params.id);
+    const singleuser = await UserModel.findById(request.params.id);
     if (!singleuser) {
       return response.status(404).json({
         success: false,
@@ -57,14 +57,17 @@ export const getSingleuser = async (request, response) => {
 
 export const updatedUser = async (request, response) => {
   try {
-    const updatedUser = await UserModel.findByPk(request.params.id);
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      request.params.id,
+      request.body,
+      { new: true, runValidators: true }
+    );
     if (!updatedUser) {
       return response.status(404).json({
         success: false,
         message: "User not found",
       });
     }
-    await updatedUser.update(request.body);
     response.status(200).json({
       success: true,
       data: updatedUser,
@@ -80,14 +83,13 @@ export const updatedUser = async (request, response) => {
 
 export const deletedUser = async (request, response) => {
   try {
-    const deletedUser = await UserModel.findByPk(request.params.id);
+    const deletedUser = await UserModel.findByIdAndDelete(request.params.id);
     if (!deletedUser) {
       return response.status(404).json({
         success: false,
         message: "User not found",
       });
     }
-    await deletedUser.destroy();
     response.status(200).json({
       success: true,
       data: deletedUser,

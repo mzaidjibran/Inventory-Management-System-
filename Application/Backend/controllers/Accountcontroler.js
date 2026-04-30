@@ -9,7 +9,7 @@ import bcrypt from "bcrypt";
 export const SignUp = async (request, response) => {
   try {
     const { User_Name, email, password } = request.body;
-    const existingUser = await UserModel.findOne({ where: { email } });
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return response.status(400).json({
         success: false,
@@ -37,7 +37,7 @@ export const SignIn = async (request, response) => {
   try {
     const { email, password } = request.body;
 
-    const findUser = await UserModel.findOne({ where: { email } });
+    const findUser = await UserModel.findOne({ email });
 
     if (!findUser) {
       return response.status(404).json({
@@ -56,11 +56,11 @@ export const SignIn = async (request, response) => {
       });
     }
 
-    const accessToken = await generateAccessToken(findUser.id, findUser.role);
-    const refreshToken = await generateRefreshToken(findUser.id);
+    const accessToken = await generateAccessToken(findUser._id, findUser.role);
+    const refreshToken = await generateRefreshToken(findUser._id);
 
     await RefreshToken.create({
-      userId: findUser.id,
+      userId: findUser._id,
       token: refreshToken,
       expiresIn: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
@@ -83,7 +83,7 @@ export const logOut = async (request, response) => {
   try {
     const { refreshToken } = request.body;
 
-    await RefreshToken.destroy({ where: { token: refreshToken } });
+    await RefreshToken.deleteOne({ refreshToken });
 
     return response.status(200).json({
       success: true,
@@ -105,9 +105,9 @@ export const refresh = async (request, response) => {
     const { refreshToken } = request.body;
 
     const storedRefreshToken = await RefreshToken.findOne({
-      where: { token: refreshToken },
-      include: [{ model: UserModel, as: "user" }],
-    });
+      refreshToken,
+    }).populate("userId", "role");
+
     if (!storedRefreshToken) {
       return response.status(400).json({
         success: false,
@@ -117,22 +117,22 @@ export const refresh = async (request, response) => {
     }
 
     jwt.verify(storedRefreshToken.token, process.env.JWT_REFRESH_SECRET);
-    await RefreshToken.destroy({ where: { token: refreshToken } });
+    await RefreshToken.deleteOne({ refreshToken });
 
-    const userRole = storedRefreshToken.user
-      ? storedRefreshToken.user.role
+    const userRole = storedRefreshToken.userId
+      ? storedRefreshToken.userId.role
       : "user";
 
     const newAccessToken = await generateAccessToken(
-      storedRefreshToken.userId,
+      storedRefreshToken.userId._id,
       userRole,
     );
     const newRefreshToken = await generateRefreshToken(
-      storedRefreshToken.userId,
+      storedRefreshToken.userId._id,
     );
 
     await RefreshToken.create({
-      userId: storedRefreshToken.userId,
+      userId: storedRefreshToken.userId._id,
       token: newRefreshToken,
       expiresIn: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });

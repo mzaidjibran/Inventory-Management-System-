@@ -1,94 +1,103 @@
-import { DataTypes } from "sequelize";
-import { sequelize } from "../config/config.js";
+import mongoose from "mongoose";
 
-const Employee = sequelize.define(
-  "Employee",
+const EmployeeSchema = new mongoose.Schema(
   {
     firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [2, 50],
-      },
+      type: String,
+      required: true,
     },
     lastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [2, 50],
-      },
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 50,
     },
     email: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
       unique: true,
-      validate: {
-        isEmail: true,
-        len: [0, 100],
-      },
-      set(value) {
-        this.setDataValue("email", value ? value.toLowerCase().trim() : value);
-      },
+      lowercase: true,
+      trim: true,
+      maxlength: 100,
     },
-    phone: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [0, 20],
-      },
+    // phone: {
+    //   type: String,
+    //   required: true,
+    //   maxlength: 20,
+    // },
+    // CNIC: {
+    //   type: String,
+    //   unique: true,
+    //   sparse: true,
+    //   maxlength: 20,
+    // },
+    // dateOfBirth: {
+    //   type: String,
+    // },
+    // gender: {
+    //   type: String,
+    //   enum: ["Male", "Female", "Other"],
+    // },
+    // dateOfJoining: {
+    //   type: String,
+    // },
+    // salary: {
+    //   type: String,
+    //   default: "0",
+    // },
+    // status: {
+    //   type: String,
+    //   enum: ["Active", "Inactive", "Terminated", "On Leave"],
+    //   default: "Active",
+    // },
+    // address: {
+    //   street: String,
+    //   city: String,
+    //   state: String,
+    //   country: String,
+    //   zipCode: String,
+    // },
+    // department: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "EmployeeDepartment",
+    // },
+    // designation: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "EmployeeDesignation",
+    // },
+    // shift: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Shift",
+    // },
+    // user: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "UserModel",
+    // },
+    // profileImage: {
+    //   type: String,
+    //   default: "",
+    // },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "UserModel",
     },
-    CNIC: {
-      type: DataTypes.STRING,
-      unique: true,
-      validate: {
-        len: [0, 20],
-      },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "UserModel",
     },
-    dateOfBirth: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "UserModel",
     },
-    gender: {
-      type: DataTypes.ENUM("Male", "Female", "Other"),
-    },
-    dateOfJoining: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    salary: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0,
-    },
-    status: {
-      type: DataTypes.ENUM("Active", "Inactive", "Terminated", "On Leave"),
-      defaultValue: "Active",
-    },
-    address: {
-      type: DataTypes.JSON,
-    },
-    department: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    designation: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    shift: {
-      type: DataTypes.INTEGER,
-    },
-    user: {
-      type: DataTypes.INTEGER,
-    },
-    profileImage: {
-      type: DataTypes.STRING,
-      defaultValue: "",
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
-    tableName: "Employee",
     timestamps: true,
-  },
+  }
 );
 
+const Employee = mongoose.model("Employee", EmployeeSchema);
 export default Employee;

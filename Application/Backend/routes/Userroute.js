@@ -10,6 +10,8 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 import { roleMiddleware } from "../middleware/roleMiddleware.js";
 const router = express.Router();
 
+router.post("/createUser", createUser);
+
 router.get(
   "/getAllusers",
   authMiddleware,
@@ -21,12 +23,6 @@ router.get(
   authMiddleware,
   roleMiddleware(["admin", "user"]),
   getSingleuser,
-);
-router.post(
-  "/createUser",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  createUser,
 );
 router.put(
   "/updateuser/:id",
