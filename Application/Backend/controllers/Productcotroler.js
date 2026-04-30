@@ -1,13 +1,17 @@
-import EmployeeDesignation from "../models/Productmodal.js";
-const createproduct = async (request, response) => {
+import Product from "../models/Productmodal.js";
+
+export const createProduct = async (request, response) => {
   try {
-    const product = await Product.create(request.body);
+    const productData = {
+      ...request.body,
+      image: request.file ? request.file.path : request.body.image || "",
+    };
+    const product = await Product.create(productData);
     response.status(201).json(product);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
-export { createproduct };
 //get all product
 export const getAllProducts = async (request, response) => {
   try {
@@ -55,10 +59,16 @@ export const getSingleProduct = async (request, response) => {
 //update product
 export const updateProduct = async (request, response) => {
   try {
+    const updateData = {
+      ...request.body,
+    };
+    if (request.file) {
+      updateData.image = request.file.path;
+    }
     const updatedProduct = await Product.findByIdAndUpdate(
       request.params.id,
-      request.body,
-      { new: true },
+      updateData,
+      { new: true, runValidators: true },
     );
     if (!updatedProduct) {
       return response.status(404).json({

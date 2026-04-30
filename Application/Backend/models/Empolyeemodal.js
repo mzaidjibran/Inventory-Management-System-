@@ -1,83 +1,80 @@
-import { DataTypes } from "sequelize";
-import { sequelize } from "../config/config.js";
+import mongoose from "mongoose";
 
-const Employee = sequelize.define(
-  "Employee",
+const employeeSchema = new mongoose.Schema(
   {
     firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [2, 50],
-      },
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
     lastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [2, 50],
-      },
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
     email: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: String,
+      required: true,
       unique: true,
-      validate: {
-        isEmail: true,
-        len: [0, 100],
-      },
-      set(value) {
-        this.setDataValue("email", value ? value.toLowerCase().trim() : value);
-      },
+      trim: true,
+      lowercase: true,
     },
     phone: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [0, 20],
-      },
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 20,
     },
     CNIC: {
-      type: DataTypes.STRING,
+      type: String,
       unique: true,
-      validate: {
-        len: [0, 20],
-      },
+      sparse: true,
+      trim: true,
+      maxlength: 20,
     },
     dateOfBirth: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      type: Date,
+      default: Date.now,
     },
     gender: {
-      type: DataTypes.ENUM("Male", "Female", "Other"),
+      type: String,
+      enum: ["Male", "Female", "Other"],
     },
     dateOfJoining: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      type: Date,
+      default: Date.now,
     },
     salary: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0,
+      type: Number,
+      default: 0,
+      min: 0,
     },
     status: {
-      type: DataTypes.ENUM("Active", "Inactive", "Terminated", "On Leave"),
-      defaultValue: "Active",
+      type: String,
+      enum: ["Active", "Inactive", "Terminated", "On Leave"],
+      default: "Active",
     },
     address: {
-      type: DataTypes.JSON,
+      type: mongoose.Schema.Types.Mixed,
     },
     user: {
-      type: DataTypes.INTEGER,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "UserModel",
     },
     profileImage: {
-      type: DataTypes.STRING,
-      defaultValue: "",
+      type: String,
+      default: "",
     },
   },
   {
-    tableName: "Employee",
     timestamps: true,
   },
 );
+
+const Employee = mongoose.model("Employee", employeeSchema);
 
 export default Employee;

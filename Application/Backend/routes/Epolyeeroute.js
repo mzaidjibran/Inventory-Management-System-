@@ -5,10 +5,10 @@ import {
   getSingleEmployee,
   updateEmployee,
   deleteEmployee,
-} from "../controllers/Empolyeecontrooler.js";
+} from "../controllers/Employeecontrooller.js";
 import upload from "../middleware/multerniddleware.js";
 const router = express.Router();
-//empoly routers
+//employee routers
 router.post("/", upload.single("image"), createEmployee);
 router.get("/", getAllEmployees);
 router.get("/:id", getSingleEmployee);

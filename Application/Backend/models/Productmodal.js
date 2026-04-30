@@ -1,74 +1,53 @@
-import { DataTypes } from "sequelize";
-import { sequelize } from "../config/config.js";
+import mongoose from "mongoose";
 
-const Product = sequelize.define(
-  "Product",
+const productSchema = new mongoose.Schema(
   {
     title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-        len: [2, 50],
-      },
-      set(value) {
-        this.setDataValue("title", value ? value.trim() : value);
-      },
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
     author: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-        len: [2, 50],
-      },
-      set(value) {
-        this.setDataValue("author", value ? value.trim() : value);
-      },
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
     price: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-      validate: {
-        isDecimal: true,
-        min: 0,
-      },
+      type: Number,
+      required: true,
+      min: 0,
     },
     stockQuantity: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        isInt: true,
-        min: 0,
-      },
+      type: Number,
+      required: true,
+      min: 0,
     },
     category: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-        len: [2, 50],
-      },
-      set(value) {
-        this.setDataValue("category", value ? value.trim() : value);
-      },
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
     image: {
-      type: DataTypes.STRING,
-      defaultValue: "",
-      validate: {
-        len: [0, 500],
-      },
+      type: String,
+      default: "",
     },
     description: {
-      type: DataTypes.TEXT,
-      defaultValue: "",
+      type: String,
+      default: "",
+      maxlength: 1000,
     },
   },
   {
-    tableName: "Product",
     timestamps: true,
   },
 );
+
+const Product = mongoose.model("Product", productSchema);
 
 export default Product;

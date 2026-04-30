@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import UserRoutes from "./routes/Userroute.js";
 import AccountRoutes from "./routes/Accountroute.js";
 import EmployeeRoutes from "./routes/Epolyeeroute.js";
+import ProductRoutes from "./routes/Productsroot.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
@@ -16,12 +17,18 @@ app.use(express.json());
 app.use(cors());
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.join(__filename);
+const __dirname = path.dirname(__filename);
 
 if (process.env.NODE_ENV == "production") {
-  app.use(express.static(__dirname, "../Frontend/Inventry-Management-System/"));
+  app.use(
+    express.static(
+      path.join(__dirname, "../Frontend/Inventry-Management-System/"),
+    ),
+  );
   app.get("*", (request, response) => {
-    response.sendFile(__dirname, "index.html");
+    response.sendFile(
+      path.join(__dirname, "../Frontend/Inventry-Management-System/index.html"),
+    );
   });
 }
 
@@ -31,7 +38,7 @@ await connectDB();
 app.use("/api/user", UserRoutes);
 app.use("/api/account", AccountRoutes);
 app.use("/api/employee", EmployeeRoutes);
-
+app.use("/api/product", ProductRoutes);
 // test route
 app.get("/", (req, res) => {
   res.send("API is running...");

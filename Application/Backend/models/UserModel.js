@@ -1,28 +1,37 @@
-import { DataTypes } from "sequelize";
-import { sequelize } from "../config/config.js";
+import mongoose from "mongoose";
 
-const UserModel = sequelize.define(
-  "UserModel",
+const userSchema = new mongoose.Schema(
   {
     User_Name: {
-      type: DataTypes.STRING,
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
     email: {
-      type: DataTypes.STRING,
+      type: String,
+      required: true,
       unique: true,
+      trim: true,
+      lowercase: true,
     },
     password: {
-      type: DataTypes.STRING,
+      type: String,
+      required: true,
+      minlength: 6,
     },
     role: {
-      type: DataTypes.ENUM("admin", "user"),
-      defaultValue: "user",
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
     },
   },
   {
-    tableName: "UserModel",
     timestamps: true,
   },
 );
+
+const UserModel = mongoose.model("UserModel", userSchema);
 
 export default UserModel;

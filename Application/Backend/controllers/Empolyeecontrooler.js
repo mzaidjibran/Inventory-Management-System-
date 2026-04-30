@@ -16,7 +16,7 @@ export { createEmployee };
 //get all employee
 export const getAllEmployees = async (request, response) => {
   try {
-    const employees = await Employee.findAll();
+    const employees = await Employee.find();
     response.status(200).json({
       success: true,
       error: false,
@@ -35,7 +35,7 @@ export const getAllEmployees = async (request, response) => {
 //get employee by id
 export const getSingleEmployee = async (request, response) => {
   try {
-    const employee = await Employee.findByPk(request.params.id);
+    const employee = await Employee.findById(request.params.id);
     if (!employee) {
       return response.status(404).json({
         success: false,
@@ -64,7 +64,11 @@ export const updateEmployee = async (request, response) => {
     if (request.file) {
       updateData.profileImage = request.file.path;
     }
-    const updateemployee = await Employee.findByPk(request.params.id);
+    const updateemployee = await Employee.findByIdAndUpdate(
+      request.params.id,
+      updateData,
+      { new: true, runValidators: true },
+    );
     if (!updateemployee) {
       return response.status(404).json({
         success: false,
@@ -73,17 +77,11 @@ export const updateEmployee = async (request, response) => {
       });
     }
 
-    await updateemployee.update(updateData);
-
-    const updatedEmployeeWithRelations = await Employee.findByPk(
-      request.params.id,
-    );
-
     response.status(200).json({
       success: true,
       error: false,
       message: "Employee updated successfully",
-      data: updatedEmployeeWithRelations,
+      data: updateemployee,
     });
   } catch (error) {
     response.status(500).json({
@@ -96,7 +94,7 @@ export const updateEmployee = async (request, response) => {
 //delete employee
 export const deleteEmployee = async (request, response) => {
   try {
-    const deleteemployee = await Employee.findByPk(request.params.id);
+    const deleteemployee = await Employee.findByIdAndDelete(request.params.id);
     if (!deleteemployee) {
       return response.status(404).json({
         success: false,
@@ -104,7 +102,6 @@ export const deleteEmployee = async (request, response) => {
         message: "Employee not found",
       });
     }
-    await deleteemployee.destroy();
     response.status(200).json({
       success: true,
       error: false,
