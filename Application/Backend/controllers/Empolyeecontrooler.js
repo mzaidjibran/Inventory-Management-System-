@@ -1,4 +1,5 @@
-import { Employee } from "../models/index.js";
+import Employee from "../models/Empolyeemodal.js";
+
 const createEmployee = async (request, response) => {
   try {
     const employeeData = {
@@ -6,17 +7,18 @@ const createEmployee = async (request, response) => {
       profileImage: request.file ? request.file.path : "",
     };
     const employee = await Employee.create(employeeData);
-
     response.status(201).json(employee);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
+
 export { createEmployee };
-//get all employee
+
+// Get all employees
 export const getAllEmployees = async (request, response) => {
   try {
-    const employees = await Employee.find();
+    const employees = await Employee.findAll();
     response.status(200).json({
       success: true,
       error: false,
@@ -32,10 +34,11 @@ export const getAllEmployees = async (request, response) => {
     });
   }
 };
-//get employee by id
+
+// Get employee by id
 export const getSingleEmployee = async (request, response) => {
   try {
-    const employee = await Employee.findById(request.params.id);
+    const employee = await Employee.findByPk(request.params.id);
     if (!employee) {
       return response.status(404).json({
         success: false,
@@ -57,18 +60,15 @@ export const getSingleEmployee = async (request, response) => {
     });
   }
 };
-//update employee
+
+// Update employee
 export const updateEmployee = async (request, response) => {
   try {
     const updateData = { ...request.body };
     if (request.file) {
       updateData.profileImage = request.file.path;
     }
-    const updateemployee = await Employee.findByIdAndUpdate(
-      request.params.id,
-      updateData,
-      { new: true, runValidators: true },
-    );
+    const updateemployee = await Employee.findByPk(request.params.id);
     if (!updateemployee) {
       return response.status(404).json({
         success: false,
@@ -77,11 +77,17 @@ export const updateEmployee = async (request, response) => {
       });
     }
 
+    await updateemployee.update(updateData);
+
+    const updatedEmployeeWithRelations = await Employee.findByPk(
+      request.params.id,
+    );
+
     response.status(200).json({
       success: true,
       error: false,
       message: "Employee updated successfully",
-      data: updateemployee,
+      data: updatedEmployeeWithRelations,
     });
   } catch (error) {
     response.status(500).json({
@@ -91,10 +97,11 @@ export const updateEmployee = async (request, response) => {
     });
   }
 };
-//delete employee
+
+// Delete employee
 export const deleteEmployee = async (request, response) => {
   try {
-    const deleteemployee = await Employee.findByIdAndDelete(request.params.id);
+    const deleteemployee = await Employee.findByPk(request.params.id);
     if (!deleteemployee) {
       return response.status(404).json({
         success: false,
@@ -106,7 +113,7 @@ export const deleteEmployee = async (request, response) => {
       success: true,
       error: false,
       message: "Employee deleted successfully",
-      data: deleteemployee,
+      data: deletedEmployee,
     });
   } catch (error) {
     response.status(500).json({

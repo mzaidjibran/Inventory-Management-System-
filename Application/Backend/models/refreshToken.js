@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-const refreshTokenSchema = new mongoose.Schema(
+const RefreshToken = sequelize.define(
+  "RefreshToken",
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -12,8 +13,7 @@ const refreshTokenSchema = new mongoose.Schema(
       required: true,
     },
     expiresIn: {
-      type: Date,
-      required: true,
+      type: DataTypes.DATE,
     },
   },
   {
@@ -23,4 +23,5 @@ const refreshTokenSchema = new mongoose.Schema(
 
 const RefreshToken = mongoose.model("RefreshToken", refreshTokenSchema);
 
+const RefreshToken = mongoose.model("RefreshToken", RefreshTokenSchema);
 export default RefreshToken;

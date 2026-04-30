@@ -9,9 +9,7 @@ import bcrypt from "bcrypt";
 export const SignUp = async (request, response) => {
   try {
     const { User_Name, email, password } = request.body;
-    const existingUser = await UserModel.findOne({
-      email: email.toLowerCase().trim(),
-    });
+    const existingUser = await UserModel.findOne({ where: { email } });
     if (existingUser) {
       return response.status(400).json({
         success: false,
@@ -39,9 +37,7 @@ export const SignIn = async (request, response) => {
   try {
     const { email, password } = request.body;
 
-    const findUser = await UserModel.findOne({
-      email: email.toLowerCase().trim(),
-    });
+    const findUser = await UserModel.findOne({ where: { email } });
 
     if (!findUser) {
       return response.status(404).json({
@@ -87,7 +83,7 @@ export const logOut = async (request, response) => {
   try {
     const { refreshToken } = request.body;
 
-    await RefreshToken.deleteOne({ token: refreshToken });
+    await RefreshToken.destroy({ where: { token: refreshToken } });
 
     return response.status(200).json({
       success: true,
@@ -109,8 +105,9 @@ export const refresh = async (request, response) => {
     const { refreshToken } = request.body;
 
     const storedRefreshToken = await RefreshToken.findOne({
-      token: refreshToken,
-    }).populate("userId");
+      where: { token: refreshToken },
+      include: [{ model: UserModel, as: "user" }],
+    });
     if (!storedRefreshToken) {
       return response.status(400).json({
         success: false,
@@ -120,7 +117,7 @@ export const refresh = async (request, response) => {
     }
 
     jwt.verify(storedRefreshToken.token, process.env.JWT_REFRESH_SECRET);
-    await RefreshToken.deleteOne({ token: refreshToken });
+    await RefreshToken.destroy({ where: { token: refreshToken } });
 
     const userRole = storedRefreshToken.userId
       ? storedRefreshToken.userId.role

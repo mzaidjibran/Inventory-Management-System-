@@ -1,25 +1,17 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const UserModel = sequelize.define(
+  "UserModel",
   {
     User_Name: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
+      type: DataTypes.STRING,
     },
     email: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
       unique: true,
-      trim: true,
-      lowercase: true,
     },
     password: {
-      type: String,
-      required: true,
-      minlength: 6,
+      type: DataTypes.STRING,
     },
     role: {
       type: String,
@@ -34,4 +26,5 @@ const userSchema = new mongoose.Schema(
 
 const UserModel = mongoose.model("UserModel", userSchema);
 
+const UserModel = mongoose.model("UserModel", UserSchema);
 export default UserModel;

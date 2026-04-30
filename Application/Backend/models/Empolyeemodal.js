@@ -1,73 +1,76 @@
 import mongoose from "mongoose";
 
-const employeeSchema = new mongoose.Schema(
+const Employee = sequelize.define(
+  "Employee",
   {
     firstName: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [2, 50],
+      },
     },
     lastName: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [2, 50],
+      },
     },
     email: {
       type: String,
       required: true,
       unique: true,
-      trim: true,
-      lowercase: true,
+      validate: {
+        isEmail: true,
+        len: [0, 100],
+      },
+      set(value) {
+        this.setDataValue("email", value ? value.toLowerCase().trim() : value);
+      },
     },
     phone: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 20,
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [0, 20],
+      },
     },
     CNIC: {
-      type: String,
+      type: DataTypes.STRING,
       unique: true,
-      sparse: true,
-      trim: true,
-      maxlength: 20,
+      validate: {
+        len: [0, 20],
+      },
     },
     dateOfBirth: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     gender: {
-      type: String,
-      enum: ["Male", "Female", "Other"],
+      type: DataTypes.ENUM("Male", "Female", "Other"),
     },
     dateOfJoining: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     salary: {
-      type: Number,
-      default: 0,
-      min: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     status: {
-      type: String,
-      enum: ["Active", "Inactive", "Terminated", "On Leave"],
-      default: "Active",
+      type: DataTypes.ENUM("Active", "Inactive", "Terminated", "On Leave"),
+      defaultValue: "Active",
     },
     address: {
-      type: mongoose.Schema.Types.Mixed,
+      type: DataTypes.JSON,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "UserModel",
+      type: DataTypes.INTEGER,
     },
     profileImage: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING,
+      defaultValue: "",
     },
   },
   {
@@ -77,4 +80,5 @@ const employeeSchema = new mongoose.Schema(
 
 const Employee = mongoose.model("Employee", employeeSchema);
 
+const Employee = mongoose.model("Employee", EmployeeSchema);
 export default Employee;

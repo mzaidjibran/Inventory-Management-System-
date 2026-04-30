@@ -57,15 +57,7 @@ export const getSingleuser = async (request, response) => {
 
 export const updatedUser = async (request, response) => {
   try {
-    const payload = { ...request.body };
-    if (payload.password) {
-      payload.password = await bcrypt.hash(payload.password, 10);
-    }
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      request.params.id,
-      payload,
-      { new: true, runValidators: true },
-    );
+    const updatedUser = await UserModel.findByPk(request.params.id);
     if (!updatedUser) {
       return response.status(404).json({
         success: false,
