@@ -1,110 +1,108 @@
-import EmployeeDesignation from "../models/EmployeeDesignation.js";
-const createDesignation = async (request, response) => {
+import EmployeeDesignation from "../models/payoutmodal.js";
+const createpayout = async (request, response) => {
   try {
-    const designation = await EmployeeDesignation.create(request.body);
-    response.status(201).json(designation);
+    const payout = await payout.create(request.body);
+    response.status(201).json(payout);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
-export { createDesignation };
-//get all designation
-export const getAllDesignations = async (request, response) => {
+export { createpayout };
+//get all payouts
+export const getAllPayouts = async (request, response) => {
   try {
-    const designations = await EmployeeDesignation.find();
+    const payouts = await payout.find();
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designations fetched successfully",
-      data: designations,
+      message: "Payouts fetched successfully",
+      data: payouts,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching designations",
+      message: "Error fetching payouts",
       data: null,
     });
   }
 };
-//get designation by id
-export const getSingleDesignation = async (request, response) => {
+//get payout by id
+export const getSinglePayout = async (request, response) => {
   try {
-    const designation = await EmployeeDesignation.findById(request.params.id);
-    if (!designation) {
+    const payout = await payout.findById(request.params.id);
+    if (!payout) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Payout not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation fetched successfully",
-      data: designation,
+      message: "Payout fetched successfully",
+      data: payout,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching designation",
+      message: "Error fetching payout",
     });
   }
 };
-//update designation
-export const updateDesignation = async (request, response) => {
+//update payout
+export const updatePayout = async (request, response) => {
   try {
-    const updatedesignation = await EmployeeDesignation.findByIdAndUpdate(
+    const updatedPayout = await payout.findByIdAndUpdate(
       request.params.id,
       request.body,
       { new: true },
     );
-    if (!updatedesignation) {
+    if (!updatedPayout) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Payout not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation updated successfully",
-      data: updatedesignation,
+      message: "Payout updated successfully",
+      data: updatedPayout,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error updating designation",
+      message: "Error updating payout",
     });
   }
 };
-//delete designation
-export const deleteDesignation = async (request, response) => {
+//delete payoutexport const deletePayout = async (request, response) => {
+export const del = async (request, response) => {
   try {
-    const deletedesignation = await EmployeeDesignation.findByIdAndDelete(
-      request.params.id,
-    );
-    if (!deletedesignation) {
+    const deletedPayout = await payout.findByIdAndDelete(request.params.id);
+    if (!deletedPayout) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Designation not found",
+        message: "Payout not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Designation deleted successfully",
-      data: deletedesignation,
+      message: "Payout deleted successfully",
+      data: deletedPayout,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error deleting designation",
+      message: "Error deleting payout",
     });
   }
 };

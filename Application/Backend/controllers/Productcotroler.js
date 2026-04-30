@@ -1,4 +1,4 @@
-import EmployeeDesignation from "../models/EmployeeDesignation.js";
+import EmployeeDesignation from "../models/Productmodal.js";
 const createproduct = async (request, response) => {
   try {
     const product = await Product.create(request.body);

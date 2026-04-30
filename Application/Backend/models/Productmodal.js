@@ -1,83 +1,74 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/config.js";
 
-const Employee = sequelize.define(
-  "Employee",
+const Product = sequelize.define(
+  "Product",
   {
-    firstName: {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
+        notEmpty: true,
         len: [2, 50],
-      },
-    },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: [2, 50],
-      },
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true,
-        len: [0, 100],
       },
       set(value) {
-        this.setDataValue("email", value ? value.toLowerCase().trim() : value);
+        this.setDataValue("title", value ? value.trim() : value);
       },
     },
-    phone: {
+    author: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [0, 20],
+        notEmpty: true,
+        len: [2, 50],
+      },
+      set(value) {
+        this.setDataValue("author", value ? value.trim() : value);
       },
     },
-    CNIC: {
-      type: DataTypes.STRING,
-      unique: true,
+    price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
       validate: {
-        len: [0, 20],
+        isDecimal: true,
+        min: 0,
       },
     },
-    dateOfBirth: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    gender: {
-      type: DataTypes.ENUM("Male", "Female", "Other"),
-    },
-    dateOfJoining: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    salary: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0,
-    },
-    status: {
-      type: DataTypes.ENUM("Active", "Inactive", "Terminated", "On Leave"),
-      defaultValue: "Active",
-    },
-    address: {
-      type: DataTypes.JSON,
-    },
-    user: {
+    stockQuantity: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: true,
+        min: 0,
+      },
     },
-    profileImage: {
+    category: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+        len: [2, 50],
+      },
+      set(value) {
+        this.setDataValue("category", value ? value.trim() : value);
+      },
+    },
+    image: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+      validate: {
+        len: [0, 500],
+      },
+    },
+    description: {
+      type: DataTypes.TEXT,
       defaultValue: "",
     },
   },
   {
-    tableName: "Employee",
+    tableName: "Product",
     timestamps: true,
   },
 );
 
-export default Employee;
+export default Product;
