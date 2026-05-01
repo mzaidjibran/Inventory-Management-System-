@@ -79,7 +79,7 @@ export const SignIn = async (request, response) => {
     });
   }
 };
-
+//logout controller
 export const logOut = async (request, response) => {
   try {
     const { refreshToken } = request.body;
