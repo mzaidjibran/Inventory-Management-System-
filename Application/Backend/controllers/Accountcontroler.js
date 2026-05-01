@@ -33,7 +33,7 @@ export const SignUp = async (request, response) => {
     response.status(500).json({ message: error.message });
   }
 };
-
+//sign in controller
 export const SignIn = async (request, response) => {
   try {
     const { email, password } = request.body;
