@@ -100,7 +100,7 @@ export const logOut = async (request, response) => {
     });
   }
 };
-
+//refresh controler
 export const refresh = async (request, response) => {
   try {
     const { refreshToken } = request.body;
