@@ -81,7 +81,7 @@ export const updateScan = async (request, response) => {
     });
   }
 };
-//delete scanexport const deleteScan = async (request, response) => {
+//delete scane
 export const deleteScan = async (request, response) => {
   try {
     const deletedScan = await ScanSession.findByIdAndDelete(request.params.id);

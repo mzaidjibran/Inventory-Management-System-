@@ -6,7 +6,7 @@ import {
 } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-
+//sing up controller
 export const SignUp = async (request, response) => {
   try {
     const { User_Name, email, password } = request.body;
