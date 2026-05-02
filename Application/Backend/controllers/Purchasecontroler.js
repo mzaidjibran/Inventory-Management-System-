@@ -1,109 +1,187 @@
 import Purchase from "../models/purchasemodal.js";
+import Product from "../models/productmodel.js";
+import StockMovement from "../models/stockmovementmodel.js";
 
-export const createPurchase = async (request, response) => {
+//  CREATE PURCHASE (WITH STOCK + TOTAL LOGIC)
+export const createPurchase = async (req, res) => {
   try {
-    const purchase = await Purchase.create(request.body);
-    response.status(201).json(purchase);
+    const { items, supplier, invoiceNumber } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "Items are required" });
+    }
+
+    let totalAmount = 0;
+
+    for (const item of items) {
+      if (!item.product || item.quantity <= 0) {
+        return res.status(400).json({ message: "Invalid item data" });
+      }
+
+      // calculate total
+      item.total = item.quantity * item.costPrice;
+      totalAmount += item.total;
+
+      // increase stock
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stockQuantity: item.quantity },
+      });
+
+      // stock movement log
+      await StockMovement.create({
+        product: item.product,
+        type: "IN",
+        quantity: item.quantity,
+        referenceId: purchase._id,
+      });
+    }
+
+    const purchase = await Purchase.create({
+      supplier,
+      items,
+      invoiceNumber,
+      totalAmount,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Purchase created successfully",
+      data: purchase,
+    });
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-//get all purchases
-export const getAllPurchases = async (request, response) => {
+//  GET ALL PURCHASES
+export const getAllPurchases = async (req, res) => {
   try {
-    const purchases = await Purchase.find();
-    response.status(200).json({
+    const purchases = await Purchase.find()
+      .populate("supplier")
+      .populate("items.product")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
       success: true,
-      error: false,
       message: "Purchases fetched successfully",
       data: purchases,
     });
   } catch (error) {
-    response.status(500).json({
+    res.status(500).json({
       success: false,
-      error: true,
-      message: "Error fetching purchases",
-      data: null,
+      message: error.message,
     });
   }
 };
-//get purchase by id
-export const getSinglePurchase = async (request, response) => {
+
+//  GET SINGLE PURCHASE
+export const getSinglePurchase = async (req, res) => {
   try {
-    const purchase = await Purchase.findById(request.params.id);
+    const purchase = await Purchase.findById(req.params.id)
+      .populate("supplier")
+      .populate("items.product");
+
     if (!purchase) {
-      return response.status(404).json({
+      return res.status(404).json({
         success: false,
-        error: true,
         message: "Purchase not found",
       });
     }
-    response.status(200).json({
+
+    res.status(200).json({
       success: true,
-      error: false,
       message: "Purchase fetched successfully",
       data: purchase,
     });
   } catch (error) {
-    response.status(500).json({
+    res.status(500).json({
       success: false,
-      error: true,
-      message: "Error fetching purchase",
+      message: error.message,
     });
   }
 };
-//update purchase
-export const updatePurchase = async (request, response) => {
+
+// UPDATE PURCHASE
+export const updatePurchase = async (req, res) => {
   try {
-    const updatedPurchase = await Purchase.findByIdAndUpdate(
-      request.params.id,
-      request.body,
-      { new: true },
-    );
-    if (!updatedPurchase) {
-      return response.status(404).json({
-        success: false,
-        error: true,
-        message: "Purchase not found",
+    const existingPurchase = await Purchase.findById(req.params.id);
+
+    if (!existingPurchase) {
+      return res.status(404).json({ message: "Purchase not found" });
+    }
+
+    for (const item of existingPurchase.items) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stockQuantity: -item.quantity },
       });
     }
-    response.status(200).json({
+
+    const { items } = req.body;
+
+    let totalAmount = 0;
+
+    for (const item of items) {
+      item.total = item.quantity * item.costPrice;
+      totalAmount += item.total;
+
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stockQuantity: item.quantity },
+      });
+    }
+
+    const updatedPurchase = await Purchase.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        totalAmount,
+      },
+      { new: true },
+    );
+
+    res.status(200).json({
       success: true,
-      error: false,
       message: "Purchase updated successfully",
       data: updatedPurchase,
     });
   } catch (error) {
-    response.status(500).json({
+    res.status(500).json({
       success: false,
-      error: true,
-      message: "Error updating purchase",
+      message: error.message,
     });
   }
 };
-//delete purchaseexport const deletePurchase = async (request, response) => {
-export const deletePurchase = async (request, response) => {
+
+//  DELETE PURCHASE (
+export const deletePurchase = async (req, res) => {
   try {
-    const deletedPurchase = await Purchase.findByIdAndDelete(request.params.id);
-    if (!deletedPurchase) {
-      return response.status(404).json({
+    const purchase = await Purchase.findById(req.params.id);
+
+    if (!purchase) {
+      return res.status(404).json({
         success: false,
-        error: true,
         message: "Purchase not found",
       });
     }
-    response.status(200).json({
+
+    for (const item of purchase.items) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stockQuantity: -item.quantity },
+      });
+    }
+
+    await Purchase.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
       success: true,
-      error: false,
-      message: "Purchase deleted successfully",
-      data: deletedPurchase,
+      message: "Purchase deleted & stock reversed",
     });
   } catch (error) {
-    response.status(500).json({
+    res.status(500).json({
       success: false,
-      error: true,
-      message: "Error deleting purchase",
+      message: error.message,
     });
   }
 };
