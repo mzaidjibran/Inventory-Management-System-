@@ -1,5 +1,5 @@
 import Purchase from "../models/purchasemodal.js";
-import Product from "../models/productmodel.js";
+import Product from "../models/Productmodal.js";
 import StockMovement from "../models/stockmovementmodel.js";
 //  CREATE PURCHASE (WITH STOCK + TOTAL LOGIC)
 export const createPurchase = async (req, res) => {
