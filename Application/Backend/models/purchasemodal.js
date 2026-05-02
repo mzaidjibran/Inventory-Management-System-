@@ -31,9 +31,9 @@ const purchaseItemSchema = new mongoose.Schema(
 
 const purchaseSchema = new mongoose.Schema(
   {
-    supplier: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Supplier",
+      ref: "User",
       required: true,
     },
 

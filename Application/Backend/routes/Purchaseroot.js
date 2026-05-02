@@ -1,4 +1,5 @@
 import express from "express";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 import {
   getAllPurchases,
   createPurchase,
@@ -6,13 +7,14 @@ import {
   updatePurchase,
   deletePurchase,
 } from "../controllers/Purchasecontroler.js";
-import upload from "../middleware/multerniddleware.js";
+
 const router = express.Router();
-//purchase routers
-router.post("/", upload.single("profileImage"), createPurchase);
-router.get("/", getAllPurchases);
-router.get("/:id", getSinglePurchase);
-router.put("/:id", upload.single("profileImage"), updatePurchase);
-router.delete("/:id", deletePurchase);
+
+// All purchase routes require authentication
+router.post("/", authMiddleware, createPurchase);
+router.get("/", authMiddleware, getAllPurchases);
+router.get("/:id", authMiddleware, getSinglePurchase);
+router.put("/:id", authMiddleware, updatePurchase);
+router.delete("/:id", authMiddleware, deletePurchase);
 
 export default router;

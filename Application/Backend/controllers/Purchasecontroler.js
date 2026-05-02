@@ -2,55 +2,102 @@ import Purchase from "../models/purchasemodal.js";
 import Product from "../models/Productmodal.js";
 import StockMovement from "../models/stockmovementmodel.js";
 //  CREATE PURCHASE (WITH STOCK + TOTAL LOGIC)
+/**
+ * Create purchase with stock update
+ * - Validates items and products
+ * - Calculates totals
+ * - Updates product stock
+ * - Uses authenticated user from req.userId
+ */
 export const createPurchase = async (req, res) => {
   try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
     const { items, invoiceNumber } = req.body;
 
-    if (!items || items.length === 0) {
-      return res.status(400).json({ message: "Items are required" });
+    // Validate items array
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Items array is required and must not be empty",
+      });
     }
 
     let totalAmount = 0;
+    const validatedItems = [];
 
+    // Validate and process each item
     for (const item of items) {
-      if (!item.product || item.quantity <= 0) {
-        return res.status(400).json({ message: "Invalid item data" });
+      // Check required fields
+      if (!item.product) {
+        return res.status(400).json({
+          success: false,
+          message: "Each item must have a product ID",
+        });
+      }
+      if (!item.quantity || item.quantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Each item must have a positive quantity",
+        });
+      }
+      if (typeof item.costPrice !== "number" || item.costPrice < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Each item must have a valid costPrice",
+        });
       }
 
-      // calculate total
-      item.total = item.quantity * item.costPrice;
-      totalAmount += item.total;
+      // Check product exists
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: `Product not found: ${item.product}`,
+        });
+      }
 
-      // increase stock
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stockQuantity: item.quantity },
-      });
-
-      // stock movement log
-      await StockMovement.create({
+      // Calculate item total
+      const itemTotal = item.quantity * item.costPrice;
+      validatedItems.push({
         product: item.product,
-        type: "IN",
         quantity: item.quantity,
-        referenceId: purchase._id,
+        costPrice: item.costPrice,
+        total: itemTotal,
       });
+      totalAmount += itemTotal;
     }
 
+    // Create purchase
     const purchase = await Purchase.create({
-      createdBy: req.user._id,
-      items,
+      user: userId,
+      createdBy: userId,
+      items: validatedItems,
       invoiceNumber,
       totalAmount,
     });
 
-    res.status(201).json({
+    // Update product stock for each item
+    for (const item of validatedItems) {
+      await Product.findByIdAndUpdate(
+        item.product,
+        { $inc: { stockQuantity: item.quantity } },
+        { new: true },
+      );
+    }
+
+    return res.status(201).json({
       success: true,
       message: "Purchase created successfully",
       data: purchase,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Internal server error",
     });
   }
 };
