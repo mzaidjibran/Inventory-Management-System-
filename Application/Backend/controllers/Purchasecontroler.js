@@ -1,11 +1,10 @@
 import Purchase from "../models/purchasemodal.js";
 import Product from "../models/productmodel.js";
 import StockMovement from "../models/stockmovementmodel.js";
-
 //  CREATE PURCHASE (WITH STOCK + TOTAL LOGIC)
 export const createPurchase = async (req, res) => {
   try {
-    const { items, supplier, invoiceNumber } = req.body;
+    const { items, invoiceNumber } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: "Items are required" });
@@ -37,7 +36,7 @@ export const createPurchase = async (req, res) => {
     }
 
     const purchase = await Purchase.create({
-      supplier,
+      createdBy: req.user._id,
       items,
       invoiceNumber,
       totalAmount,
@@ -60,7 +59,7 @@ export const createPurchase = async (req, res) => {
 export const getAllPurchases = async (req, res) => {
   try {
     const purchases = await Purchase.find()
-      .populate("supplier")
+
       .populate("items.product")
       .sort({ createdAt: -1 });
 
@@ -81,7 +80,7 @@ export const getAllPurchases = async (req, res) => {
 export const getSinglePurchase = async (req, res) => {
   try {
     const purchase = await Purchase.findById(req.params.id)
-      .populate("supplier")
+
       .populate("items.product");
 
     if (!purchase) {
@@ -176,7 +175,7 @@ export const deletePurchase = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Purchase deleted & stock reversed",
+      message: "Purchase deleted",
     });
   } catch (error) {
     res.status(500).json({
