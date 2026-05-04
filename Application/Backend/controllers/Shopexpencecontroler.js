@@ -1,4 +1,4 @@
-import Payout from "../models/payoutmodal.js";
+import Payout from "../models/Shopexpence.js";
 export const createPayout = async (request, response) => {
   try {
     const payout = await Payout.create(request.body);
