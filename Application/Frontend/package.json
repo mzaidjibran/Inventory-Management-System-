@@ -1,0 +1,11 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "npm --prefix Inventry-Management-System run dev",
+    "build": "npm --prefix Inventry-Management-System run build",
+    "lint": "npm --prefix Inventry-Management-System run lint",
+    "preview": "npm --prefix Inventry-Management-System run preview"
+  }
+}

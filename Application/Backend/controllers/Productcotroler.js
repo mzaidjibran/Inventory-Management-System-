@@ -91,7 +91,7 @@ export const updateProduct = async (request, response) => {
     });
   }
 };
-//delete productexport const deleteProduct = async (request, response) => {
+//delete productexport
 export const deleteProduct = async (request, response) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(request.params.id);

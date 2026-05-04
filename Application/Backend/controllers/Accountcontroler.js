@@ -9,7 +9,7 @@ import bcrypt from "bcrypt";
 //sing up controller
 export const SignUp = async (request, response) => {
   try {
-    const { User_Name, email, password } = request.body;
+    const { Name, email, password } = request.body;
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return response.status(400).json({
@@ -19,7 +19,7 @@ export const SignUp = async (request, response) => {
     }
     const hashpassword = await bcrypt.hash(password, 10);
     const newUser = await UserModel.create({
-      User_Name,
+      Name: Name,
       email: email.toLowerCase().trim(),
       password: hashpassword,
       role: "user",

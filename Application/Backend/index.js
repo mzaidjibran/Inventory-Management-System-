@@ -9,7 +9,7 @@ import AccountRoutes from "./routes/Accountroute.js";
 import EmployeeRoutes from "./routes/Epolyeeroute.js";
 import ProductRoutes from "./routes/Productsroot.js";
 import PurchaseRoutes from "./routes/Purchaseroot.js";
-
+import BillingRoutes from "./routes/bilingroute.js";
 import ScanRoutes from "./routes/Scanerroot.js";
 import Shopexpence from "./models/Shopexpence.js";
 dotenv.config();
@@ -46,6 +46,7 @@ app.use("/api/product", ProductRoutes);
 app.use("/api/purchase", PurchaseRoutes);
 app.use("/api/shopexpence", Shopexpence);
 app.use("/api/scan", ScanRoutes);
+app.use("/api/billing", BillingRoutes);
 // test route
 app.get("/", (req, res) => {
   res.send("API is running...");
