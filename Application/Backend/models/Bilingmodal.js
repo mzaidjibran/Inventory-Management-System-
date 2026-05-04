@@ -18,7 +18,11 @@ const saleSchema = new mongoose.Schema(
       required: true,
     },
     invoiceNumber: { type: String, unique: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     status: {
       type: String,
       enum: ["completed", "pending"],

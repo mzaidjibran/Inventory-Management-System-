@@ -1,7 +1,58 @@
 import Billing from "../models/Bilingmodal.js";
 const createbilling = async (request, response) => {
   try {
-    const billing = await Billing.create(request.body);
+    const userId = request.userId;
+
+    if (!userId) {
+      return response.status(401).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: user id is required to generate billing",
+      });
+    }
+
+    const items = Array.isArray(request.body.items) ? request.body.items : [];
+    if (!items.length) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Billing items are required",
+      });
+    }
+
+    const normalizedItems = items.map((item) => {
+      const quantity = Number(item.quantity);
+      const price = Number(item.price);
+      const total = Number.isFinite(Number(item.total))
+        ? Number(item.total)
+        : quantity * price;
+
+      return {
+        ...item,
+        quantity,
+        price,
+        total,
+      };
+    });
+
+    const subtotal = normalizedItems.reduce((sum, item) => sum + item.total, 0);
+    const discount = Number(request.body.discount || 0);
+    const tax = Number(request.body.tax || 0);
+    const totalAmount = subtotal + tax - discount;
+
+    const billing = await Billing.create({
+      ...request.body,
+      items: normalizedItems,
+      discount,
+      tax,
+      totalAmount,
+      invoiceNumber:
+        request.body.invoiceNumber ||
+        `INVOICE-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      createdBy: userId,
+      status: request.body.status || "completed",
+    });
+
     response.status(201).json(billing);
   } catch (error) {
     response.status(400).json({ message: error.message });
