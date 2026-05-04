@@ -1,7 +1,14 @@
 import Purchase from "../models/purchasemodal.js";
 import Product from "../models/Productmodal.js";
 import StockMovement from "../models/stockmovementmodel.js";
-
+//  CREATE PURCHASE (WITH STOCK + TOTAL LOGIC)
+/**
+ * Create purchase with stock update
+ * - Validates items and products
+ * - Calculates totals
+ * - Updates product stock
+ * - Uses authenticated user from req.userId
+ */
 export const createPurchase = async (req, res) => {
   try {
     const userId = req.userId;
@@ -24,6 +31,7 @@ export const createPurchase = async (req, res) => {
 
     // Validate and process each item
     for (const item of items) {
+      // Check required fields
       if (!item.product) {
         return res.status(400).json({
           success: false,
