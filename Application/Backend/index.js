@@ -19,7 +19,7 @@ const port = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
 app.use(cors());
-
+//frontend connection
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -51,7 +51,7 @@ app.use("/api/billing", BillingRoutes);
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
-
+// Start the server
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

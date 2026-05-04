@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 const saleSchema = new mongoose.Schema(
   {
     items: [
@@ -8,7 +9,7 @@ const saleSchema = new mongoose.Schema(
         total: { type: Number, required: true },
       },
     ],
-    totalAmount: { type: Number, required: true },
+    totalAmount: { type: Number },
     discount: { type: Number, default: 0 },
     tax: { type: Number, default: 0 },
     paymentMethod: {
