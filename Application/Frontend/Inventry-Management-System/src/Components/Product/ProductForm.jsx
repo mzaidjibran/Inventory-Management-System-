@@ -121,6 +121,7 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
                     field: "barcode",
                     type: "text",
                     hint: "Enter Product Barcode",
+                    required: true,
                   },
                   {
                     label: "Description",
@@ -140,7 +141,7 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
                     type: "number",
                     hint: "Enter Stock Quantity",
                   },
-                ].map(({ label, field, type, hint }) => (
+                ].map(({ label, field, type, hint, required }) => (
                   <div className="col-6" key={field}>
                     <label className="form-label">{label}</label>
                     <input
@@ -148,6 +149,7 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
                       type={type}
                       value={value[field]}
                       onChange={handleChange(field)}
+                      required={required || false}
                     />
                     <small className="form-text text-muted">{hint}</small>
                   </div>
