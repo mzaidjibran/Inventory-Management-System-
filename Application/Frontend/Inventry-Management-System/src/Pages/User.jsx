@@ -1,7 +1,7 @@
 import { useState } from "react";
-import UserTable from "../Components/User/UserTable.jsx"
-import Topbar from "../Components/Topbar.jsx";
-import Sidebar from "../Components/Sidebar.jsx";
+import UserTable from "../components/User/UserTable.jsx"
+import Topbar from "../components/topbar.jsx";
+import Sidebar from "../components/sidebar.jsx";
 
 export default function User() {
     const [sidebarOpen, setSidebarOpen] = useState(false);

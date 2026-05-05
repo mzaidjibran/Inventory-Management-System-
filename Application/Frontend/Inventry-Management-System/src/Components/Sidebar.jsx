@@ -15,21 +15,19 @@ const Sidebar = ({ isOpen }) => {
                             <li>
                                 <Link to="/">
                                     <i className="fas fa-desktop"></i>
-                                    <span>Dashboard</span>
+                                    <span>Management</span>
                                 </Link>
                             </li>
 
-                            {/* <li>
+                            <li>
 
                                 <ul className="sub-menu" aria-expanded="false">
                                     <li><Link to="/"><i className="mdi mdi-checkbox-blank-circle align-middle"></i>Employee</Link></li>
-                                    <li><Link to="/department"><i className="mdi mdi-checkbox-blank-circle align-middle"></i> Department</Link></li>
-                                    <li><Link to="/designation"><i className="mdi mdi-checkbox-blank-circle align-middle"></i> Designation</Link></li>
-                                    <li><Link to="/shift"><i className="mdi mdi-checkbox-blank-circle align-middle"></i> Shift</Link></li>
+                                    <li><Link to="/product"><i className="mdi mdi-checkbox-blank-circle align-middle"></i>Products</Link></li>
                                     <li><Link to="/user"><i className="mdi mdi-checkbox-blank-circle align-middle"></i> User</Link></li>
 
                                 </ul>
-                            </li> */}
+                            </li>
 
                         </ul>
                     </div>

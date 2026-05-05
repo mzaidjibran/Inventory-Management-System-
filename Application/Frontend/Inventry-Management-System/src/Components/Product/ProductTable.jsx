@@ -1,11 +1,12 @@
 import { useState } from "react";
-import UserHook from "../../hook/UserHook.jsx"
-import UserForm from "./UserForm.jsx";
-import { deleteUser } from "../../api/UserApi.js";
+import ProductHook from "../../hook/ProductHook.jsx";
+import ProductForm from "./ProductForm.jsx";
+import { deleteProduct } from "../../api/ProductApi.js";
 import { toast } from "react-toastify";
 
-const UserTable = () => {
-    const { users, loadUser } = UserHook();
+const ProductTable = () => {
+
+    const { products, loadProducts } = ProductHook();
     const [editData, setEditData] = useState(null);
     const [viewData, setViewData] = useState(null);
 
@@ -14,42 +15,53 @@ const UserTable = () => {
         confirmToastId = toast(
             ({ closeToast }) => (
                 <div>
-                    <div className="fw-semibold">Delete this user?</div>
+                    <div className="fw-semibold">Delete this Product?</div>
                     <div className="d-flex gap-2 mt-2">
-                        <button type="button" className="btn btn-sm btn-danger"
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-danger"
                             onClick={async () => {
                                 closeToast();
                                 try {
-                                    await deleteUser(id);
-                                    loadUser();
+                                    await deleteProduct(id);
+                                    loadProducts();
                                     toast.dismiss(confirmToastId);
-                                    toast.success("User deleted successfully");
+                                    toast.success("Product deleted successfully");
                                 } catch (err) {
                                     toast.error("Delete failed: " + err.message);
                                 }
-                            }}>
+                            }}
+                        >
                             Delete
                         </button>
-                        <button type="button" className="btn btn-sm btn-outline-secondary"
-                            onClick={closeToast}>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={closeToast}
+                        >
                             Cancel
                         </button>
                     </div>
                 </div>
             ),
-            { autoClose: false, closeOnClick: false, draggable: false, position: "top-right" }
+            {
+                autoClose: false,
+                closeOnClick: false,
+                draggable: false,
+                position: "top-right",
+            }
         );
     }
 
-    function handleEdit(dept) {
-        setEditData(dept);
-        const modal = new window.bootstrap.Modal(document.getElementById("modalDeptForm"));
+    function handleEdit(pro) {
+        setEditData(pro);
+        const modal = new window.bootstrap.Modal(document.getElementById("modal8"));
         modal.show();
     }
 
-    function handleView(dept) {
-        setViewData(dept);
-        const modal = new window.bootstrap.Modal(document.getElementById("modalDeptView"));
+    function handleView(pro) {
+        setViewData(pro);
+        const modal = new window.bootstrap.Modal(document.getElementById("modalView"));
         modal.show();
     }
 
@@ -58,26 +70,25 @@ const UserTable = () => {
             <div className="col-12">
                 <div className="card">
                     <div className="card-header">
-                        <h4 className="card-title">Users</h4>
+                        <h4 className="card-title">Products</h4>
                         <button type="button" className="btn btn-primary btn-sm ms-2"
-                            data-bs-toggle="modal" data-bs-target="#modalDeptForm"
+                            data-bs-toggle="modal" data-bs-target="#modal8"
                             onClick={() => setEditData(null)}>
-                            Add User
+                            Add Product
                         </button>
                     </div>
 
-                    <UserForm
-                        onSaved={loadUser}
+                    <ProductForm
+                        onSaved={loadProducts}
                         editData={editData}
                         onClearEdit={() => setEditData(null)}
                     />
 
-                    {/* View Modal */}
-                    <div className="modal fade" id="modalDeptView">
-                        <div className="modal-dialog">
+                    <div className="modal fade" id="modalView">
+                        <div className="modal-dialog modal-lg">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title">User Details</h5>
+                                    <h5 className="modal-title">Product Details</h5>
                                     <button type="button" className="btn btn-sm btn-label-danger btn-icon"
                                         data-bs-dismiss="modal">
                                         <i className="mdi mdi-close"></i>
@@ -87,22 +98,20 @@ const UserTable = () => {
                                     {viewData && (
                                         <div className="row g-3">
                                             <div className="col-6">
-                                                <small className="text-muted">User Name</small>
-                                                <p className="fw-semibold">{viewData.User_Name || "-"}</p>
+                                                <small className="text-muted">Name</small>
+                                                <p className="fw-semibold">{viewData.productName || "-"}</p>
                                             </div>
                                             <div className="col-6">
-                                                <small className="text-muted">Email</small>
-                                                <p className="fw-semibold">{viewData.email || "-"}</p>
+                                                <small className="text-muted">Description</small>
+                                                <p className="fw-semibold">{viewData.productDescription || "-"}</p>
                                             </div>
                                             <div className="col-6">
-                                                <small className="text-muted">Role</small>
-                                                <p className="fw-semibold"><span className="badge bg-info">{viewData.role || "employee"}</span></p>
+                                                <small className="text-muted">Price</small>
+                                                <p className="fw-semibold">{viewData.productPrice || "-"}</p>
                                             </div>
                                             <div className="col-6">
-                                                <small className="text-muted">Created At</small>
-                                                <p className="fw-semibold">
-                                                    {viewData.createdAt ? new Date(viewData.createdAt).toLocaleDateString("en-GB") : "-"}
-                                                </p>
+                                                <small className="text-muted">Stock</small>
+                                                <p className="fw-semibold">{viewData.productStock || "-"}</p>
                                             </div>
                                         </div>
                                     )}
@@ -120,31 +129,35 @@ const UserTable = () => {
                             style={{ borderCollapse: "collapse", borderSpacing: 0, width: "100%" }}>
                             <thead>
                                 <tr>
-                                    <th>User Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Created At</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {users && users.map((use) => (
-                                    <tr key={use._id}>
-                                        <td>{use.User_Name}</td>
-                                        <td>{use.email}</td>
-                                        <td><span className="badge bg-info">{use.role || "employee"}</span></td>
-                                        <td>{use.createdAt ? new Date(use.createdAt).toLocaleDateString("en-GB") : "-"}</td>
+                                {products.map((pro) => (
+                                    <tr key={pro._id}>
+                                        <td>{pro.productName}</td>
+                                        <td>{pro.department || "-"}</td>
+                                        <td>{pro.productDescription || "-"}</td>
+                                        <td>{pro.productPrice}</td>
+                                        <td>{pro.productStock}</td>
                                         <td>
-                                            <button className="btn btn-sm btn-info me-1" title="View"
-                                                onClick={() => handleView(use)}>
+                                            <button className="btn btn-sm btn-info me-1"
+                                                title="View"
+                                                onClick={() => handleView(pro)}>
                                                 <i className="mdi mdi-eye"></i>
                                             </button>
-                                            <button className="btn btn-sm btn-warning me-1" title="Edit"
-                                                onClick={() => handleEdit(use)}>
+                                            <button className="btn btn-sm btn-warning me-1"
+                                                title="Edit"
+                                                onClick={() => handleEdit(pro)}>
                                                 <i className="mdi mdi-pencil"></i>
                                             </button>
-                                            <button className="btn btn-sm btn-danger" title="Delete"
-                                                onClick={() => handleDelete(use._id)}>
+                                            <button className="btn btn-sm btn-danger"
+                                                title="Delete"
+                                                onClick={() => handleDelete(pro._id)}>
                                                 <i className="mdi mdi-delete"></i>
                                             </button>
                                         </td>
@@ -159,4 +172,4 @@ const UserTable = () => {
     );
 };
 
-export default UserTable;
+export default ProductTable;

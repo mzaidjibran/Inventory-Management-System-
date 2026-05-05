@@ -1,27 +1,37 @@
-import { useNavigate } from 'react-router-dom';
-import { logOut, isLoggedIn, getUserRole, isAdmin } from '../Api/authApi.js';
-import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 const Topbar = ({ onSidebarToggle }) => {
-
     const navigate = useNavigate();
-    const userRole = getUserRole();
 
-    async function handleLogout() {
-        await logOut();
-        toast.success('Logout ho gaye!');
-        navigate('/signin');
-    }
+    const handleLogout = async () => {
+        try {
+            const refreshToken = localStorage.getItem("refreshToken");
+
+            await fetch("http://localhost:3000/api/Account/logOut", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ refreshToken }),
+            });
+
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            navigate("/login");
+        } catch (error) {
+            console.error("Logout failed:", error);
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            navigate("/login");
+        }
+    };
 
     return (
         <>
-            {/* <!-- Start topbar --> */}
             <header id="page-topbar">
                 <div className="navbar-header">
 
-                    {/* <!-- Logo --> */}
-
-                    {/* <!-- Start Navbar-Brand --> */}
+                    {/* Logo */}
                     <div className="navbar-logo-box">
                         <a href="index.html" className="logo logo-dark">
                             <span className="logo-sm">
@@ -50,115 +60,54 @@ const Topbar = ({ onSidebarToggle }) => {
                             <i className="mdi mdi-menu-open align-middle fs-19"></i>
                         </button>
                     </div>
-                    {/* <!-- End navbar brand --> */}
 
-                    {/* <!-- Start menu --> */}
+                    {/* Menu */}
                     <div className="d-flex justify-content-between menu-sm px-3 ms-auto">
-                        <div className="d-flex align-items-center gap-2">
-                            {isLoggedIn() ? (
-                                <button className="btn btn-danger btn-sm fs-14"
-                                    onClick={handleLogout}>
-                                    Logout
-                                </button>
-                            ) : (
-                                <>
-                                    <button className="btn btn-primary btn-sm fs-14"
-                                        onClick={() => navigate('/signup')}>
-                                        SignUp
-                                    </button>
 
-                                    <div className="dropdown d-none d-lg-block">
-                                        <button className="btn btn-primary btn-sm fs-14"
-                                            onClick={() => navigate('/signin')}>
-                                            SignIn
-                                        </button>
-                                {/* <div className="dropdown-menu dropdown-menu-start dropdown-menu-lg-widest dropdown-menu-widest dropdown-menu-animated bg-primary-subtle overflow-hidden">
-                                    <div className="dropdown-row justify-content-center">
-                                        <div className="p-2 menu-image">
-                                            <img src="assets/images/mega-menu.png" alt="mega-menu image" className="img-fluid" style={{ height: "200px" }} />
-                                        </div>
-                                        <div className="dropdown-col">
-                                            <h2 className="">Welcome back!</h2>
-                                            <p className="text-muted mb-0">
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium, commodi hic qui aspernatur doloremque quos tempora placeat culpa illum, voluptatibus delectus provident cumque
-                                                aliquid enim, laborum aliquam. Quod, perferendis unde.
-                                            </p>
-                                            <div className="mt-3">
-                                                <a href="auth-login.html" className="btn btn-dark btn-wider">Login</a>
-                                            </div>
-                                        </div>
-                                        <div className="dropdown-col border-start border-primary border-opacity-50">
-                                            <h4 className="dropdown-header">Features</h4>
-                                            <div className="grid-nav grid-nav-action">
-                                                <div className="grid-nav-row">
-                                                    <a href="index.html" className="grid-nav-item">
-                                                        <div className="grid-nav-icon"><i className="far fa-window-restore"></i></div>
-                                                        <span className="grid-nav-content">Dashboard</span>
-                                                    </a>
-                                                    <a href="apps-kanban.html" className="grid-nav-item">
-                                                        <div className="grid-nav-icon"><i className="far fa-clipboard"></i></div>
-                                                        <span className="grid-nav-content">TODO List</span>
-                                                    </a>
-                                                    <a href="#" className="grid-nav-item">
-                                                        <div className="grid-nav-icon"><i className="far fa-question-circle"></i></div>
-                                                        <span className="grid-nav-content">Help Center</span>
-                                                    </a>
-                                                </div>
-                                                <div className="grid-nav-row">
-                                                    <a href="#" className="grid-nav-item">
-                                                        <div className="grid-nav-icon"><i className="far fa-images"></i></div>
-                                                        <span className="grid-nav-content">Gallery</span>
-                                                    </a>
-                                                    <a href="#" className="grid-nav-item">
-                                                        <div className="grid-nav-icon"><i className="far fa-chart-bar"></i></div>
-                                                        <span className="grid-nav-content">Scrumboard</span>
-                                                    </a>
-                                                    <a href="#" className="grid-nav-item">
-                                                        <div className="grid-nav-icon"><i className="far fa-bookmark"></i></div>
-                                                        <span className="grid-nav-content">Docs</span>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="dropdown-col border-start border-primary border-opacity-50">
-                                            <h4 className="dropdown-header">Tools</h4>
-                                            <a href="#" className="dropdown-item"><i className="mdi mdi-checkbox-blank-circle align-middle dropdown-bullet me-2"></i> <span className="dropdown-content">Components</span> </a>
-                                            <a href="#" className="dropdown-item"><i className="mdi mdi-checkbox-blank-circle align-middle dropdown-bullet me-2"></i> <span className="dropdown-content">Form Wizard</span> </a>
-                                            <a href="#" className="dropdown-item"><i className="mdi mdi-checkbox-blank-circle align-middle dropdown-bullet me-2"></i> <span className="dropdown-content">Documentation</span> </a>
-                                            <a href="#" className="dropdown-item"><i className="mdi mdi-checkbox-blank-circle align-middle dropdown-bullet me-2"></i> <span className="dropdown-content">Knowledge Base</span> </a>
-                                            <a href="#" className="dropdown-item"><i className="mdi mdi-checkbox-blank-circle align-middle dropdown-bullet me-2"></i> <span className="dropdown-content">Inventory Manager</span></a>
-                                        </div>
-                                    </div>
-                                </div> */}
-                            </div>
-                                    </>
-                                )}
+                        {/* Sign In / Sign Up Buttons */}
+                        <div className="d-flex align-items-center gap-2">
+                            <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm fs-14"
+                                onClick={() => navigate("/login")}
+                            >
+                                <i className="mdi mdi-login align-middle me-1"></i>
+                                Sign In
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-primary btn-sm fs-14"
+                                onClick={() => navigate("/register")}
+                            >
+                                <i className="mdi mdi-account-plus align-middle me-1"></i>
+                                Sign Up
+                            </button>
                         </div>
 
                         <div className="d-flex align-items-center gap-2">
-                            {/* <!--Start App Search--> */}
+
+                            {/* Search */}
                             <form className="app-search d-none d-lg-block">
                                 <div className="position-relative">
                                     <input type="text" className="form-control" placeholder="Search..." />
                                     <span className="fab fa-sistrix fs-17 align-middle"></span>
                                 </div>
                             </form>
-                            {/* <!--End App Search--> */}
 
-                            {/* <!-- Start Notification --> */}
+                            {/* Notification */}
                             <div className="dropdown d-inline-block">
                                 <button type="button" className="btn btn-sm top-icon" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i className="fas fa-bell align-middle"></i>
                                     <span className="btn-marker"><i className="marker marker-dot text-danger"></i></span>
                                 </button>
-                                <div className="dropdown-menu dropdown-menu-lg dropdown-menu-md dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown">
+                                <div className="dropdown-menu dropdown-menu-lg dropdown-menu-md dropdown-menu-end p-0">
                                     <div className="p-3 bg-info">
                                         <div className="row align-items-center">
                                             <div className="col">
-                                                <h6 className="text-white m-0"><i className="far fa-bell me-2"></i> Notifications </h6>
+                                                <h6 className="text-white m-0"><i className="far fa-bell me-2"></i> Notifications</h6>
                                             </div>
                                             <div className="col-auto">
-                                                <a href="#!" className="badge bg-info-subtle text-info"> 8+</a>
+                                                <a href="#!" className="badge bg-info-subtle text-info">8+</a>
                                             </div>
                                         </div>
                                     </div>
@@ -166,12 +115,10 @@ const Topbar = ({ onSidebarToggle }) => {
                                         <a href="" className="text-reset notification-item">
                                             <div className="d-flex">
                                                 <div className="avatar avatar-xs avatar-label-primary me-3">
-                                                    <span className="rounded fs-16">
-                                                        <i className="mdi mdi-file-document-outline"></i>
-                                                    </span>
+                                                    <span className="rounded fs-16"><i className="mdi mdi-file-document-outline"></i></span>
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h6 className="mb-1">New report has been recived</h6>
+                                                    <h6 className="mb-1">New report has been received</h6>
                                                     <div className="fs-12 text-muted">
                                                         <p className="mb-0"><i className="mdi mdi-clock-outline"></i> 3 min ago</p>
                                                     </div>
@@ -182,9 +129,7 @@ const Topbar = ({ onSidebarToggle }) => {
                                         <a href="" className="text-reset notification-item">
                                             <div className="d-flex">
                                                 <div className="avatar avatar-xs avatar-label-success me-3">
-                                                    <span className="rounded fs-16">
-                                                        <i className="mdi mdi-cart-variant"></i>
-                                                    </span>
+                                                    <span className="rounded fs-16"><i className="mdi mdi-cart-variant"></i></span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <h6 className="mb-1">Last order was completed</h6>
@@ -198,9 +143,7 @@ const Topbar = ({ onSidebarToggle }) => {
                                         <a href="" className="text-reset notification-item">
                                             <div className="d-flex">
                                                 <div className="avatar avatar-xs avatar-label-danger me-3">
-                                                    <span className="rounded fs-16">
-                                                        <i className="mdi mdi-account-group"></i>
-                                                    </span>
+                                                    <span className="rounded fs-16"><i className="mdi mdi-account-group"></i></span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <h6 className="mb-1">Completed meeting canceled</h6>
@@ -214,9 +157,7 @@ const Topbar = ({ onSidebarToggle }) => {
                                         <a href="" className="text-reset notification-item">
                                             <div className="d-flex">
                                                 <div className="avatar avatar-xs avatar-label-warning me-3">
-                                                    <span className="rounded fs-16">
-                                                        <i className="mdi mdi-send-outline"></i>
-                                                    </span>
+                                                    <span className="rounded fs-16"><i className="mdi mdi-send-outline"></i></span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <h6 className="mb-1">New feedback received</h6>
@@ -230,9 +171,7 @@ const Topbar = ({ onSidebarToggle }) => {
                                         <a href="" className="text-reset notification-item">
                                             <div className="d-flex">
                                                 <div className="avatar avatar-xs avatar-label-secondary me-3">
-                                                    <span className="rounded fs-16">
-                                                        <i className="mdi mdi-download-box"></i>
-                                                    </span>
+                                                    <span className="rounded fs-16"><i className="mdi mdi-download-box"></i></span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <h6 className="mb-1">New update was available</h6>
@@ -246,9 +185,7 @@ const Topbar = ({ onSidebarToggle }) => {
                                         <a href="" className="text-reset notification-item">
                                             <div className="d-flex">
                                                 <div className="avatar avatar-xs avatar-label-info me-3">
-                                                    <span className="rounded fs-16">
-                                                        <i className="mdi mdi-hexagram-outline"></i>
-                                                    </span>
+                                                    <span className="rounded fs-16"><i className="mdi mdi-hexagram-outline"></i></span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <h6 className="mb-1">Your password was changed</h6>
@@ -269,17 +206,15 @@ const Topbar = ({ onSidebarToggle }) => {
                                     </div>
                                 </div>
                             </div>
-                            {/* <!-- End Notification --> */}
 
-                            {/* <!-- Start Activities --> */}
+                            {/* Activities */}
                             <div className="d-inline-block activities">
                                 <button type="button" className="btn btn-sm top-icon" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-rightsidabar">
                                     <i className="fas fa-table align-middle"></i>
                                 </button>
                             </div>
-                            {/* <!-- End Activities --> */}
 
-                            {/* <!-- Start Profile --> */}
+                            {/* Profile Dropdown */}
                             <div className="dropdown d-inline-block">
                                 <button type="button" className="btn btn-sm top-icon p-0" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <img className="rounded avatar-2xs p-0" src="assets/images/users/avatar-6.png" alt="Header Avatar" />
@@ -294,16 +229,12 @@ const Topbar = ({ onSidebarToggle }) => {
                                                     </div>
                                                 </div>
                                                 <div className="rich-list-content">
-                                                    <h3 className="rich-list-title text-white">User Profile</h3>
-                                                    <span className="rich-list-subtitle text-white">
-                                                        {userRole && (
-                                                            <span className="badge bg-warning text-dark">
-                                                                {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
-                                                            </span>
-                                                        )}
-                                                    </span>
+                                                    <h3 className="rich-list-title text-white">Charlie Stone</h3>
+                                                    <span className="rich-list-subtitle text-white">admin@codubucks.in</span>
                                                 </div>
-                                                <div className="rich-list-append"><span className="badge badge-label-light fs-6">{isAdmin() ? '⭐' : '👤'}</span></div>
+                                                <div className="rich-list-append">
+                                                    <span className="badge badge-label-light fs-6">6+</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="card-body p-0">
@@ -338,23 +269,31 @@ const Topbar = ({ onSidebarToggle }) => {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Sign Out - Logout API se connected */}
                                         <div className="card-footer card-footer-bordered rounded-0">
-                                            <button className="btn btn-label-danger" onClick={handleLogout}>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="btn btn-label-danger"
+                                            >
+                                                <i className="mdi mdi-logout me-1"></i>
                                                 Sign out
                                             </button>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
-                            {/* <!-- End Profile --> */}
+                            {/* End Profile */}
+
                         </div>
                     </div>
-                    {/* <!-- End menu --> */}
+                    {/* End menu */}
+
                 </div>
             </header>
-            {/* <!-- End topbar --> */}
         </>
-    )
-}
+    );
+};
 
-export default Topbar
+export default Topbar;
