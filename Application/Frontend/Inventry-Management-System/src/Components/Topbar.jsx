@@ -380,7 +380,6 @@ const Topbar = ({ onSidebarToggle }) => {
                       </div>
                     </div>
 
-                    {/* Sign Out - Logout API se connected */}
                     <div className="card-footer card-footer-bordered rounded-0">
                       <button
                         onClick={handleLogout}
