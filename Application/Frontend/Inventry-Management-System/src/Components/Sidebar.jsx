@@ -13,7 +13,7 @@ const Sidebar = ({ isOpen }) => {
                         {/* <!-- Left Menu Start --> */}
                         <ul className="left-menu list-unstyled" id="side-menu">
                             <li>
-                                <Link to="/">
+                                <Link to="/product">
                                     <i className="fas fa-desktop"></i>
                                     <span>Management</span>
                                 </Link>
@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen }) => {
                             <li>
 
                                 <ul className="sub-menu" aria-expanded="false">
-                                    <li><Link to="/"><i className="mdi mdi-checkbox-blank-circle align-middle"></i>Employee</Link></li>
+                                    <li><Link to="/employee"><i className="mdi mdi-checkbox-blank-circle align-middle"></i>Employee</Link></li>
                                     <li><Link to="/product"><i className="mdi mdi-checkbox-blank-circle align-middle"></i>Products</Link></li>
                                     <li><Link to="/user"><i className="mdi mdi-checkbox-blank-circle align-middle"></i> User</Link></li>
 
