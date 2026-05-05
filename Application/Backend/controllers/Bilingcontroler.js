@@ -1,4 +1,6 @@
 import Billing from "../models/Bilingmodal.js";
+import Product from "../models/Productmodal.js";
+
 const createbilling = async (request, response) => {
   try {
     const userId = request.userId;
@@ -18,6 +20,29 @@ const createbilling = async (request, response) => {
         error: true,
         message: "Billing items are required",
       });
+    }
+
+    // Check and reduce product stock
+    const updateProductsQueue = [];
+    for (const item of items) {
+      if (item.product) {
+        const product = await Product.findById(item.product);
+        if (!product) {
+          return response.status(404).json({
+            success: false,
+            error: true,
+            message: `Product not found: ${item.product}`,
+          });
+        }
+        if (product.stockQuantity < item.quantity) {
+          return response.status(400).json({
+            success: false,
+            error: true,
+            message: `Insufficient stock for product ${product.title}. Available: ${product.stockQuantity}, Requested: ${item.quantity}`,
+          });
+        }
+        updateProductsQueue.push({ product, quantity: item.quantity });
+      }
     }
 
     const normalizedItems = items.map((item) => {
@@ -53,9 +78,24 @@ const createbilling = async (request, response) => {
       status: request.body.status || "completed",
     });
 
-    response.status(201).json(billing);
+    // Update product stock after successful billing
+    for (const { product, quantity } of updateProductsQueue) {
+      product.stockQuantity -= quantity;
+      await product.save();
+    }
+
+    response.status(201).json({
+      success: true,
+      error: false,
+      message: "Billing created successfully and stock updated",
+      data: billing,
+    });
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    response.status(400).json({ 
+      success: false,
+      error: true,
+      message: error.message 
+    });
   }
 };
 export { createbilling };

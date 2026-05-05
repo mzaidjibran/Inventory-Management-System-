@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000';
+const API_BASE = 'http://localhost:5000';
 
 // Helper: Decode JWT to extract user info
 const decodeToken = (token) => {

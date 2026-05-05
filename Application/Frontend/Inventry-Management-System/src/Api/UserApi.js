@@ -1,7 +1,7 @@
-const API_BASE = 'http://localhost:3000'
+const API_BASE = 'http://localhost:5000'
 
 const getHeaders = () => ({
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json', // multipart/form-data
     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
 }); // ← Token added here
 

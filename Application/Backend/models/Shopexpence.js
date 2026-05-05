@@ -21,11 +21,11 @@ const payoutSchema = new mongoose.Schema(
       required: true,
     },
 
-    paymentMethod: {
-      type: String,
-      enum: ["cash", "bank", "online"],
-      default: "cash",
-    },
+    // paymentMethod: {
+    //   type: String,
+    //   enum: ["cash", "bank", "online"],
+    //   default: "cash",
+    // },
 
     payoutDate: {
       type: Date,

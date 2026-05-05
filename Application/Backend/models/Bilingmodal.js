@@ -12,11 +12,11 @@ const saleSchema = new mongoose.Schema(
     totalAmount: { type: Number },
     discount: { type: Number, default: 0 },
     tax: { type: Number, default: 0 },
-    paymentMethod: {
-      type: String,
-      enum: ["cash", "card", "online"],
-      required: true,
-    },
+    // paymentMethod: {
+    //   type: String,
+    //   enum: ["cash", "card", "online"],
+    //   required: true,
+    // },
     invoiceNumber: { type: String, unique: true },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

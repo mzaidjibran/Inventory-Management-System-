@@ -116,3 +116,40 @@ export const deleteProduct = async (request, response) => {
     });
   }
 };
+
+// Search product by barcode
+export const searchProductByBarcode = async (request, response) => {
+  try {
+    const { barcode } = request.query || request.body;
+    
+    if (!barcode) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Barcode is required",
+      });
+    }
+
+    const product = await Product.findOne({ barcode });
+    if (!product) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Product not found with this barcode",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Product found",
+      data: product,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};

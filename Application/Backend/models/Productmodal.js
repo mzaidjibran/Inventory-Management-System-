@@ -33,6 +33,11 @@ const productSchema = new mongoose.Schema(
       minlength: 2,
       maxlength: 50,
     },
+    barcode: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     image: {
       type: String,
       default: "",
