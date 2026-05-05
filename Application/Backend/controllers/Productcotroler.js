@@ -4,7 +4,9 @@ export const createProduct = async (request, response) => {
   try {
     const productData = {
       ...request.body,
-      image: request.file ? request.file.path : request.body.image || "",
+      image: request.file
+        ? `image/${request.file.filename}`
+        : request.body.image || "",
     };
     const product = await Product.create(productData);
     response.status(201).json(product);
@@ -63,7 +65,7 @@ export const updateProduct = async (request, response) => {
       ...request.body,
     };
     if (request.file) {
-      updateData.image = request.file.path;
+      updateData.image = `image/${request.file.filename}`;
     }
     const updatedProduct = await Product.findByIdAndUpdate(
       request.params.id,

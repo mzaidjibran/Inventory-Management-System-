@@ -55,7 +55,7 @@ const ProductTable = () => {
 
     function handleEdit(pro) {
         setEditData(pro);
-        const modal = new window.bootstrap.Modal(document.getElementById("modal8"));
+        const modal = new window.bootstrap.Modal(document.getElementById("productModal"));
         modal.show();
     }
 
@@ -72,7 +72,7 @@ const ProductTable = () => {
                     <div className="card-header">
                         <h4 className="card-title">Products</h4>
                         <button type="button" className="btn btn-primary btn-sm ms-2"
-                            data-bs-toggle="modal" data-bs-target="#modal8"
+                            data-bs-toggle="modal" data-bs-target="#productModal"
                             onClick={() => setEditData(null)}>
                             Add Product
                         </button>
@@ -98,20 +98,28 @@ const ProductTable = () => {
                                     {viewData && (
                                         <div className="row g-3">
                                             <div className="col-6">
-                                                <small className="text-muted">Name</small>
-                                                <p className="fw-semibold">{viewData.productName || "-"}</p>
+                                                <small className="text-muted">Title</small>
+                                                <p className="fw-semibold">{viewData.title || "-"}</p>
+                                            </div>
+                                            <div className="col-6">
+                                                <small className="text-muted">Author</small>
+                                                <p className="fw-semibold">{viewData.author || "-"}</p>
+                                            </div>
+                                            <div className="col-6">
+                                                <small className="text-muted">Category</small>
+                                                <p className="fw-semibold">{viewData.category || "-"}</p>
                                             </div>
                                             <div className="col-6">
                                                 <small className="text-muted">Description</small>
-                                                <p className="fw-semibold">{viewData.productDescription || "-"}</p>
+                                                <p className="fw-semibold">{viewData.description || "-"}</p>
                                             </div>
                                             <div className="col-6">
                                                 <small className="text-muted">Price</small>
-                                                <p className="fw-semibold">{viewData.productPrice || "-"}</p>
+                                                <p className="fw-semibold">{viewData.price || "-"}</p>
                                             </div>
                                             <div className="col-6">
-                                                <small className="text-muted">Stock</small>
-                                                <p className="fw-semibold">{viewData.productStock || "-"}</p>
+                                                <small className="text-muted">Stock Quantity</small>
+                                                <p className="fw-semibold">{viewData.stockQuantity || "-"}</p>
                                             </div>
                                         </div>
                                     )}
@@ -129,21 +137,22 @@ const ProductTable = () => {
                             style={{ borderCollapse: "collapse", borderSpacing: 0, width: "100%" }}>
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Description</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Category</th>
                                     <th>Price</th>
-                                    <th>Stock</th>
+                                    <th>Stock Qty</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {products.map((pro) => (
                                     <tr key={pro._id}>
-                                        <td>{pro.productName}</td>
-                                        <td>{pro.department || "-"}</td>
-                                        <td>{pro.productDescription || "-"}</td>
-                                        <td>{pro.productPrice}</td>
-                                        <td>{pro.productStock}</td>
+                                        <td>{pro.title}</td>
+                                        <td>{pro.author || "-"}</td>
+                                        <td>{pro.category || "-"}</td>
+                                        <td>{pro.price}</td>
+                                        <td>{pro.stockQuantity}</td>
                                         <td>
                                             <button className="btn btn-sm btn-info me-1"
                                                 title="View"
