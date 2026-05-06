@@ -6,6 +6,22 @@ import {
 } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import bcrypt, { compare } from "bcrypt";
+
+const normalizeUserImage = (image) => {
+  if (!image) return "";
+  return image.startsWith("/image/")
+    ? image
+    : `/image/${image.split(/[\\/]/).pop()}`;
+};
+
+const toSafeUser = (user) => {
+  if (!user) return null;
+  const raw = user.toObject ? user.toObject() : user;
+  return {
+    ...raw,
+    image: normalizeUserImage(raw.image),
+  };
+};
 //sing up controller
 export const SignUp = async (request, response) => {
   try {
@@ -147,6 +163,67 @@ export const refresh = async (request, response) => {
       error: true,
       message: "Login failed",
       Message: error.message,
+    });
+  }
+};
+
+export const getMyProfile = async (request, response) => {
+  try {
+    const user = await UserModel.findById(request.userId);
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "User not found",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      data: toSafeUser(user),
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
+export const updateMyProfile = async (request, response) => {
+  try {
+    const updateData = { ...request.body };
+    if (request.file) {
+      updateData.image = `/image/${request.file.filename}`;
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      request.userId,
+      updateData,
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "User not found",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Profile updated successfully",
+      data: toSafeUser(updatedUser),
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
     });
   }
 };

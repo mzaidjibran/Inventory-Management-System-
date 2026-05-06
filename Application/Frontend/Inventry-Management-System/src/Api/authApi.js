@@ -82,6 +82,40 @@ export const getUserId = () => localStorage.getItem("userId") || null;
 // Check if user is admin
 export const isAdmin = () => getUserRole() === "admin";
 
+// Get logged-in user's profile
+export const getMyProfile = async () => {
+  const response = await fetch(`${API_BASE}/api/account/me`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to load profile");
+  return data;
+};
+
+// Update logged-in user's profile image/info
+export const updateMyProfile = async (data) => {
+  const isFormData = data instanceof FormData;
+  const response = await fetch(`${API_BASE}/api/account/me`, {
+    method: "PUT",
+    headers: isFormData
+      ? { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
+      : {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+    body: isFormData ? data : JSON.stringify(data),
+  });
+  const responseData = await response.json();
+  if (!response.ok) {
+    throw new Error(responseData.message || "Profile update failed");
+  }
+  return responseData;
+};
+
 // SIGNUP - Public endpoint, NO token required
 export const signUp = async (userData) => {
   const response = await fetch(`${API_BASE}/api/account/SignUp`, {
