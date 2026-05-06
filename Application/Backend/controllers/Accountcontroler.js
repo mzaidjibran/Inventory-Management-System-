@@ -6,6 +6,15 @@ import {
 } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+import passwordResetToken from "../models/passwordResetToken.js";
+
+// Minimal email sender placeholder — replace with real email integration
+const sendResetEmail = async (email, rawToken) => {
+  console.log(`Password reset token for ${email}: ${rawToken}`);
+  // TODO: integrate with real email provider (nodemailer, SendGrid, etc.)
+  return true;
+};
 //sing up controller
 export const SignUp = async (request, response) => {
   try {
@@ -148,5 +157,85 @@ export const refresh = async (request, response) => {
       message: "Login failed",
       Message: error.message,
     });
+  }
+};
+export const resetpassword = async (request, response) => {
+  try {
+    const { token, newPassword } = request.body;
+    if (!token || !newPassword) {
+      return response.status(400).json({ success: false, message: "Token and new password are required" });
+    }
+
+    const tokens = await passwordResetToken.find({ used: false }).populate("userId");
+    for (const tokenData of tokens) {
+      if (await bcrypt.compare(token, tokenData.tokenhash)) {
+        if (tokenData.attemts >= 5) {
+          return response.status(400).json({
+            message: "too many failed attempts, please request a new token",
+          });
+        }
+
+        tokenData.attemts++;
+        await tokenData.save();
+
+        if (tokenData.expiresIn < new Date()) {
+          return response.status(400).json({
+            message: "token expired, please request a new token",
+          });
+        }
+
+        tokenData.userId.password = await bcrypt.hash(newPassword, 10);
+        await tokenData.userId.save();
+
+        tokenData.used = true;
+        await tokenData.save();
+
+        return response.status(200).json({
+          message: "password reset successfully",
+        });
+      }
+    }
+
+    return response.status(400).json({
+      message: "invalid token",
+    });
+  } catch (error) {
+    return response.status(500).json({ success: false, message: "Password reset failed", errorMessage: error.message });
+  }
+};
+
+// forgot password controller
+export const forgotpassword = async (request, response) => {
+  try {
+    const user = await UserModel.findOne({ email: request.body.email });
+    if (!user) {
+      return response.status(404).json({ message: "user not found" });
+    }
+
+    await passwordResetToken.deleteMany({ userId: user._id });
+
+    const raw = crypto.randomBytes(32).toString("hex");
+    console.log("reset token:", raw);
+
+    const tokenhash = await bcrypt.hash(raw, 10);
+    await passwordResetToken.create({
+      userId: user._id,
+      tokenhash,
+      expiresIn: new Date(Date.now() + 60 * 60 * 1000),
+      attemts: 0,
+      used: false,
+    });
+
+    try {
+      await sendResetEmail(user.email, raw);
+    } catch (emailErr) {
+      console.warn("sendResetEmail failed:", emailErr);
+    }
+
+    return response.status(200).json({
+      message: "password reset email sent",
+    });
+  } catch (error) {
+    return response.status(500).json({ message: "Forgot password failed", errorMessage: error.message });
   }
 };
