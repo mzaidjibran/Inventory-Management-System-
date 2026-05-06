@@ -1,4 +1,5 @@
 import Employee from "../models/Empolyeemodal.js";
+import path from "path";
 
 // helper: normalize incoming payloads from older frontend
 function normalizePayload(body, file) {
@@ -39,7 +40,7 @@ function normalizePayload(body, file) {
     else if (s === "terminated") data.status = "Terminated";
     else if (s === "leave" || s === "on leave") data.status = "On Leave";
   }
-  if (file) data.profileImage = file.path;
+  if (file) data.profileImage = `/image/${file.filename}`;
   return data;
 }
 
@@ -54,6 +55,11 @@ function transformEmployeeDoc(doc) {
     cnic: raw.CNIC || raw.cnic || "",
     dateofBirth: raw.dateOfBirth || raw.dateofBirth || null,
     dateOfJoining: raw.dateOfJoining || raw.dateOfJoining || null,
+    profileImage: raw.profileImage
+      ? raw.profileImage.startsWith("/image/")
+        ? raw.profileImage
+        : `/image/${path.basename(raw.profileImage)}`
+      : "",
   };
 }
 

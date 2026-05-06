@@ -1,49 +1,80 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import createEmployee from "../../api/EmployeeApi.js";
 import { toast } from "react-toastify";
 
-const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
-  const empty = {
-    Name: "",
-    email: "",
-    phone: "",
-    cnic: "",
-    dateofBirth: "",
-    gender: "",
-    dateOfJoining: "",
-    salary: "",
-    status: "",
-  };
-  const [value, updateValue] = useState(empty);
+const API_BASE = "http://localhost:3000";
 
-  useEffect(() => {
-    if (editData) {
-      updateValue({
-        Name: editData.Name || "",
-        email: editData.email || "",
-        phone: editData.phone || "",
-        cnic: editData.cnic || "",
-        dateofBirth: editData.dateofBirth
-          ? editData.dateofBirth.slice(0, 10)
-          : "",
-        gender: editData.gender || "",
-        dateOfJoining: editData.dateOfJoining
-          ? editData.dateOfJoining.slice(0, 10)
-          : "",
-        salary: editData.salary || "",
-        status: editData.status || "",
-      });
-    }
-  }, [editData]);
+const EMPTY_EMPLOYEE_FORM = {
+  Name: "",
+  email: "",
+  phone: "",
+  cnic: "",
+  dateofBirth: "",
+  gender: "",
+  dateOfJoining: "",
+  salary: "",
+  status: "",
+};
+
+function buildInitialValue(editData) {
+  if (!editData) {
+    return { ...EMPTY_EMPLOYEE_FORM };
+  }
+
+  return {
+    Name: editData.Name || "",
+    email: editData.email || "",
+    phone: editData.phone || "",
+    cnic: editData.cnic || "",
+    dateofBirth: editData.dateofBirth ? editData.dateofBirth.slice(0, 10) : "",
+    gender: editData.gender || "",
+    dateOfJoining: editData.dateOfJoining
+      ? editData.dateOfJoining.slice(0, 10)
+      : "",
+    salary: editData.salary || "",
+    status: editData.status || "",
+  };
+}
+
+const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
+  const [value, updateValue] = useState(() => buildInitialValue(editData));
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(() =>
+    editData?.profileImage ? `${API_BASE}${editData.profileImage}` : "",
+  );
 
   function handleChange(field) {
     return (e) => updateValue((prev) => ({ ...prev, [field]: e.target.value }));
   }
 
+  function handleImageChange(e) {
+    const file = e.target.files?.[0] || null;
+    setSelectedImage(file);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImagePreview(
+        editData?.profileImage ? `${API_BASE}${editData.profileImage}` : "",
+      );
+    }
+  }
+
   async function SaveEmployee(e) {
     e.preventDefault();
     try {
-      const payload = { ...value };
+      const payload = new FormData();
+      Object.entries(value).forEach(([key, currentValue]) => {
+        if (
+          currentValue !== "" &&
+          currentValue !== null &&
+          currentValue !== undefined
+        ) {
+          payload.append(key, currentValue);
+        }
+      });
+      if (selectedImage) {
+        payload.append("profileImage", selectedImage);
+      }
 
       if (editData) {
         const { updateEmployee } = await import("../../api/EmployeeApi.js");
@@ -53,7 +84,9 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
         await createEmployee(payload);
         toast.success("Employee added successfully");
       }
-      updateValue(empty);
+      updateValue({ ...EMPTY_EMPLOYEE_FORM });
+      setSelectedImage(null);
+      setImagePreview("");
       onSaved && onSaved();
       onClearEdit && onClearEdit();
       const modal = document.getElementById("modal8");
@@ -65,7 +98,9 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
   }
 
   function handleReset() {
-    updateValue(empty);
+    updateValue({ ...EMPTY_EMPLOYEE_FORM });
+    setSelectedImage(null);
+    setImagePreview("");
     onClearEdit && onClearEdit();
   }
 
@@ -144,6 +179,33 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
                     <small className="form-text text-muted">{hint}</small>
                   </div>
                 ))}
+
+                <div className="col-6">
+                  <label className="form-label">Profile Image</label>
+                  <input
+                    className="form-control"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                  <small className="form-text text-muted">
+                    Upload employee profile photo
+                  </small>
+                  {imagePreview ? (
+                    <div className="mt-2">
+                      <img
+                        src={imagePreview}
+                        alt="Employee preview"
+                        style={{
+                          width: 72,
+                          height: 72,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
 
                 <div className="col-6">
                   <label className="form-label">Gender</label>

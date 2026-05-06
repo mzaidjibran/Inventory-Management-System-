@@ -30,7 +30,7 @@ const EmployeeTable = () => {
 
   const { employees, loadEmployees } = EmployeeHook();
   const [editData, setEditData] = useState(null);
-  // 🆕 viewData: jis employee ka View button click ho us ki details store karta hai
+
   const [viewData, setViewData] = useState(null);
 
   function handleDelete(id) {
@@ -82,7 +82,6 @@ const EmployeeTable = () => {
     modal.show();
   }
 
-  // 🆕 handleView: viewData mein employee set karta hai aur view modal kholata hai
   function handleView(emp) {
     setViewData(emp);
     const modal = new window.bootstrap.Modal(
@@ -109,12 +108,12 @@ const EmployeeTable = () => {
           </div>
 
           <EmployeeForm
+            key={editData?._id || "new-employee"}
             onSaved={loadEmployees}
             editData={editData}
             onClearEdit={() => setEditData(null)}
           />
 
-          {/* 🆕 View Modal — employee ki saari details show karta hai */}
           <div className="modal fade" id="modalView">
             <div className="modal-dialog modal-lg">
               <div className="modal-content">
@@ -131,7 +130,22 @@ const EmployeeTable = () => {
                 <div className="modal-body">
                   {viewData && (
                     <div className="row g-3">
-                      {/* 🆕 col-6 grid — 2 columns mein details neatly dikhata hai */}
+                      <div className="col-12 text-center">
+                        {viewData.profileImage ? (
+                          <img
+                            src={`http://localhost:3000${viewData.profileImage}`}
+                            alt={viewData.Name || "Employee"}
+                            style={{
+                              width: 120,
+                              height: 120,
+                              objectFit: "cover",
+                              borderRadius: "50%",
+                            }}
+                          />
+                        ) : (
+                          <div className="text-muted">No profile image</div>
+                        )}
+                      </div>
                       <div className="col-6">
                         <small className="text-muted">Name</small>
                         <p className="fw-semibold">{viewData.Name || "-"}</p>
