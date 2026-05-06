@@ -1,22 +1,22 @@
 import Supplier from "../models/Supliermodal.js";
-export const createsuplier = async (request, response) => {
+const createsuppliers = async (request, response) => {
   try {
-    const suplier = await Suplier.create(request.body);
-    response.status(201).json(suplier);
+    const supplier = await Supplier.create(request.body);
+    response.status(201).json(supplier);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
-
+export { createsuppliers };
 //get all suppliers
-export const getAllsuplier = async (request, response) => {
+export const getAllsuppliers = async (request, response) => {
   try {
-    const supliers = await Suplier.find();
+    const suppliers = await Supplier.find();
     response.status(200).json({
       success: true,
       error: false,
       message: "Suppliers fetched successfully",
-      data: supliers,
+      data: suppliers,
     });
   } catch (error) {
     response.status(500).json({
@@ -28,10 +28,10 @@ export const getAllsuplier = async (request, response) => {
   }
 };
 //get supplier by id
-export const getSingleSuplier = async (request, response) => {
+export const getSingleSupplier = async (request, response) => {
   try {
-    const suplier = await Suplier.findById(request.params.id);
-    if (!suplier) {
+    const supplier = await Supplier.findById(request.params.id);
+    if (!supplier) {
       return response.status(404).json({
         success: false,
         error: true,
@@ -42,7 +42,7 @@ export const getSingleSuplier = async (request, response) => {
       success: true,
       error: false,
       message: "Supplier fetched successfully",
-      data: suplier,
+      data: supplier,
     });
   } catch (error) {
     response.status(500).json({
@@ -53,14 +53,14 @@ export const getSingleSuplier = async (request, response) => {
   }
 };
 //update supplier
-export const updateSuplier = async (request, response) => {
+export const updateSupplier = async (request, response) => {
   try {
-    const updatedSuplier = await Suplier.findByIdAndUpdate(
+    const updatedSupplier = await Supplier.findByIdAndUpdate(
       request.params.id,
       request.body,
       { new: true },
     );
-    if (!updatedSuplier) {
+    if (!updatedSupplier) {
       return response.status(404).json({
         success: false,
         error: true,
@@ -71,7 +71,7 @@ export const updateSuplier = async (request, response) => {
       success: true,
       error: false,
       message: "Supplier updated successfully",
-      data: updatedSuplier,
+      data: updatedSupplier,
     });
   } catch (error) {
     response.status(500).json({
@@ -82,10 +82,10 @@ export const updateSuplier = async (request, response) => {
   }
 };
 //delete supplier
-export const deleteSuplier = async (request, response) => {
+export const deleteSupplier = async (request, response) => {
   try {
-    const deletedSuplier = await Suplier.findByIdAndDelete(request.params.id);
-    if (!deletedSuplier) {
+    const deletedSupplier = await Supplier.findByIdAndDelete(request.params.id);
+    if (!deletedSupplier) {
       return response.status(404).json({
         success: false,
         error: true,
@@ -96,7 +96,7 @@ export const deleteSuplier = async (request, response) => {
       success: true,
       error: false,
       message: "Supplier deleted successfully",
-      data: deletedSuplier,
+      data: deletedSupplier,
     });
   } catch (error) {
     response.status(500).json({

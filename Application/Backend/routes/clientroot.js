@@ -5,7 +5,7 @@ import {
   getSingleClient,
   updateClient,
   deleteClient,
-} from "../controllers/Clientcontroler.js";
+} from "../controllers/clientcontroler.js";
 import upload from "../middleware/multerniddleware.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();

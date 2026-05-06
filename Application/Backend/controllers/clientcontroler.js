@@ -1,5 +1,5 @@
 import Client from "../models/Clientmodal.js";
-export const createclient = async (request, response) => {
+const createclient = async (request, response) => {
   try {
     const client = await Client.create(request.body);
     response.status(201).json(client);
@@ -7,6 +7,7 @@ export const createclient = async (request, response) => {
     response.status(400).json({ message: error.message });
   }
 };
+export { createclient };
 
 //get all clients
 export const getAllclients = async (request, response) => {

@@ -70,6 +70,11 @@ export const createPurchase = async (req, res) => {
       items: validatedItems,
       invoiceNumber,
       totalAmount,
+      suplier: req.body.suplier || req.body.supplierID,
+      paymentStatus: req.body.paymentStatus || "pending",
+      paymentMethod: req.body.paymentMethod || "cash",
+      purchaseDate: req.body.purchaseDate || new Date(),
+      note: req.body.note || "",
     });
 
     // Update product stock for each item
@@ -100,6 +105,7 @@ export const getAllPurchases = async (req, res) => {
     const purchases = await Purchase.find()
 
       .populate("items.product")
+      .populate("suplier")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -120,7 +126,8 @@ export const getSinglePurchase = async (req, res) => {
   try {
     const purchase = await Purchase.findById(req.params.id)
 
-      .populate("items.product");
+      .populate("items.product")
+      .populate("suplier");
 
     if (!purchase) {
       return res.status(404).json({
@@ -170,14 +177,24 @@ export const updatePurchase = async (req, res) => {
       });
     }
 
+    const updateData = {
+      items: req.body.items,
+      totalAmount,
+      invoiceNumber: req.body.invoiceNumber,
+      paymentStatus: req.body.paymentStatus,
+      paymentMethod: req.body.paymentMethod,
+      purchaseDate: req.body.purchaseDate,
+      note: req.body.note,
+      suplier: req.body.suplier || req.body.supplierID,
+    };
+
     const updatedPurchase = await Purchase.findByIdAndUpdate(
       req.params.id,
-      {
-        ...req.body,
-        totalAmount,
-      },
+      updateData,
       { new: true },
-    );
+    )
+      .populate("items.product")
+      .populate("suplier");
 
     res.status(200).json({
       success: true,
