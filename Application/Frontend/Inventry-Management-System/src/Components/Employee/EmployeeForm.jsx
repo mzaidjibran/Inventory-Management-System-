@@ -2,10 +2,11 @@ import { useState } from "react";
 import createEmployee from "../../api/EmployeeApi.js";
 import { toast } from "react-toastify";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "http://localhost:3000";
 
 const EMPTY_EMPLOYEE_FORM = {
-  Name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   phone: "",
   cnic: "",
@@ -22,7 +23,9 @@ function buildInitialValue(editData) {
   }
 
   return {
-    Name: editData.Name || "",
+    firstName: editData.firstName || "",
+    lastName: editData.lastName || "",
+
     email: editData.email || "",
     phone: editData.phone || "",
     cnic: editData.cnic || "",
@@ -125,12 +128,8 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
             <div className="modal-body">
               <div className="row g-3">
                 {[
-                  {
-                    label: "Name",
-                    field: "Name",
-                    type: "text",
-                    hint: "Enter your Name",
-                  },
+                  { label: "First Name", field: "firstName", type: "text" },
+                  { label: "Last Name", field: "lastName", type: "text" },
                   {
                     label: "Email",
                     field: "email",
@@ -217,7 +216,7 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
                     <option value="">-- Select Gender --</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
-                    <option value="rather_not_say">Rather Not Say</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 
