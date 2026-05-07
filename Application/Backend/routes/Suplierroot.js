@@ -10,7 +10,7 @@ import upload from "../middleware/multerniddleware.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 //supplier routers
-router.post("/", authMiddleware, upload.single("image"), createsuppliers);
+router.post("/", upload.single("image"), createsuppliers);
 router.get("/", getAllsuppliers);
 router.get("/:id", getSingleSupplier);
 router.put("/:id", upload.single("image"), updateSupplier);
