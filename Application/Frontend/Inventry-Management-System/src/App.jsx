@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Supplier from "./Pages/supplier.jsx";
 import Client from "./Pages/client.jsx";
 
+
 function App() {
   return (
     <Routes>

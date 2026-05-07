@@ -5,7 +5,7 @@ import { deleteProduct } from "../../Api/ProductApi.js";
 import { toast } from "react-toastify";
 
 const ProductTable = () => {
-  const API_BASE = "http://localhost:3000";
+  const API_BASE = "http://localhost:5000";
 
   const { products, loadProducts } = ProductHook();
   const [editData, setEditData] = useState(null);

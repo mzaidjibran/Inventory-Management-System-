@@ -1,7 +1,7 @@
 import { useState } from "react";
-import SupplierHook from "../../hook/SupplierHook.jsx";
+import SupplierHook from "../../Hook/SupplierHook.jsx";
 import SupplierForm from "./SupplierForm.jsx";
-import { deleteSupplier } from "../../Api/supplier.js";
+import { deleteProduct } from "../../Api/ProductApi.js";
 import { toast } from "react-toastify";
 
 const SupplierTable = () => {
@@ -31,7 +31,7 @@ const SupplierTable = () => {
     return "-";
   }
 
-  const { suppliers, loadSuppliers } = SupplierHook();
+  const { products, loadProducts } = ProductHook();
   const [editData, setEditData] = useState(null);
   const [viewData, setViewData] = useState(null);
 
@@ -40,7 +40,7 @@ const SupplierTable = () => {
     confirmToastId = toast(
       ({ closeToast }) => (
         <div>
-          <div className="fw-semibold">Delete this Supplier?</div>
+          <div className="fw-semibold">Delete this Product?</div>
           <div className="d-flex gap-2 mt-2">
             <button
               type="button"
@@ -48,10 +48,10 @@ const SupplierTable = () => {
               onClick={async () => {
                 closeToast();
                 try {
-                  await deleteSupplier(id);
-                  loadSuppliers();
+                  await deleteProduct(id);
+                  loadProducts();
                   toast.dismiss(confirmToastId);
-                  toast.success("Supplier deleted successfully");
+                  toast.success("Product deleted successfully");
                 } catch (err) {
                   toast.error("Delete failed: " + err.message);
                 }
@@ -84,8 +84,8 @@ const SupplierTable = () => {
     modal.show();
   }
 
-  function handleView(sup) {
-    setViewData(sup);
+  function handleView(pro) {
+    setViewData(pro);
     const modal = new window.bootstrap.Modal(
       document.getElementById("modalView"),
     );
@@ -97,20 +97,20 @@ const SupplierTable = () => {
       <div className="col-12">
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">Suppliers</h4>
+            <h4 className="card-title">Products</h4>
             <button
               type="button"
               className="btn btn-primary btn-sm ms-2"
               data-bs-toggle="modal"
-              data-bs-target="#modal8"
+              data-bs-target="#productModal"
               onClick={() => setEditData(null)}
             >
-              Add Supplier
+              Add Product
             </button>
           </div>
 
-          <SupplierForm
-            onSaved={loadSuppliers}
+          <ProductForm
+            onSaved={loadProducts}
             editData={editData}
             onClearEdit={() => setEditData(null)}
           />
@@ -119,7 +119,7 @@ const SupplierTable = () => {
             <div className="modal-dialog modal-lg">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Supplier Details</h5>
+                  <h5 className="modal-title">Product Details</h5>
                   <button
                     type="button"
                     className="btn btn-sm btn-label-danger btn-icon"
@@ -131,20 +131,60 @@ const SupplierTable = () => {
                 <div className="modal-body">
                   {viewData && (
                     <div className="row g-3">
-                      <div className="col-6">
-                        <small className="text-muted">Name</small>
-                        <p className="fw-semibold">{viewData.name || "-"}</p>
+                      <div className="col-12">
+                        <small className="text-muted">Image</small>
+                        <div className="mt-1">
+                          {viewData.image ? (
+                            <img
+                              src={
+                                viewData.image.startsWith("http")
+                                  ? viewData.image
+                                  : `${API_BASE}/${viewData.image}`
+                              }
+                              alt={viewData.title || "Product"}
+                              style={{
+                                width: "120px",
+                                height: "120px",
+                                objectFit: "cover",
+                                borderRadius: "8px",
+                                border: "1px solid #e5e7eb",
+                              }}
+                            />
+                          ) : (
+                            <p className="fw-semibold mb-0">-</p>
+                          )}
+                        </div>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Email</small>
-                        <p className="fw-semibold">{viewData.email || "-"}</p>
+                        <small className="text-muted">Title</small>
+                        <p className="fw-semibold">{viewData.title || "-"}</p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Contact</small>
-                        <p className="fw-semibold">{viewData.contact || "-"}</p>
+                        <small className="text-muted">Author</small>
+                        <p className="fw-semibold">{viewData.author || "-"}</p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Address</small>
+                        <small className="text-muted">Category</small>
+                        <p className="fw-semibold">
+                          {viewData.category || "-"}
+                        </p>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted">Barcode</small>
+                        <p className="fw-semibold">{viewData.barcode || "-"}</p>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted">Description</small>
+                        <p className="fw-semibold">
+                          {viewData.description || "-"}
+                        </p>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted">Price</small>
+                        <p className="fw-semibold">{viewData.price || "-"}</p>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted">Stock Quantity</small>
                         <p className="fw-semibold">
                           {formatAddress(viewData.address)}
                         </p>
@@ -176,10 +216,11 @@ const SupplierTable = () => {
             >
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Contact</th>
-                  <th>Email</th>
-                  <th>Address</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock Qty</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -194,21 +235,21 @@ const SupplierTable = () => {
                       <button
                         className="btn btn-sm btn-info me-1"
                         title="View"
-                        onClick={() => handleView(sup)}
+                        onClick={() => handleView(pro)}
                       >
                         <i className="mdi mdi-eye"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-warning me-1"
                         title="Edit"
-                        onClick={() => handleEdit(sup)}
+                        onClick={() => handleEdit(pro)}
                       >
                         <i className="mdi mdi-pencil"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
                         title="Delete"
-                        onClick={() => handleDelete(sup._id)}
+                        onClick={() => handleDelete(pro._id)}
                       >
                         <i className="mdi mdi-delete"></i>
                       </button>
@@ -224,4 +265,4 @@ const SupplierTable = () => {
   );
 };
 
-export default SupplierTable;
+export default ProductTable;
