@@ -29,12 +29,6 @@ const clientSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Email cannot exceed 100 characters"],
     },
-    phone: {
-      type: String,
-      required: [true, "Phone number is required"],
-      trim: true,
-      maxlength: [20, "Phone number cannot exceed 20 characters"],
-    },
   },
   { timestamps: true },
 );

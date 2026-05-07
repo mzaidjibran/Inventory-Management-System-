@@ -145,10 +145,6 @@ const ClientTable = () => {
                         <p className="fw-semibold">{viewData.contact || "-"}</p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Phone</small>
-                        <p className="fw-semibold">{viewData.phone || "-"}</p>
-                      </div>
-                      <div className="col-6">
                         <small className="text-muted">Address</small>
                         <p className="fw-semibold">
                           {formatAddress(viewData.address)}
@@ -184,7 +180,6 @@ const ClientTable = () => {
                   <th>Name</th>
                   <th>Contact</th>
                   <th>Email</th>
-                  <th>Phone</th>
                   <th>Address</th>
                   <th>Actions</th>
                 </tr>
@@ -195,7 +190,6 @@ const ClientTable = () => {
                     <td>{client.name}</td>
                     <td>{client.contact || "-"}</td>
                     <td>{client.email || "-"}</td>
-                    <td>{client.phone || "-"}</td>
                     <td>{formatAddress(client.address)}</td>
                     <td>
                       <button
