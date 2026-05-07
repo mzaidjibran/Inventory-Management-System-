@@ -9,6 +9,7 @@ import SignUp from "./pages/SignUp.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Supplier from "./Pages/supplier.jsx";
 
+
 function App() {
   return (
     <Routes>
