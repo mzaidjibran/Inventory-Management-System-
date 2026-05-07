@@ -1,10 +1,10 @@
 import { useState } from "react";
-import SupplierHook from "../../hook/SupplierHook.jsx";
-import SupplierForm from "./SupplierForm.jsx";
-import { deleteSupplier } from "../../Api/supplier.js";
+import ClientHook from "../../Hook/clienthook.jsx";
+import ClientForm from "./clientform.jsx";
+import { deleteClient } from "../../Api/client.js";
 import { toast } from "react-toastify";
 
-const SupplierTable = () => {
+const ClientTable = () => {
   function formatAddress(address) {
     if (!address) {
       return "-";
@@ -31,7 +31,7 @@ const SupplierTable = () => {
     return "-";
   }
 
-  const { suppliers, loadSuppliers } = SupplierHook();
+  const { clients, loadClients } = ClientHook();
   const [editData, setEditData] = useState(null);
   const [viewData, setViewData] = useState(null);
 
@@ -48,10 +48,10 @@ const SupplierTable = () => {
               onClick={async () => {
                 closeToast();
                 try {
-                  await deleteSupplier(id);
-                  loadSuppliers();
+                  await deleteClient(id);
+                  loadClients();
                   toast.dismiss(confirmToastId);
-                  toast.success("Supplier deleted successfully");
+                  toast.success("Client deleted successfully");
                 } catch (err) {
                   toast.error("Delete failed: " + err.message);
                 }
@@ -78,14 +78,14 @@ const SupplierTable = () => {
     );
   }
 
-  function handleEdit(sup) {
-    setEditData(sup);
+  function handleEdit(client) {
+    setEditData(client);
     const modal = new window.bootstrap.Modal(document.getElementById("modal8"));
     modal.show();
   }
 
-  function handleView(sup) {
-    setViewData(sup);
+  function handleView(client) {
+    setViewData(client);
     const modal = new window.bootstrap.Modal(
       document.getElementById("modalView"),
     );
@@ -97,7 +97,7 @@ const SupplierTable = () => {
       <div className="col-12">
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">Suppliers</h4>
+            <h4 className="card-title">Clients</h4>
             <button
               type="button"
               className="btn btn-primary btn-sm ms-2"
@@ -105,12 +105,13 @@ const SupplierTable = () => {
               data-bs-target="#modal8"
               onClick={() => setEditData(null)}
             >
-              Add Supplier
+              Add Client
             </button>
           </div>
 
-          <SupplierForm
-            onSaved={loadSuppliers}
+          <ClientForm
+            key={editData?._id || "new-client"}
+            onSaved={loadClients}
             editData={editData}
             onClearEdit={() => setEditData(null)}
           />
@@ -119,7 +120,7 @@ const SupplierTable = () => {
             <div className="modal-dialog modal-lg">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Supplier Details</h5>
+                  <h5 className="modal-title">Client Details</h5>
                   <button
                     type="button"
                     className="btn btn-sm btn-label-danger btn-icon"
@@ -142,6 +143,10 @@ const SupplierTable = () => {
                       <div className="col-6">
                         <small className="text-muted">Contact</small>
                         <p className="fw-semibold">{viewData.contact || "-"}</p>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted">Phone</small>
+                        <p className="fw-semibold">{viewData.phone || "-"}</p>
                       </div>
                       <div className="col-6">
                         <small className="text-muted">Address</small>
@@ -179,36 +184,38 @@ const SupplierTable = () => {
                   <th>Name</th>
                   <th>Contact</th>
                   <th>Email</th>
+                  <th>Phone</th>
                   <th>Address</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {suppliers.map((sup) => (
-                  <tr key={sup._id}>
-                    <td>{sup.name}</td>
-                    <td>{sup.contact || "-"}</td>
-                    <td>{sup.email || "-"}</td>
-                    <td>{formatAddress(sup.address)}</td>
+                {clients.map((client) => (
+                  <tr key={client._id}>
+                    <td>{client.name}</td>
+                    <td>{client.contact || "-"}</td>
+                    <td>{client.email || "-"}</td>
+                    <td>{client.phone || "-"}</td>
+                    <td>{formatAddress(client.address)}</td>
                     <td>
                       <button
                         className="btn btn-sm btn-info me-1"
                         title="View"
-                        onClick={() => handleView(sup)}
+                        onClick={() => handleView(client)}
                       >
                         <i className="mdi mdi-eye"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-warning me-1"
                         title="Edit"
-                        onClick={() => handleEdit(sup)}
+                        onClick={() => handleEdit(client)}
                       >
                         <i className="mdi mdi-pencil"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
                         title="Delete"
-                        onClick={() => handleDelete(sup._id)}
+                        onClick={() => handleDelete(client._id)}
                       >
                         <i className="mdi mdi-delete"></i>
                       </button>
@@ -224,4 +231,4 @@ const SupplierTable = () => {
   );
 };
 
-export default SupplierTable;
+export default ClientTable;

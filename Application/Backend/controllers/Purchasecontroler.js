@@ -71,10 +71,6 @@ export const createPurchase = async (req, res) => {
       invoiceNumber,
       totalAmount,
       suplier: req.body.suplier || req.body.supplierID,
-      paymentStatus: req.body.paymentStatus || "pending",
-      paymentMethod: req.body.paymentMethod || "cash",
-      purchaseDate: req.body.purchaseDate || new Date(),
-      note: req.body.note || "",
     });
 
     // Update product stock for each item
@@ -177,20 +173,13 @@ export const updatePurchase = async (req, res) => {
       });
     }
 
-    const updateData = {
-      items: req.body.items,
-      totalAmount,
-      invoiceNumber: req.body.invoiceNumber,
-      paymentStatus: req.body.paymentStatus,
-      paymentMethod: req.body.paymentMethod,
-      purchaseDate: req.body.purchaseDate,
-      note: req.body.note,
-      suplier: req.body.suplier || req.body.supplierID,
-    };
-
     const updatedPurchase = await Purchase.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      {
+        ...req.body,
+        totalAmount,
+        suplier: req.body.suplier || req.body.supplierID,
+      },
       { new: true },
     )
       .populate("items.product")

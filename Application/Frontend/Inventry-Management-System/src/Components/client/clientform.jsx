@@ -1,31 +1,25 @@
-import { useState, useEffect } from "react";
-import createSupplier from "../../api/supplier.js";
+import { useState } from "react";
+import createClient from "../../Api/client.js";
 import { toast } from "react-toastify";
 
-const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
+const ClientForm = ({ onSaved, editData, onClearEdit }) => {
   const empty = {
     name: "",
     email: "",
     contact: "",
+    phone: "",
     address: "",
   };
-  const [value, updateValue] = useState(empty);
-
-  useEffect(() => {
-    if (editData) {
-      updateValue({
-        name: editData.name || "",
-        email: editData.email || "",
-        contact: editData.contact || "",
-        address:
-          typeof editData.address === "string"
-            ? editData.address
-            : editData.address?.street || "",
-      });
-    } else {
-      updateValue(empty);
-    }
-  }, [editData]);
+  const [value, updateValue] = useState(() => ({
+    name: editData?.name || "",
+    email: editData?.email || "",
+    contact: editData?.contact || "",
+    phone: editData?.phone || "",
+    address:
+      typeof editData?.address === "string"
+        ? editData.address
+        : editData?.address?.street || "",
+  }));
 
   function handleChange(field) {
     return (e) => updateValue((prev) => ({ ...prev, [field]: e.target.value }));
@@ -34,15 +28,24 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
   async function SaveSupplier(e) {
     e.preventDefault();
     try {
-      const payload = { ...value };
+      const payload = {
+        ...value,
+        address: {
+          street: value.address,
+          city: "",
+          state: "",
+          country: "",
+          zipCode: "",
+        },
+      };
 
       if (editData) {
-        const { updateSuppliers } = await import("../../api/supplier.js");
-        await updateSuppliers(editData._id, payload);
-        toast.success("Supplier updated successfully");
+        const { updateClient } = await import("../../Api/client.js");
+        await updateClient(editData._id, payload);
+        toast.success("Client updated successfully");
       } else {
-        await createSupplier(payload);
-        toast.success("Supplier added successfully");
+        await createClient(payload);
+        toast.success("Client added successfully");
       }
       updateValue(empty);
       onSaved && onSaved();
@@ -66,7 +69,7 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">
-              {editData ? "Edit Supplier" : "Add Supplier"}
+              {editData ? "Edit Client" : "Add Client"}
             </h5>
             <button
               type="button"
@@ -98,6 +101,12 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
                     field: "contact",
                     type: "text",
                     hint: "Enter contact number",
+                  },
+                  {
+                    label: "Phone",
+                    field: "phone",
+                    type: "text",
+                    hint: "Enter phone number",
                   },
                   {
                     label: "Address",
@@ -139,4 +148,4 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
   );
 };
 
-export default SupplierForm;
+export default ClientForm;
