@@ -1,0 +1,175 @@
+/* ── Session Badge ── */
+.session-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.session-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* ── Top Controls Bar ── */
+.billing-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+}
+
+.billing-topbar .barcode-input {
+  width: 260px;
+}
+
+.billing-topbar .name-search {
+  width: 220px;
+}
+
+/* ── Cart Table ── */
+.cart-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+}
+
+.cart-empty i {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.cart-empty p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.qty-input {
+  width: 70px !important;
+  text-align: center;
+}
+
+.cart-table thead th {
+  background: #1f2937;
+  color: #fff;
+  font-size: 13px;
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+
+.cart-table tbody tr:hover {
+  background: #f0fdf4;
+}
+
+.cart-table .total-cell {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* ── Product Search Dropdown ── */
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.search-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s;
+}
+
+.search-dropdown-item:hover {
+  background: #f0fdf4;
+}
+
+.search-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.search-dropdown-item .product-title {
+  font-weight: 600;
+  color: #111827;
+}
+
+.search-dropdown-item .product-meta {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* ── Customer / Cashier Cards ── */
+.info-card .card-header {
+  padding: 10px 16px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.info-card .card-header h6 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ── Summary Card ── */
+.summary-table td {
+  padding: 5px 4px;
+  font-size: 13px;
+  border: none !important;
+}
+
+.summary-table .grand-row td {
+  font-size: 15px;
+  font-weight: 700;
+  color: #16a34a;
+  border-top: 2px solid #e5e7eb !important;
+  padding-top: 10px;
+}
+
+/* ── Receipt Actions ── */
+.receipt-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ── Bill Complete Alert ── */
+.bill-complete-alert {
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* ── Print styles ── */
+@media print {
+  .no-print { display: none !important; }
+}

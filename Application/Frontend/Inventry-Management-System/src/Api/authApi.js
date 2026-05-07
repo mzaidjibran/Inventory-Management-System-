@@ -1,6 +1,5 @@
 const API_BASE = "http://localhost:3000";
 
-// Helper: Decode JWT to extract user info
 const decodeToken = (token) => {
   try {
     const parts = token.split(".");
@@ -12,7 +11,6 @@ const decodeToken = (token) => {
   }
 };
 
-// SIGNIN
 export const signIn = async (email, password) => {
   const response = await fetch(`${API_BASE}/api/account/SignIn`, {
     method: "POST",
@@ -22,20 +20,36 @@ export const signIn = async (email, password) => {
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Login failed");
 
-  // Tokens save karo
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
 
-  // Role save karo
   const decoded = decodeToken(data.accessToken);
-  if (decoded && decoded.role) {
-    localStorage.setItem("userRole", decoded.role);
-    localStorage.setItem("userId", decoded._id || decoded.userId || decoded.id);
+  if (decoded) {
+    localStorage.setItem("userRole", decoded.role || "");
+    localStorage.setItem("userId", decoded._id || decoded.userId || decoded.id || "");
   }
+
+  // fetch profile for cashier info
+  try {
+    const profileRes = await fetch(`${API_BASE}/api/account/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${data.accessToken}`,
+      },
+    });
+    const profileData = await profileRes.json();
+    if (profileRes.ok) {
+      const user = profileData.data || profileData;
+      localStorage.setItem("userName", user.Name || user.name || "");
+      localStorage.setItem("userEmail", user.email || "");
+    }
+  } catch {
+  }
+
   return data;
 };
 
-// LOGOUT
 export const logOut = async () => {
   const refreshToken = localStorage.getItem("refreshToken");
   await fetch(`${API_BASE}/api/account/logOut`, {
@@ -47,9 +61,10 @@ export const logOut = async () => {
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("userRole");
   localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+  localStorage.removeItem("userEmail");
 };
 
-// TOKEN REFRESH
 export const refreshAccessToken = async () => {
   const refreshToken = localStorage.getItem("refreshToken");
   const response = await fetch(`${API_BASE}/api/account/refresh`, {
@@ -61,8 +76,6 @@ export const refreshAccessToken = async () => {
   if (!response.ok) throw new Error("Session expired");
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
-
-  // Update role
   const decoded = decodeToken(data.accessToken);
   if (decoded && decoded.role) {
     localStorage.setItem("userRole", decoded.role);
@@ -70,19 +83,11 @@ export const refreshAccessToken = async () => {
   return data;
 };
 
-// Check login hai ya nahi
 export const isLoggedIn = () => !!localStorage.getItem("accessToken");
-
-// Get current user role
 export const getUserRole = () => localStorage.getItem("userRole") || null;
-
-// Get current user ID
 export const getUserId = () => localStorage.getItem("userId") || null;
-
-// Check if user is admin
 export const isAdmin = () => getUserRole() === "admin";
 
-// Get logged-in user's profile
 export const getMyProfile = async () => {
   const response = await fetch(`${API_BASE}/api/account/me`, {
     method: "GET",
@@ -96,7 +101,6 @@ export const getMyProfile = async () => {
   return data;
 };
 
-// Update logged-in user's profile image/info
 export const updateMyProfile = async (data) => {
   const isFormData = data instanceof FormData;
   const response = await fetch(`${API_BASE}/api/account/me`, {
@@ -110,13 +114,10 @@ export const updateMyProfile = async (data) => {
     body: isFormData ? data : JSON.stringify(data),
   });
   const responseData = await response.json();
-  if (!response.ok) {
-    throw new Error(responseData.message || "Profile update failed");
-  }
+  if (!response.ok) throw new Error(responseData.message || "Profile update failed");
   return responseData;
 };
 
-// SIGNUP - Public endpoint, NO token required
 export const signUp = async (userData) => {
   const response = await fetch(`${API_BASE}/api/account/SignUp`, {
     method: "POST",

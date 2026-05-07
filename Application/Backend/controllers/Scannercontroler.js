@@ -243,7 +243,12 @@ export const getScanSession = async (request, response) => {
 export const finalizeBill = async (request, response) => {
   try {
     const userId = request.userId;
-    const { sessionId, paymentMethod, discount = 0, tax = 0 } = request.body;
+    
+    // sessionId URL params se bhi lo, body se bhi
+    const sessionId = request.params.sessionId || request.body.sessionId;
+    const paymentMethod = request.body.paymentMethod;
+    const discount = request.body.discount || 0;
+    const tax = request.body.tax || 0;
 
     if (!userId) {
       return response.status(401).json({
@@ -257,7 +262,7 @@ export const finalizeBill = async (request, response) => {
       return response.status(400).json({
         success: false,
         error: true,
-        message: "sessionId and paymentMethod are required",
+        message: `sessionId and paymentMethod are required. Got: sessionId=${sessionId}, paymentMethod=${paymentMethod}`,
       });
     }
 
