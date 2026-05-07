@@ -5,31 +5,31 @@ import { deleteSupplier } from "../../Api/supplier.js";
 import { toast } from "react-toastify";
 
 const SupplierTable = () => {
-  function formatAddress(address) {
-    if (!address) {
-      return "-";
-    }
+  // function formatAddress(address) {
+  //   if (!address) {
+  //     return "-";
+  //   }
 
-    if (typeof address === "string") {
-      return address;
-    }
+  //   if (typeof address == "string") {
+  //     return address;
+  //   }
 
-    if (typeof address === "object") {
-      return (
-        [
-          address.street,
-          address.city,
-          address.state,
-          address.country,
-          address.zipCode,
-        ]
-          .filter(Boolean)
-          .join(", ") || "-"
-      );
-    }
+  //   if (typeof address == "object") {
+  //     return (
+  //       [
+  //         address.street,
+  //         address.city,
+  //         address.state,
+  //         address.country,
+  //         address.zipCode,
+  //       ]
+  //         .filter(Boolean)
+  //         .join(", ") || "-"
+  //     );
+  //   }
 
-    return "-";
-  }
+  //   return "-";
+  // }
 
   const { suppliers, loadSuppliers } = SupplierHook();
   const [editData, setEditData] = useState(null);
@@ -147,7 +147,7 @@ const SupplierTable = () => {
                       <div className="col-6">
                         <small className="text-muted">Address</small>
                         <p className="fw-semibold">
-                          {formatAddress(viewData.address)}
+                          {viewData.address || "-"}
                         </p>
                       </div>
                     </div>
@@ -190,7 +190,7 @@ const SupplierTable = () => {
                     <td>{sup.name}</td>
                     <td>{sup.contact || "-"}</td>
                     <td>{sup.email || "-"}</td>
-                    <td>{formatAddress(sup.address)}</td>
+                    <td>{sup.address || "-"}</td>
                     <td>
                       <button
                         className="btn btn-sm btn-info me-1"

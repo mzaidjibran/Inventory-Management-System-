@@ -7,14 +7,12 @@ const ClientForm = ({ onSaved, editData, onClearEdit }) => {
     name: "",
     email: "",
     contact: "",
-    phone: "",
     address: "",
   };
   const [value, updateValue] = useState(() => ({
     name: editData?.name || "",
     email: editData?.email || "",
     contact: editData?.contact || "",
-    phone: editData?.phone || "",
     address:
       typeof editData?.address === "string"
         ? editData.address
@@ -101,12 +99,6 @@ const ClientForm = ({ onSaved, editData, onClearEdit }) => {
                     field: "contact",
                     type: "text",
                     hint: "Enter contact number",
-                  },
-                  {
-                    label: "Phone",
-                    field: "phone",
-                    type: "text",
-                    hint: "Enter phone number",
                   },
                   {
                     label: "Address",

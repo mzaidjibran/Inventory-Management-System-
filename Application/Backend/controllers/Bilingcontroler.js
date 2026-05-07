@@ -9,7 +9,7 @@ const createbilling = async (request, response) => {
       return response.status(401).json({
         success: false,
         error: true,
-        message: "Unauthorized: user id is required to generate billing",
+        message: "Unauthorized: user id is required to generate bill",
       });
     }
 
@@ -23,8 +23,11 @@ const createbilling = async (request, response) => {
     }
 
     // Check and reduce product stock
+
     const updateProductsQueue = [];
+
     for (const item of items) {
+      
       if (item.product) {
         const product = await Product.findById(item.product);
         if (!product) {
@@ -34,6 +37,7 @@ const createbilling = async (request, response) => {
             message: `Product not found: ${item.product}`,
           });
         }
+
         if (product.stockQuantity < item.quantity) {
           return response.status(400).json({
             success: false,
@@ -87,7 +91,7 @@ const createbilling = async (request, response) => {
     response.status(201).json({
       success: true,
       error: false,
-      message: "Billing created successfully and stock updated",
+      message: "Bill created successfully and stock updated",
       data: billing,
     });
   } catch (error) {
@@ -98,27 +102,33 @@ const createbilling = async (request, response) => {
     });
   }
 };
+
 export { createbilling };
+
 //get all billings
+
 export const getAllbillings = async (request, response) => {
   try {
     const billings = await Billing.find();
     response.status(200).json({
       success: true,
       error: false,
-      message: "Billings fetched successfully",
+      message: "Bills fetched successfully",
       data: billings,
     });
+
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching billings",
+      message: "Error fetching bills",
       data: null,
     });
   }
 };
-//get billing by id
+
+//get bill by id
+
 export const getSingleBilling = async (request, response) => {
   try {
     const billing = await Billing.findById(request.params.id);
@@ -126,24 +136,26 @@ export const getSingleBilling = async (request, response) => {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Billing not found",
+        message: "Bill not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Billing fetched successfully",
+      message: "Bill fetched successfully",
       data: billing,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching billing",
+      message: "Error fetching bill",
     });
   }
 };
-//update billing
+
+//update bill
+
 export const updateBilling = async (request, response) => {
   try {
     const updatedBilling = await Billing.findByIdAndUpdate(
@@ -155,24 +167,26 @@ export const updateBilling = async (request, response) => {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Billing not found",
+        message: "Bill not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Billing updated successfully",
+      message: "Bill updated successfully",
       data: updatedBilling,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error updating billing",
+      message: "Error updating bill",
     });
   }
 };
-//delete billing
+
+//delete bill
+
 export const deleteBilling = async (request, response) => {
   try {
     const deletedBilling = await Billing.findByIdAndDelete(request.params.id);
@@ -180,20 +194,20 @@ export const deleteBilling = async (request, response) => {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Billing not found",
+        message: "Bill not found",
       });
     }
     response.status(200).json({
       success: true,
       error: false,
-      message: "Billing deleted successfully",
+      message: "Bill deleted successfully",
       data: deletedBilling,
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error deleting billing",
+      message: "Error deleting bill",
     });
   }
 };

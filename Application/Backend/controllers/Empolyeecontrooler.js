@@ -1,19 +1,14 @@
 import Employee from "../models/Empolyeemodal.js";
 import path from "path";
 
-// helper: normalize incoming payloads from older frontend
 function normalizePayload(body, file) {
   const data = { ...body };
-  // frontend sometimes sends `Name` as single field; split into first/last
   if (data.Name) {
-    const parts = String(data.Name || "")
-      .trim()
-      .split(/\s+/);
-    data.firstName = parts.shift() || "";
-    data.lastName = parts.join(" ") || "";
-    delete data.Name;
-  }
-  // map lowercase keys used in frontend to model keys
+  const parts = String(data.Name || "").trim().split(/\s+/);
+  data.firstName = parts[0] || "";
+  data.lastName = parts.slice(1).join(" ") || parts[0] || "";
+  delete data.Name;
+}
   if (data.cnic && !data.CNIC) {
     data.CNIC = data.cnic;
     delete data.cnic;
@@ -23,9 +18,7 @@ function normalizePayload(body, file) {
     delete data.dateofBirth;
   }
   if (data.dateOfJoining && !data.dateOfJoining) {
-    // already proper key; keep as-is
   }
-  // normalize gender values from frontend variations
   if (data.gender && typeof data.gender === "string") {
     const g = data.gender.toLowerCase();
     if (g === "male") data.gender = "Male";
@@ -63,7 +56,7 @@ function transformEmployeeDoc(doc) {
   };
 }
 
-const createEmployee = async (request, response) => {
+export const createEmployee = async (request, response) => {
   try {
     const employeeData = normalizePayload(request.body, request.file);
     const employee = await Employee.create(employeeData);
@@ -73,7 +66,7 @@ const createEmployee = async (request, response) => {
   }
 };
 
-export { createEmployee };
+
 
 // Get all employees
 export const getAllEmployees = async (request, response) => {
