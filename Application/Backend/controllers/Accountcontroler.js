@@ -5,7 +5,23 @@ import {
   generateRefreshToken,
 } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt, { compare } from "bcrypt";
+
+const normalizeUserImage = (image) => {
+  if (!image) return "";
+  return image.startsWith("/image/")
+    ? image
+    : `/image/${image.split(/[\\/]/).pop()}`;
+};
+
+const toSafeUser = (user) => {
+  if (!user) return null;
+  const raw = user.toObject ? user.toObject() : user;
+  return {
+    ...raw,
+    image: normalizeUserImage(raw.image),
+  };
+};
 //sing up controller
 export const SignUp = async (request, response) => {
   try {
@@ -150,3 +166,114 @@ export const refresh = async (request, response) => {
     });
   }
 };
+
+export const getMyProfile = async (request, response) => {
+  try {
+    const user = await UserModel.findById(request.userId);
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "User not found",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      data: toSafeUser(user),
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
+export const updateMyProfile = async (request, response) => {
+  try {
+    const updateData = { ...request.body };
+    if (request.file) {
+      updateData.image = `/image/${request.file.filename}`;
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      request.userId,
+      updateData,
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "User not found",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Profile updated successfully",
+      data: toSafeUser(updatedUser),
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
+// export const resetpassword = async (request, response) => {
+//   const { token, newPassword } = request.body;
+//   const tokens = await passwordResetToken
+//     .findOne({ used: false })
+//     .papolate("userId");
+//   for (const tokenData of tokens) {
+//     if (await comparetoken(token, tokenData.tokenhash)) {
+//       if (tokenData.attemts >= 5) {
+//         return response.status(400).json({
+//           message: "too many failed attempts, please request a new token",
+//         });
+//       }
+//       tokenData.attemts++;
+//       await tokenData.save();
+//       if (tokenData.expiresIn < new Date())
+//         return response.status(400).json({
+//           message: "token expired, please request a new token",
+//         });
+//       tokenData.userId.password = await hashpassword(newPassword);
+//       await tokenData.userId.save();
+//       tokenData.used = true;
+//       await tokenData.save();
+//       return response.status(200).json({
+//         message: "password reset successfully",
+//       });
+//     }
+//   }
+//   return response.status(400).json({
+//     message: "invalid token",
+//   });
+// };
+// //frogot password controller
+// export const forgotpassword = async (request, response) => {
+//   const user = await User.findOne({ email: request.body.email });
+//   if (!user) {
+//     return response.status(404).json({message: "user not found"});
+//   }
+//   await passwordResetToken.deleteMany({ userId: user._id });
+//   const raw genrateresetToken = ();
+//   console.log(raw genrateresetToken);
+//   await passwordResetToken.create({
+//     userId: user._id,
+//     tokenhash: await hashtoken(raw),
+//     expiresIn: new Date(Date.now() + 60 * 60 * 1000),
+//   });
+//   await sendResetEmail(user.email, raw);
+//   return response.status(200).json({
+//     message: "password reset email sent",
+//   });
+// };

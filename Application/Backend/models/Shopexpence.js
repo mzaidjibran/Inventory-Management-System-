@@ -49,7 +49,7 @@ const payoutSchema = new mongoose.Schema(
     },
 
     receipt: {
-      type: String, // image URL
+      type: String,
       default: "",
     },
 

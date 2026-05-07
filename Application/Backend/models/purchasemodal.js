@@ -84,6 +84,10 @@ const purchaseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    suplier: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Supplier",
+    },
   },
   { timestamps: true },
 );

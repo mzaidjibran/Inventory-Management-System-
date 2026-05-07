@@ -12,6 +12,8 @@ import PurchaseRoutes from "./routes/Purchaseroot.js";
 import BillingRoutes from "./routes/bilingroute.js";
 import ScanRoutes from "./routes/Scanerroot.js";
 import Shopexpence from "./models/Shopexpence.js";
+import SuplierRoutes from "./routes/Suplierroot.js";
+import ClientRoutes from "./routes/clientroot.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
@@ -22,6 +24,8 @@ app.use(cors());
 //frontend connection
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+app.use("/image", express.static(path.join(__dirname, "image")));
 
 if (process.env.NODE_ENV == "production") {
   app.use(
@@ -47,6 +51,8 @@ app.use("/api/purchase", PurchaseRoutes);
 app.use("/api/shopexpence", Shopexpence);
 app.use("/api/scan", ScanRoutes);
 app.use("/api/billing", BillingRoutes);
+app.use("/api/suplier", SuplierRoutes);
+app.use("/api/client", ClientRoutes);
 // test route
 app.get("/", (req, res) => {
   res.send("API is running...");

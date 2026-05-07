@@ -2,9 +2,21 @@ import Product from "../models/Productmodal.js";
 
 export const createProduct = async (request, response) => {
   try {
+    const barcode = (request.body.barcode || "").trim();
+    if (!barcode) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Barcode is required",
+      });
+    }
+
     const productData = {
       ...request.body,
-      image: request.file ? request.file.path : request.body.image || "",
+      barcode,
+      image: request.file
+        ? `image/${request.file.filename}`
+        : request.body.image || "",
     };
     const product = await Product.create(productData);
     response.status(201).json(product);
@@ -62,8 +74,21 @@ export const updateProduct = async (request, response) => {
     const updateData = {
       ...request.body,
     };
+
+    if (Object.prototype.hasOwnProperty.call(request.body, "barcode")) {
+      const barcode = (request.body.barcode || "").trim();
+      if (!barcode) {
+        return response.status(400).json({
+          success: false,
+          error: true,
+          message: "Barcode cannot be empty",
+        });
+      }
+      updateData.barcode = barcode;
+    }
+
     if (request.file) {
-      updateData.image = request.file.path;
+      updateData.image = `image/${request.file.filename}`;
     }
     const updatedProduct = await Product.findByIdAndUpdate(
       request.params.id,
@@ -121,7 +146,7 @@ export const deleteProduct = async (request, response) => {
 export const searchProductByBarcode = async (request, response) => {
   try {
     const { barcode } = request.query || request.body;
-    
+
     if (!barcode) {
       return response.status(400).json({
         success: false,
