@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SupplierHook from "../../Hook/SupplierHook.jsx";
 import SupplierForm from "./SupplierForm.jsx";
-import { deleteProduct } from "../../Api/ProductApi.js";
+import { deleteSupplier } from "../../Api/supplier.js";
 import { toast } from "react-toastify";
 
 const SupplierTable = () => {
@@ -31,7 +31,7 @@ const SupplierTable = () => {
     return "-";
   }
 
-  const { products, loadProducts } = ProductHook();
+  const { suppliers, loadSuppliers } = SupplierHook();
   const [editData, setEditData] = useState(null);
   const [viewData, setViewData] = useState(null);
 
@@ -40,7 +40,7 @@ const SupplierTable = () => {
     confirmToastId = toast(
       ({ closeToast }) => (
         <div>
-          <div className="fw-semibold">Delete this Product?</div>
+          <div className="fw-semibold">Delete this Supplier?</div>
           <div className="d-flex gap-2 mt-2">
             <button
               type="button"
@@ -48,10 +48,10 @@ const SupplierTable = () => {
               onClick={async () => {
                 closeToast();
                 try {
-                  await deleteProduct(id);
-                  loadProducts();
+                  await deleteSupplier(id);
+                  loadSuppliers();
                   toast.dismiss(confirmToastId);
-                  toast.success("Product deleted successfully");
+                  toast.success("Supplier deleted successfully");
                 } catch (err) {
                   toast.error("Delete failed: " + err.message);
                 }
@@ -84,8 +84,8 @@ const SupplierTable = () => {
     modal.show();
   }
 
-  function handleView(pro) {
-    setViewData(pro);
+  function handleView(sup) {
+    setViewData(sup);
     const modal = new window.bootstrap.Modal(
       document.getElementById("modalView"),
     );
@@ -97,20 +97,21 @@ const SupplierTable = () => {
       <div className="col-12">
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">Products</h4>
+            <h4 className="card-title">Suppliers</h4>
             <button
               type="button"
               className="btn btn-primary btn-sm ms-2"
               data-bs-toggle="modal"
-              data-bs-target="#productModal"
+              data-bs-target="#modal8"
               onClick={() => setEditData(null)}
             >
-              Add Product
+              Add Supplier
             </button>
           </div>
 
-          <ProductForm
-            onSaved={loadProducts}
+          <SupplierForm
+            key={editData?._id || "new-supplier"}
+            onSaved={loadSuppliers}
             editData={editData}
             onClearEdit={() => setEditData(null)}
           />
@@ -119,7 +120,7 @@ const SupplierTable = () => {
             <div className="modal-dialog modal-lg">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Product Details</h5>
+                  <h5 className="modal-title">Supplier Details</h5>
                   <button
                     type="button"
                     className="btn btn-sm btn-label-danger btn-icon"
@@ -131,60 +132,20 @@ const SupplierTable = () => {
                 <div className="modal-body">
                   {viewData && (
                     <div className="row g-3">
-                      <div className="col-12">
-                        <small className="text-muted">Image</small>
-                        <div className="mt-1">
-                          {viewData.image ? (
-                            <img
-                              src={
-                                viewData.image.startsWith("http")
-                                  ? viewData.image
-                                  : `${API_BASE}/${viewData.image}`
-                              }
-                              alt={viewData.title || "Product"}
-                              style={{
-                                width: "120px",
-                                height: "120px",
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                                border: "1px solid #e5e7eb",
-                              }}
-                            />
-                          ) : (
-                            <p className="fw-semibold mb-0">-</p>
-                          )}
-                        </div>
+                      <div className="col-6">
+                        <small className="text-muted">Name</small>
+                        <p className="fw-semibold">{viewData.name || "-"}</p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Title</small>
-                        <p className="fw-semibold">{viewData.title || "-"}</p>
+                        <small className="text-muted">Email</small>
+                        <p className="fw-semibold">{viewData.email || "-"}</p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Author</small>
-                        <p className="fw-semibold">{viewData.author || "-"}</p>
+                        <small className="text-muted">Contact</small>
+                        <p className="fw-semibold">{viewData.contact || "-"}</p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Category</small>
-                        <p className="fw-semibold">
-                          {viewData.category || "-"}
-                        </p>
-                      </div>
-                      <div className="col-6">
-                        <small className="text-muted">Barcode</small>
-                        <p className="fw-semibold">{viewData.barcode || "-"}</p>
-                      </div>
-                      <div className="col-6">
-                        <small className="text-muted">Description</small>
-                        <p className="fw-semibold">
-                          {viewData.description || "-"}
-                        </p>
-                      </div>
-                      <div className="col-6">
-                        <small className="text-muted">Price</small>
-                        <p className="fw-semibold">{viewData.price || "-"}</p>
-                      </div>
-                      <div className="col-6">
-                        <small className="text-muted">Stock Quantity</small>
+                        <small className="text-muted">Address</small>
                         <p className="fw-semibold">
                           {formatAddress(viewData.address)}
                         </p>
@@ -216,11 +177,10 @@ const SupplierTable = () => {
             >
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Stock Qty</th>
+                  <th>Name</th>
+                  <th>Contact</th>
+                  <th>Email</th>
+                  <th>Address</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -235,21 +195,21 @@ const SupplierTable = () => {
                       <button
                         className="btn btn-sm btn-info me-1"
                         title="View"
-                        onClick={() => handleView(pro)}
+                        onClick={() => handleView(sup)}
                       >
                         <i className="mdi mdi-eye"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-warning me-1"
                         title="Edit"
-                        onClick={() => handleEdit(pro)}
+                        onClick={() => handleEdit(sup)}
                       >
                         <i className="mdi mdi-pencil"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
                         title="Delete"
-                        onClick={() => handleDelete(pro._id)}
+                        onClick={() => handleDelete(sup._id)}
                       >
                         <i className="mdi mdi-delete"></i>
                       </button>
@@ -265,4 +225,4 @@ const SupplierTable = () => {
   );
 };
 
-export default ProductTable;
+export default SupplierTable;

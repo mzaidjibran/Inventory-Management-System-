@@ -1,31 +1,31 @@
-import { useState, useEffect } from "react";
-import createSupplier from "../../api/supplier.js";
+import { useState } from "react";
+import createSupplier, { updateSuppliers } from "../../Api/supplier.js";
 import { toast } from "react-toastify";
 
-const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
-  const empty = {
-    name: "",
-    email: "",
-    contact: "",
-    address: "",
-  };
-  const [value, updateValue] = useState(empty);
+function buildInitialValue(editData) {
+  if (!editData) {
+    return {
+      name: "",
+      email: "",
+      contact: "",
+      address: "",
+    };
+  }
 
-  useEffect(() => {
-    if (editData) {
-      updateValue({
-        name: editData.name || "",
-        email: editData.email || "",
-        contact: editData.contact || "",
-        address:
-          typeof editData.address === "string"
-            ? editData.address
-            : editData.address?.street || "",
-      });
-    } else {
-      updateValue(empty);
-    }
-  }, [editData]);
+  return {
+    name: editData.name || "",
+    email: editData.email || "",
+    contact: editData.contact || "",
+    address:
+      typeof editData.address === "string"
+        ? editData.address
+        : editData.address?.street || "",
+  };
+}
+
+const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
+  const empty = buildInitialValue(null);
+  const [value, updateValue] = useState(() => buildInitialValue(editData));
 
   function handleChange(field) {
     return (e) => updateValue((prev) => ({ ...prev, [field]: e.target.value }));
@@ -37,7 +37,6 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
       const payload = { ...value };
 
       if (editData) {
-        const { updateSuppliers } = await import("../../api/supplier.js");
         await updateSuppliers(editData._id, payload);
         toast.success("Supplier updated successfully");
       } else {
