@@ -7,6 +7,7 @@ import Employee from "./pages/employee.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Supplier from "./Pages/supplier.jsx";
 
 function App() {
   return (
@@ -34,6 +35,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Employee />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/supplier"
+        element={
+          <ProtectedRoute>
+            <Supplier />
           </ProtectedRoute>
         }
       />

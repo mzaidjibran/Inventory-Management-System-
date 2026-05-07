@@ -3,7 +3,6 @@ const API_BASE = 'http://localhost:5000'
 // creating supplier
 
 const createSupplier = async (data) => {
-
     const response = await fetch(`${API_BASE}/api/suplier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -14,22 +13,10 @@ const createSupplier = async (data) => {
 };
 export default createSupplier;
 
-//get Single Supplier
-
-export const getSingleSupplier = async (id, data) => {
-    const response = await fetch(`${API_BASE}/api/suplier/getSingleSupplier/${id}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-    });
-    if (!response.ok) throw new Error(`Get all failed: ${response.status}`);
-    return response.json();
-}
-
-
-//get all suppliers
+// get all suppliers
 
 export const getAllSuppliers = async () => {
-    const response = await fetch(`${API_BASE}/api/suplier/getAllsuppliers`, {
+    const response = await fetch(`${API_BASE}/api/suplier`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     });
@@ -37,10 +24,21 @@ export const getAllSuppliers = async () => {
     return response.json();
 };
 
-//update suppliers
+// get Single Supplier
+
+export const getSingleSupplier = async (id) => {
+    const response = await fetch(`${API_BASE}/api/suplier/${id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!response.ok) throw new Error(`Get failed: ${response.status}`);
+    return response.json();
+};
+
+// update suppliers
 
 export const updateSuppliers = async (id, data) => {
-    const response = await fetch(`${API_BASE}/api/suplier/updateSupplier/${id}`, {
+    const response = await fetch(`${API_BASE}/api/suplier/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -49,10 +47,10 @@ export const updateSuppliers = async (id, data) => {
     return response.json();
 };
 
-//Delete supplier
+// delete supplier
 
 export const deleteSupplier = async (id) => {
-    const response = await fetch(`${API_BASE}/api/suplier/deleteSupplier/${id}`, {
+    const response = await fetch(`${API_BASE}/api/suplier/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
     });

@@ -26,6 +26,12 @@ const Sidebar = ({ isOpen }) => {
                     </Link>
                   </li>
                   <li>
+                    <Link to="/supplier">
+                      <i className="mdi mdi-checkbox-blank-circle align-middle"></i>
+                      Supplier
+                    </Link>
+                  </li>
+                  <li>
                     <Link to="/product">
                       <i className="mdi mdi-checkbox-blank-circle align-middle"></i>
                       Products
