@@ -2,7 +2,7 @@ import { useState } from "react";
 import ProductHook from "../../hook/ProductHook.jsx";
 import ProductForm from "./ProductForm.jsx";
 import { deleteProduct } from "../../Api/ProductApi.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 const ProductTable = () => {
   const API_BASE = "http://localhost:3000";
@@ -12,46 +12,17 @@ const ProductTable = () => {
   const [viewData, setViewData] = useState(null);
 
   function handleDelete(id) {
-    let confirmToastId;
-    confirmToastId = toast(
-      ({ closeToast }) => (
-        <div>
-          <div className="fw-semibold">Delete this Product?</div>
-          <div className="d-flex gap-2 mt-2">
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
-              onClick={async () => {
-                closeToast();
-                try {
-                  await deleteProduct(id);
-                  loadProducts();
-                  toast.dismiss(confirmToastId);
-                  toast.success("Product deleted successfully");
-                } catch (err) {
-                  toast.error("Delete failed: " + err.message);
-                }
-              }}
-            >
-              Delete
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-secondary"
-              onClick={closeToast}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        autoClose: false,
-        closeOnClick: false,
-        draggable: false,
-        position: "top-right",
-      },
-    );
+    if (window.confirm("Delete this Product?")) {
+      (async () => {
+        try {
+          await deleteProduct(id);
+          loadProducts();
+          toast.success("Product deleted successfully");
+        } catch (err) {
+          toast.error("Delete failed: " + err.message);
+        }
+      })();
+    }
   }
 
   function handleEdit(pro) {

@@ -2,7 +2,8 @@ import { useState } from "react";
 import EmployeeHook from "../../hook/EmployeeHook.jsx";
 import EmployeeForm from "./EmployeeForm.jsx";
 import { deleteEmployee } from "../../api/EmployeeApi.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/confirmToast.js";
 
 const EmployeeTable = () => {
   function formatDate(dateStr) {
@@ -34,46 +35,15 @@ const EmployeeTable = () => {
   const [viewData, setViewData] = useState(null);
 
   function handleDelete(id) {
-    let confirmToastId;
-    confirmToastId = toast(
-      ({ closeToast }) => (
-        <div>
-          <div className="fw-semibold">Delete this employee?</div>
-          <div className="d-flex gap-2 mt-2">
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
-              onClick={async () => {
-                closeToast();
-                try {
-                  await deleteEmployee(id);
-                  loadEmployees();
-                  toast.dismiss(confirmToastId);
-                  toast.success("Employee deleted successfully");
-                } catch (err) {
-                  toast.error("Delete failed: " + err.message);
-                }
-              }}
-            >
-              Delete
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-secondary"
-              onClick={closeToast}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        autoClose: false,
-        closeOnClick: false,
-        draggable: false,
-        position: "top-right",
-      },
-    );
+    confirmToast("Delete this employee?", async () => {
+      try {
+        await deleteEmployee(id);
+        loadEmployees();
+        toast.success("Employee deleted successfully");
+      } catch (err) {
+        toast.error("Delete failed: " + err.message);
+      }
+    });
   }
 
   function handleEdit(emp) {

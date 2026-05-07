@@ -26,7 +26,10 @@ export const signIn = async (email, password) => {
   const decoded = decodeToken(data.accessToken);
   if (decoded) {
     localStorage.setItem("userRole", decoded.role || "");
-    localStorage.setItem("userId", decoded._id || decoded.userId || decoded.id || "");
+    localStorage.setItem(
+      "userId",
+      decoded._id || decoded.userId || decoded.id || "",
+    );
   }
 
   // fetch profile for cashier info
@@ -44,7 +47,8 @@ export const signIn = async (email, password) => {
       localStorage.setItem("userName", user.Name || user.name || "");
       localStorage.setItem("userEmail", user.email || "");
     }
-  } catch {
+  } catch (e) {
+    console.error("Error fetching user profile:", e);
   }
 
   return data;
@@ -114,7 +118,8 @@ export const updateMyProfile = async (data) => {
     body: isFormData ? data : JSON.stringify(data),
   });
   const responseData = await response.json();
-  if (!response.ok) throw new Error(responseData.message || "Profile update failed");
+  if (!response.ok)
+    throw new Error(responseData.message || "Profile update failed");
   return responseData;
 };
 
@@ -126,5 +131,50 @@ export const signUp = async (userData) => {
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Signup failed");
+  return data;
+};
+
+export const forgotPassword = async (email) => {
+  const response = await fetch(`${API_BASE}/api/account/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Forgot password request failed");
+  }
+
+  return data;
+};
+
+export const verifyOtp = async (email, otp) => {
+  const response = await fetch(`${API_BASE}/api/account/verify-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "OTP verification failed");
+  }
+
+  return data;
+};
+
+export const resetPassword = async (resetToken, newPassword) => {
+  const response = await fetch(`${API_BASE}/api/account/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ resetToken, newPassword }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Password reset failed");
+  }
+
   return data;
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import {
   searchProductByBarcode,
   getAllProducts,
@@ -112,7 +112,11 @@ const BillingPage = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [customer, setCustomer] = useState({ name: "", phone: "", address: "" });
+  const [customer, setCustomer] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
@@ -185,7 +189,8 @@ const BillingPage = () => {
 
   const handleStopSession = () => {
     if (cartItems.length > 0) {
-      if (!window.confirm("Bill mein items hain. Phir bhi stop karein?")) return;
+      if (!window.confirm("Bill mein items hain. Phir bhi stop karein?"))
+        return;
     }
     setSessionActive(false);
     setSessionId(null);
@@ -223,7 +228,11 @@ const BillingPage = () => {
       if (existing) {
         return prev.map((it) =>
           it.productId === product._id
-            ? { ...it, quantity: it.quantity + 1, total: (it.quantity + 1) * it.price }
+            ? {
+                ...it,
+                quantity: it.quantity + 1,
+                total: (it.quantity + 1) * it.price,
+              }
             : it,
         );
       }
@@ -261,7 +270,8 @@ const BillingPage = () => {
 
   // ── Finalize ──
   const handleFinalize = async () => {
-    if (!sessionActive || !sessionId) return toast.error("Please Start Session");
+    if (!sessionActive || !sessionId)
+      return toast.error("Please Start Session");
     if (cartItems.length === 0) return toast.error("No product in cart");
     if (!paymentMethod) return toast.error("Select Payment Method");
 
@@ -323,8 +333,12 @@ const BillingPage = () => {
           onStopSession={handleStopSession}
           onBarcodeEnter={handleBarcodeEnter}
           onSelectProduct={handleSelectProduct}
-          onPrint={() => printBill(lastBill, customer, cashier, cartItems, totalsObj)}
-          onPDF={() => downloadPDF(lastBill, customer, cashier, cartItems, totalsObj)}
+          onPrint={() =>
+            printBill(lastBill, customer, cashier, cartItems, totalsObj)
+          }
+          onPDF={() =>
+            downloadPDF(lastBill, customer, cashier, cartItems, totalsObj)
+          }
           onNewBill={handleNewBill}
         />
       </div>

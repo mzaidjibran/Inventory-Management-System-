@@ -1,6 +1,6 @@
 import { useState } from "react";
 import createClient from "../../Api/client.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 const ClientForm = ({ onSaved, editData, onClearEdit }) => {
   const empty = {

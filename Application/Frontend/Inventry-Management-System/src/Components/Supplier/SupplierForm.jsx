@@ -1,6 +1,6 @@
 import { useState } from "react";
 import createSupplier, { updateSuppliers } from "../../Api/supplier.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 function buildInitialValue(editData) {
   if (!editData) {

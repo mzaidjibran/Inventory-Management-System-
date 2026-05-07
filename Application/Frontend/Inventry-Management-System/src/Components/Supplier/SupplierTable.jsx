@@ -2,7 +2,8 @@ import { useState } from "react";
 import SupplierHook from "../../Hook/SupplierHook.jsx";
 import SupplierForm from "./SupplierForm.jsx";
 import { deleteSupplier } from "../../Api/supplier.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/confirmToast.js";
 
 const SupplierTable = () => {
   // function formatAddress(address) {
@@ -36,46 +37,15 @@ const SupplierTable = () => {
   const [viewData, setViewData] = useState(null);
 
   function handleDelete(id) {
-    let confirmToastId;
-    confirmToastId = toast(
-      ({ closeToast }) => (
-        <div>
-          <div className="fw-semibold">Delete this Supplier?</div>
-          <div className="d-flex gap-2 mt-2">
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
-              onClick={async () => {
-                closeToast();
-                try {
-                  await deleteSupplier(id);
-                  loadSuppliers();
-                  toast.dismiss(confirmToastId);
-                  toast.success("Supplier deleted successfully");
-                } catch (err) {
-                  toast.error("Delete failed: " + err.message);
-                }
-              }}
-            >
-              Delete
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-secondary"
-              onClick={closeToast}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        autoClose: false,
-        closeOnClick: false,
-        draggable: false,
-        position: "top-right",
-      },
-    );
+    confirmToast("Delete this Supplier?", async () => {
+      try {
+        await deleteSupplier(id);
+        loadSuppliers();
+        toast.success("Supplier deleted successfully");
+      } catch (err) {
+        toast.error("Delete failed: " + err.message);
+      }
+    });
   }
 
   function handleEdit(sup) {
@@ -146,9 +116,7 @@ const SupplierTable = () => {
                       </div>
                       <div className="col-6">
                         <small className="text-muted">Address</small>
-                        <p className="fw-semibold">
-                          {viewData.address || "-"}
-                        </p>
+                        <p className="fw-semibold">{viewData.address || "-"}</p>
                       </div>
                     </div>
                   )}

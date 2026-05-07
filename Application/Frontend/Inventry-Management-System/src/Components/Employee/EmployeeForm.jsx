@@ -1,6 +1,6 @@
 import { useState } from "react";
 import createEmployee from "../../api/EmployeeApi.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 const API_BASE = "http://localhost:3000";
 

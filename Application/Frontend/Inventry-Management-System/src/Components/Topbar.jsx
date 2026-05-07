@@ -6,7 +6,7 @@ import {
   logOut,
   updateMyProfile,
 } from "../Api/authApi.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 const API_BASE = "http://localhost:3000";
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import createProduct from "../../api/ProductApi.js";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 const ProductForm = ({ onSaved, editData, onClearEdit }) => {
   const empty = {
