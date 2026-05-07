@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from "react";
-import createProduct from "../../api/ProductApi.js";
+import createProduct from "../../Api/ProductApi.js";
 import { toast } from "react-toastify";
 
 const ProductForm = ({ onSaved, editData, onClearEdit }) => {
     const empty = {
-        productName: "", productDescription: "", productPrice: "",
-        productStock: ""
+        title: "", author: "", description: "", price: "",
+        stockQuantity: "", category: "", barcode: ""
     };
     const [value, updateValue] = useState(empty);
 
     useEffect(() => {
         if (editData) {
             updateValue({
-                productName: editData.productName || "",
-                productDescription: editData.productDescription || "",
-                productPrice: editData.productPrice || "",
-                productStock: editData.productStock || ""
+                title: editData.title || "",
+                author: editData.author || "",
+                description: editData.description || "",
+                price: editData.price || "",
+                stockQuantity: editData.stockQuantity || "",
+                category: editData.category || "",
+                barcode: editData.barcode || ""
             });
         }
     }, [editData]);
@@ -27,12 +30,25 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
     async function SaveProduct(e) {
         e.preventDefault();
         try {
+            // Validate required fields
+            if (!value.title || !value.author || !value.category || !value.price || !value.stockQuantity) {
+                toast.error("Please fill all required fields (Title, Author, Category, Price, Stock)");
+                return;
+            }
+
+            // Convert string fields to correct types
+            const productData = {
+                ...value,
+                price: parseFloat(value.price) || 0,
+                stockQuantity: parseInt(value.stockQuantity) || 0
+            };
+
             if (editData) {
-                const { updateProduct } = await import("../../api/ProductApi.js");
-                await updateProduct(editData._id, value);
+                const { updateProduct } = await import("../../Api/ProductApi.js");
+                await updateProduct(editData._id, productData);
                 toast.success("Product updated successfully");
             } else {
-                await createProduct(value);
+                await createProduct(productData);
                 toast.success("Product added successfully");
             }
             updateValue(empty);
@@ -66,10 +82,13 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
                         <div className="modal-body">
                             <div className="row g-3">
                                 {[
-                                    { label: "product Name", field: "productName", type: "text", hint: "Enter Product Name" },
-                                    { label: "product Description", field: "productDescription", type: "text", hint: "Enter Product description" },
-                                    { label: "product Price", field: "productPrice", type: "Number", hint: "Enter Product Price" },
-                                    { label: "product Stock", field: "productStock", type: "Number", hint: "Enter Product Quantity" }
+                                    { label: "Product Title", field: "title", type: "text", hint: "Enter Product Title" },
+                                    { label: "Author/Brand", field: "author", type: "text", hint: "Enter Author/Brand" },
+                                    { label: "Description", field: "description", type: "text", hint: "Enter Product description" },
+                                    { label: "Category", field: "category", type: "text", hint: "Enter Product Category" },
+                                    { label: "Price", field: "price", type: "number", hint: "Enter Product Price" },
+                                    { label: "Stock Quantity", field: "stockQuantity", type: "number", hint: "Enter Stock Quantity" },
+                                    { label: "Barcode", field: "barcode", type: "text", hint: "Enter Barcode (optional)" }
                                 ].map(({ label, field, type, hint }) => (
                                     <div className="col-6" key={field}>
                                         <label className="form-label">{label}</label>

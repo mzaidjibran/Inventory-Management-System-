@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ProductHook from "../../hook/ProductHook.jsx";
 import ProductForm from "./ProductForm.jsx";
-import { deleteProduct } from "../../api/ProductApi.js";
+import { deleteProduct } from "../../Api/ProductApi.js";
 import { toast } from "react-toastify";
 
 const ProductTable = () => {

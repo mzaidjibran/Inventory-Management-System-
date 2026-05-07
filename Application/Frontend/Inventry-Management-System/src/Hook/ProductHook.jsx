@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import * as api from '../api/ProductApi.js'
+import * as api from '../Api/ProductApi.js'
 
 export default function ProductHook() {
     const [products, setProducts] = useState([])
