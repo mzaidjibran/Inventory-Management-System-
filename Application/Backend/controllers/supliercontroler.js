@@ -1,4 +1,5 @@
 import Supplier from "../models/Supliermodal.js";
+
 const createsuppliers = async (request, response) => {
   try {
     const supplier = await Supplier.create(request.body);

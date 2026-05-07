@@ -15,11 +15,9 @@ const supplierSchema = new mongoose.Schema(
       maxlength: [50, "Contact cannot exceed 50 characters"],
     },
     address: {
-      street: String,
-      city: String,
-      state: String,
-      country: String,
-      zipCode: String,
+      type: String,
+      required: true,
+      maxlength: [50, "Address cannot exceed 50 characters"],
     },
     email: {
       type: String,
