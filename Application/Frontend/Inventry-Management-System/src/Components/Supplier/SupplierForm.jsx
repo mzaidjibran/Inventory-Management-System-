@@ -34,7 +34,24 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
   async function SaveSupplier(e) {
     e.preventDefault();
     try {
-      const payload = { ...value };
+      if (!value.name.trim() || !value.email.trim() || !value.contact.trim()) {
+        toast.error("Name, email, and contact are required");
+        return;
+      }
+
+      const payload = {
+        ...value,
+        name: value.name.trim(),
+        email: value.email.trim(),
+        contact: value.contact.trim(),
+        address: {
+          street: value.address.trim() || "",
+          city: "",
+          state: "",
+          country: "",
+          zipCode: "",
+        },
+      };
 
       if (editData) {
         await updateSuppliers(editData._id, payload);
@@ -113,6 +130,7 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
                       value={value[field]}
                       onChange={handleChange(field)}
                       placeholder={hint}
+                      required={field !== "address"}
                     />
                     <small className="form-text text-muted">{hint}</small>
                   </div>

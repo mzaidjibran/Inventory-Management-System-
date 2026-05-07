@@ -1,9 +1,10 @@
+import "dotenv/config";
 import express from "express";
 import connectDB from "./config/config.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
-import dotenv from "dotenv";
+
 import UserRoutes from "./routes/Userroute.js";
 import AccountRoutes from "./routes/Accountroute.js";
 import EmployeeRoutes from "./routes/Epolyeeroute.js";
@@ -14,7 +15,6 @@ import ScanRoutes from "./routes/Scanerroot.js";
 import Shopexpence from "./models/Shopexpence.js";
 import SuplierRoutes from "./routes/Suplierroot.js";
 import ClientRoutes from "./routes/clientroot.js";
-dotenv.config();
 const port = process.env.PORT || 5000;
 
 // Middleware

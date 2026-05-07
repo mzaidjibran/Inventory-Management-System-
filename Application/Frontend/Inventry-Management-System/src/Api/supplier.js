@@ -1,5 +1,17 @@
 const API_BASE = "http://localhost:3000";
 
+const parseApiError = async (response, fallback) => {
+  try {
+    const errorData = await response.json();
+    if (errorData?.message) {
+      throw new Error(errorData.message);
+    }
+  } catch {
+    // Ignore parse failures and use fallback message below.
+  }
+  throw new Error(fallback);
+};
+
 // creating supplier
 
 const createSupplier = async (data) => {
@@ -8,7 +20,9 @@ const createSupplier = async (data) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Create failed: ${response.status}`);
+  if (!response.ok) {
+    await parseApiError(response, `Create failed: ${response.status}`);
+  }
   return response.json();
 };
 export default createSupplier;
@@ -20,7 +34,9 @@ export const getAllSuppliers = async () => {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
-  if (!response.ok) throw new Error(`Get all failed: ${response.status}`);
+  if (!response.ok) {
+    await parseApiError(response, `Get all failed: ${response.status}`);
+  }
   return response.json();
 };
 
@@ -31,7 +47,9 @@ export const getSingleSupplier = async (id) => {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
-  if (!response.ok) throw new Error(`Get failed: ${response.status}`);
+  if (!response.ok) {
+    await parseApiError(response, `Get failed: ${response.status}`);
+  }
   return response.json();
 };
 
@@ -43,7 +61,9 @@ export const updateSuppliers = async (id, data) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Update failed: ${response.status}`);
+  if (!response.ok) {
+    await parseApiError(response, `Update failed: ${response.status}`);
+  }
   return response.json();
 };
 
@@ -54,6 +74,8 @@ export const deleteSupplier = async (id) => {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
   });
-  if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+  if (!response.ok) {
+    await parseApiError(response, `Delete failed: ${response.status}`);
+  }
   return response.json();
 };

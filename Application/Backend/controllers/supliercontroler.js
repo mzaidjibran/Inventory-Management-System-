@@ -4,7 +4,19 @@ const createsuppliers = async (request, response) => {
     const supplier = await Supplier.create(request.body);
     response.status(201).json(supplier);
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    if (error?.code === 11000) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Supplier email already exists",
+      });
+    }
+
+    response.status(400).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
   }
 };
 export { createsuppliers };
@@ -58,7 +70,7 @@ export const updateSupplier = async (request, response) => {
     const updatedSupplier = await Supplier.findByIdAndUpdate(
       request.params.id,
       request.body,
-      { new: true },
+      { new: true, runValidators: true },
     );
     if (!updatedSupplier) {
       return response.status(404).json({
@@ -74,10 +86,18 @@ export const updateSupplier = async (request, response) => {
       data: updatedSupplier,
     });
   } catch (error) {
+    if (error?.code === 11000) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Supplier email already exists",
+      });
+    }
+
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error updating supplier",
+      message: error.message || "Error updating supplier",
     });
   }
 };
