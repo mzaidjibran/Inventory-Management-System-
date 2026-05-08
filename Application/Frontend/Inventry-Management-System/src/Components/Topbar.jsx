@@ -5,15 +5,34 @@ import {
   isLoggedIn,
   logOut,
   updateMyProfile,
+  getUserRole,
 } from "../Api/authApi.js";
 import toast from "react-hot-toast";
 
 const API_BASE = "http://localhost:3000";
 
+const normalizeRole = (r) => {
+  if (!r) return "User";
+  const lower = String(r).toLowerCase();
+  if (lower === "employee" || lower === "user") return "Employee";
+  if (lower === "administrator" || lower === "admin" || lower === "manager") return "Administrator";
+  return "User";
+};
+
 const Topbar = ({ onSidebarToggle }) => {
   const navigate = useNavigate();
   const imageInputRef = useRef(null);
-  const [profile, setProfile] = useState({ Name: "", email: "", image: "" });
+  const [profile, setProfile] = useState(() => {
+    // Load cached profile from localStorage on initial mount
+    if (isLoggedIn()) {
+      return {
+        Name: localStorage.getItem("userName") || "",
+        email: localStorage.getItem("userEmail") || "",
+        image: localStorage.getItem("userImage") || "",
+      };
+    }
+    return { Name: "", email: "", image: "" };
+  });
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -30,7 +49,15 @@ const Topbar = ({ onSidebarToggle }) => {
       try {
         const response = await getMyProfile();
         if (active) {
-          setProfile(response.data || { Name: "", email: "", image: "" });
+          const userData = response.data || { Name: "", email: "", image: "" };
+          setProfile(userData);
+          // Update cache whenever profile is fetched
+          localStorage.setItem(
+            "userName",
+            userData.Name || userData.name || "",
+          );
+          localStorage.setItem("userEmail", userData.email || "");
+          localStorage.setItem("userImage", userData.image || "");
         }
       } catch (error) {
         console.error("Failed to load profile:", error);
@@ -59,6 +86,9 @@ const Topbar = ({ onSidebarToggle }) => {
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userImage");
       navigate("/signin");
     }
   };
@@ -76,7 +106,10 @@ const Topbar = ({ onSidebarToggle }) => {
       const formData = new FormData();
       formData.append("image", file);
       const response = await updateMyProfile(formData);
-      setProfile(response.data || profile);
+      const userData = response.data || profile;
+      setProfile(userData);
+      // Cache updated profile data
+      localStorage.setItem("userImage", userData.image || "");
       toast.success("Profile image updated");
     } catch (error) {
       console.error("Profile image update failed:", error);
@@ -225,6 +258,9 @@ const Topbar = ({ onSidebarToggle }) => {
                           </h3>
                           <span className="rich-list-subtitle text-white">
                             {profile.email || ""}
+                          </span>
+                          <span className="rich-list-subtitle text-white" style={{ fontSize: "0.85rem" }}>
+                            Logged in as {normalizeRole(getUserRole())}
                           </span>
                         </div>
                       </div>

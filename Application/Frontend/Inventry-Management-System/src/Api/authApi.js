@@ -32,7 +32,7 @@ export const signIn = async (email, password) => {
     );
   }
 
-  // fetch profile for cashier info
+  // fetch profile for persistent caching
   try {
     const profileRes = await fetch(`${API_BASE}/api/account/me`, {
       method: "GET",
@@ -46,6 +46,7 @@ export const signIn = async (email, password) => {
       const user = profileData.data || profileData;
       localStorage.setItem("userName", user.Name || user.name || "");
       localStorage.setItem("userEmail", user.email || "");
+      localStorage.setItem("userImage", user.image || "");
     }
   } catch (e) {
     console.error("Error fetching user profile:", e);
@@ -67,6 +68,7 @@ export const logOut = async () => {
   localStorage.removeItem("userId");
   localStorage.removeItem("userName");
   localStorage.removeItem("userEmail");
+  localStorage.removeItem("userImage");
 };
 
 export const refreshAccessToken = async () => {
