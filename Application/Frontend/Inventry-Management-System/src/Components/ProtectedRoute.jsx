@@ -1,16 +1,31 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../Hook/useAuth.jsx';
+import { Navigate } from "react-router-dom";
+import { isLoggedIn, getUserRole } from "../Api/authApi.js";
 
-export default function ProtectedRoute({ children, requiredRole = null }) {
-    const { isLoggedIn, userRole } = useAuth();
+export default function ProtectedRoute({ children, allowedRoles }) {
+  const loggedIn = isLoggedIn();
+  const role = getUserRole();
 
-    if (!isLoggedIn) {
-        return <Navigate to="/signin" replace />;
-    }
+  const normalizeRole = (r) => {
+    if (!r) return null;
+    const lower = String(r).toLowerCase();
+    if (lower === "employee") return "user";
+    if (lower === "administrator") return "admin";
+    if (lower === "manager") return "admin";
+    return lower; // 'admin', 'user', etc.
+  };
 
-    if (requiredRole && userRole !== requiredRole) {
-        return <Navigate to="/" replace />;
-    }
+  const normalizedRole = normalizeRole(role);
 
-    return children;
+  if (!loggedIn) return <Navigate to="/signin" replace />;
+
+  if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
+    return (
+      <Navigate
+        to={normalizedRole === "admin" ? "/product" : "/billing"}
+        replace
+      />
+    );
+  }
+
+  return children;
 }

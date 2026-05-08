@@ -9,8 +9,7 @@ import {
 import toast from "react-hot-toast";
 
 export default function SignInPage() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [recoveryMode, setRecoveryMode] = useState("forgot");
+  const [form, setForm] = useState({ email: "", password: "", role: "" });
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("email");
   const [forgotForm, setForgotForm] = useState({
@@ -28,25 +27,33 @@ export default function SignInPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!form.role) {
+      toast.error("Pehle role select karo");
+      return;
+    }
     try {
       await signIn(form.email, form.password);
+      // Normalize selected role and persist it so UI can reflect user choice
+      const normalizeRole = (r) => {
+        if (!r) return null;
+        const lower = String(r).toLowerCase();
+        if (lower === "employee") return "user";
+        if (lower === "administrator") return "admin";
+        if (lower === "manager") return "admin";
+        return lower;
+      };
+
+      const selected = normalizeRole(form.role);
+      if (selected) localStorage.setItem("userRole", selected);
+      const role = localStorage.getItem("userRole");
       toast.success("Login successful!");
-      navigate("/product");
+      navigate(role === "admin" ? "/product" : "/billing");
     } catch (err) {
       toast.error(err.message);
     }
   }
 
   function openForgotPassword() {
-    setRecoveryMode("forgot");
-    setForgotForm((prev) => ({ ...prev, email: form.email || prev.email }));
-    setForgotStep("email");
-    setResetToken("");
-    setForgotOpen(true);
-  }
-
-  function openResetPassword() {
-    setRecoveryMode("reset");
     setForgotForm((prev) => ({ ...prev, email: form.email || prev.email }));
     setForgotStep("email");
     setResetToken("");
@@ -57,39 +64,24 @@ export default function SignInPage() {
     setForgotOpen(false);
     setForgotStep("email");
     setResetToken("");
-    setForgotForm({
-      email: "",
-      otp: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    setForgotForm({ email: "", otp: "", newPassword: "", confirmPassword: "" });
   }
 
   async function handleSendOtp(event) {
     event.preventDefault();
-
-    if (!forgotForm.email.trim()) {
-      toast.error("Email zaroori hai");
-      return;
-    }
-
+    if (!forgotForm.email.trim()) return toast.error("Email zaroori hai");
     try {
       const result = await forgotPassword(forgotForm.email.trim());
-      toast.success(result.message || "OTP aapki email pe bhej diya gaya hai");
+      toast.success(result.message || "OTP bhej diya gaya");
       setForgotStep("otp");
     } catch (err) {
-      toast.error(err.message || "Forgot password request failed");
+      toast.error(err.message);
     }
   }
 
   async function handleVerifyOtp(event) {
     event.preventDefault();
-
-    if (!forgotForm.otp.trim()) {
-      toast.error("OTP zaroori hai");
-      return;
-    }
-
+    if (!forgotForm.otp.trim()) return toast.error("OTP zaroori hai");
     try {
       const result = await verifyOtp(
         forgotForm.email.trim(),
@@ -99,23 +91,16 @@ export default function SignInPage() {
       toast.success(result.message || "OTP verify ho gaya");
       setForgotStep("reset");
     } catch (err) {
-      toast.error(err.message || "OTP verification failed");
+      toast.error(err.message);
     }
   }
 
   async function handleResetPassword(event) {
     event.preventDefault();
-
-    if (!forgotForm.newPassword.trim()) {
-      toast.error("New password zaroori hai");
-      return;
-    }
-
-    if (forgotForm.newPassword !== forgotForm.confirmPassword) {
-      toast.error("Passwords match nahi kar rahe");
-      return;
-    }
-
+    if (!forgotForm.newPassword.trim())
+      return toast.error("New password zaroori hai");
+    if (forgotForm.newPassword !== forgotForm.confirmPassword)
+      return toast.error("Passwords match nahi kar rahe");
     try {
       const result = await resetPassword(
         resetToken,
@@ -124,15 +109,34 @@ export default function SignInPage() {
       toast.success(result.message || "Password reset ho gaya");
       closeForgotPassword();
     } catch (err) {
-      toast.error(err.message || "Password reset failed");
+      toast.error(err.message);
     }
   }
 
   return (
     <div className="signin-container">
       <div className="card signin-card">
-        <h4 className="mb-3 text-center">Sign In</h4>
+        <h4 className="mb-4 text-center">Sign In</h4>
+
         <form onSubmit={handleSubmit}>
+          {/* Role Dropdown */}
+          <div className="mb-3">
+            <label className="form-label">Role</label>
+            <select
+              name="role"
+              className="form-select"
+              value={form.role}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Role select karo --
+              </option>
+              <option value="user">👷 Employee</option>
+              <option value="admin">🛡️ Administrator</option>
+            </select>
+          </div>
+
           <div className="mb-3">
             <label className="form-label">Email</label>
             <input
@@ -144,6 +148,7 @@ export default function SignInPage() {
               required
             />
           </div>
+
           <div className="mb-3">
             <label className="form-label">Password</label>
             <input
@@ -155,12 +160,12 @@ export default function SignInPage() {
               required
             />
           </div>
-          <div className="d-flex justify-content-between mb-3">
-            <button type="submit" className="btn btn-primary w-100 me-2">
-              Sign In
-            </button>
-          </div>
-          <div className="d-flex justify-content-between gap-2 mb-3">
+
+          <button type="submit" className="btn btn-primary w-100 mb-3">
+            Sign In
+          </button>
+
+          <div className="d-flex justify-content-between">
             <button
               type="button"
               className="btn btn-link text-decoration-none p-0"
@@ -168,29 +173,20 @@ export default function SignInPage() {
             >
               Forgot Password?
             </button>
-            <button
-              type="button"
-              className="btn btn-link text-decoration-none p-0"
-              onClick={openResetPassword}
-            >
-              Reset Password
-            </button>
           </div>
         </form>
+
         <p className="text-center mt-3">
           Account nahi hai? <a href="/signup">Sign Up karo</a>
         </p>
       </div>
 
+      {/* Forgot Password Modal */}
       {forgotOpen && (
         <div className="forgot-modal-backdrop">
           <div className="card forgot-modal-card">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="mb-0">
-                {recoveryMode === "reset"
-                  ? "Reset Password"
-                  : "Forgot Password"}
-              </h5>
+              <h5 className="mb-0">Forgot Password</h5>
               <button
                 type="button"
                 className="btn btn-sm btn-light"
@@ -209,10 +205,7 @@ export default function SignInPage() {
                     className="form-control"
                     value={forgotForm.email}
                     onChange={(e) =>
-                      setForgotForm((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
+                      setForgotForm((p) => ({ ...p, email: e.target.value }))
                     }
                     placeholder="Enter registered email"
                     required
@@ -220,7 +213,7 @@ export default function SignInPage() {
                 </div>
                 <div className="d-flex gap-2">
                   <button type="submit" className="btn btn-primary w-100">
-                    {recoveryMode === "reset" ? "Send Reset OTP" : "Send OTP"}
+                    Send OTP
                   </button>
                   <button
                     type="button"
@@ -242,10 +235,7 @@ export default function SignInPage() {
                     className="form-control"
                     value={forgotForm.otp}
                     onChange={(e) =>
-                      setForgotForm((prev) => ({
-                        ...prev,
-                        otp: e.target.value,
-                      }))
+                      setForgotForm((p) => ({ ...p, otp: e.target.value }))
                     }
                     placeholder="Enter OTP"
                     required
@@ -253,9 +243,7 @@ export default function SignInPage() {
                 </div>
                 <div className="d-flex gap-2">
                   <button type="submit" className="btn btn-primary w-100">
-                    {recoveryMode === "reset"
-                      ? "Verify Reset OTP"
-                      : "Verify OTP"}
+                    Verify OTP
                   </button>
                   <button
                     type="button"
@@ -277,8 +265,8 @@ export default function SignInPage() {
                     className="form-control"
                     value={forgotForm.newPassword}
                     onChange={(e) =>
-                      setForgotForm((prev) => ({
-                        ...prev,
+                      setForgotForm((p) => ({
+                        ...p,
                         newPassword: e.target.value,
                       }))
                     }
@@ -293,8 +281,8 @@ export default function SignInPage() {
                     className="form-control"
                     value={forgotForm.confirmPassword}
                     onChange={(e) =>
-                      setForgotForm((prev) => ({
-                        ...prev,
+                      setForgotForm((p) => ({
+                        ...p,
                         confirmPassword: e.target.value,
                       }))
                     }
@@ -304,9 +292,7 @@ export default function SignInPage() {
                 </div>
                 <div className="d-flex gap-2">
                   <button type="submit" className="btn btn-primary w-100">
-                    {recoveryMode === "reset"
-                      ? "Reset Password"
-                      : "Update Password"}
+                    Update Password
                   </button>
                   <button
                     type="button"
@@ -322,7 +308,6 @@ export default function SignInPage() {
         </div>
       )}
 
-      {/* Custom styles for background, animation, and hover effects */}
       <style jsx>{`
         .signin-container {
           display: flex;
@@ -332,7 +317,6 @@ export default function SignInPage() {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           animation: fadeIn 0.8s ease-out;
         }
-
         .signin-card {
           width: 400px;
           padding: 2rem;
@@ -344,12 +328,10 @@ export default function SignInPage() {
             transform 0.3s ease,
             box-shadow 0.3s ease;
         }
-
         .signin-card:hover {
           transform: translateY(-5px);
           box-shadow: 0 25px 40px rgba(0, 0, 0, 0.25);
         }
-
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -360,8 +342,6 @@ export default function SignInPage() {
             transform: scale(1);
           }
         }
-
-        /* Override Bootstrap button styles for the Forgot Password link */
         .btn-link {
           color: #667eea;
           font-size: 0.9rem;
@@ -371,12 +351,9 @@ export default function SignInPage() {
           color: #5a67d8;
           text-decoration: underline !important;
         }
-
         .btn-link:focus {
           box-shadow: none;
         }
-
-        /* Make primary button gradient */
         .btn-primary {
           background: linear-gradient(90deg, #667eea, #764ba2);
           border: none;
@@ -386,7 +363,10 @@ export default function SignInPage() {
           opacity: 0.9;
           background: linear-gradient(90deg, #667eea, #764ba2);
         }
-
+        .form-select:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
         .forgot-modal-backdrop {
           position: fixed;
           inset: 0;
@@ -397,7 +377,6 @@ export default function SignInPage() {
           z-index: 1050;
           padding: 1rem;
         }
-
         .forgot-modal-card {
           width: 100%;
           max-width: 420px;
@@ -407,14 +386,11 @@ export default function SignInPage() {
           box-shadow: 0 20px 35px rgba(0, 0, 0, 0.22);
           animation: fadeIn 0.2s ease-out;
         }
-
-        /* Responsive */
         @media (max-width: 480px) {
           .signin-card {
             width: 90%;
             padding: 1.5rem;
           }
-
           .forgot-modal-card {
             max-width: 100%;
           }

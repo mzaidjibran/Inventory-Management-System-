@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { isLoggedIn } from "./Api/authApi.js";
+import { isLoggedIn, getUserRole } from "./Api/authApi.js";
 
 import Product from "./pages/product.jsx";
+import Dashboard from "./Pages/Dashboard.jsx";
 import User from "./pages/user.jsx";
 import Employee from "./pages/employee.jsx";
 import SignIn from "./pages/SignIn.jsx";
@@ -11,24 +12,52 @@ import Supplier from "./Pages/supplier.jsx";
 import Client from "./Pages/client.jsx";
 import Billing from "./pages/Billing.jsx";
 
+// Login ke baad role ke hisaab se redirect
+const normalizeRole = (r) => {
+  if (!r) return null;
+  const lower = String(r).toLowerCase();
+  if (lower === "employee") return "user";
+  if (lower === "administrator") return "admin";
+  if (lower === "manager") return "admin";
+  return lower;
+};
+
+const defaultRoute = () => {
+  if (!isLoggedIn()) return "/signin";
+  const role = normalizeRole(getUserRole());
+  return role === "admin" ? "/product" : "/billing";
+};
 
 function App() {
   return (
     <Routes>
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/" element={<Navigate to={defaultRoute()} replace />} />
+
+      {/* Employee + Admin dono ke liye */}
       <Route
-        path="/"
+        path="/dashboard"
         element={
-          <Navigate to={isLoggedIn() ? "/product" : "/signin"} replace />
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <Billing />
+          </ProtectedRoute>
         }
       />
 
-      {/* Protected Routes */}
+      {/* Sirf Admin ke liye */}
       <Route
         path="/product"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Product />
           </ProtectedRoute>
         }
@@ -36,7 +65,7 @@ function App() {
       <Route
         path="/employee"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Employee />
           </ProtectedRoute>
         }
@@ -44,7 +73,7 @@ function App() {
       <Route
         path="/supplier"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Supplier />
           </ProtectedRoute>
         }
@@ -52,7 +81,7 @@ function App() {
       <Route
         path="/client"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Client />
           </ProtectedRoute>
         }
@@ -60,25 +89,13 @@ function App() {
       <Route
         path="/user"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <User />
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/billing"
-        element={
-          <ProtectedRoute>
-            <Billing />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="*"
-        element={
-          <Navigate to={isLoggedIn() ? "/product" : "/signin"} replace />
-        }
-      />
+
+      <Route path="*" element={<Navigate to={defaultRoute()} replace />} />
     </Routes>
   );
 }
