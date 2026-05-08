@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "cookie-parser": "^1.4.7",
-    "nodemailer": "^8.0.7"
+    "nodemailer": "^8.0.7",
+    "react-notify": "^3.0.0"
   }
 }

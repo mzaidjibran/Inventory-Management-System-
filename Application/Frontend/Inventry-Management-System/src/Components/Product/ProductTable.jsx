@@ -3,6 +3,7 @@ import ProductHook from "../../hook/ProductHook.jsx";
 import ProductForm from "./ProductForm.jsx";
 import { deleteProduct } from "../../Api/ProductApi.js";
 import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/confirmToast.js";
 
 const ProductTable = () => {
   const API_BASE = "http://localhost:3000";
@@ -12,17 +13,15 @@ const ProductTable = () => {
   const [viewData, setViewData] = useState(null);
 
   function handleDelete(id) {
-    if (window.confirm("Delete this Product?")) {
-      (async () => {
-        try {
-          await deleteProduct(id);
-          loadProducts();
-          toast.success("Product deleted successfully");
-        } catch (err) {
-          toast.error("Delete failed: " + err.message);
-        }
-      })();
-    }
+    confirmToast("Delete this Product?", async () => {
+      try {
+        await deleteProduct(id);
+        loadProducts();
+        toast.success("Product deleted successfully");
+      } catch (err) {
+        toast.error("Delete failed: " + err.message);
+      }
+    });
   }
 
   function handleEdit(pro) {
