@@ -15,13 +15,18 @@ const normalizeRole = (r) => {
   if (!r) return "User";
   const lower = String(r).toLowerCase();
   if (lower === "employee" || lower === "user") return "Employee";
-  if (lower === "administrator" || lower === "admin" || lower === "manager") return "Administrator";
+  if (lower === "administrator" || lower === "admin" || lower === "manager")
+    return "Administrator";
   return "User";
 };
 
 const Topbar = ({ onSidebarToggle }) => {
   const navigate = useNavigate();
   const imageInputRef = useRef(null);
+  const [searchText, setSearchText] = useState("");
+  const [calendarDate, setCalendarDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
   const [profile, setProfile] = useState(() => {
     // Load cached profile from localStorage on initial mount
     if (isLoggedIn()) {
@@ -120,6 +125,54 @@ const Topbar = ({ onSidebarToggle }) => {
     }
   };
 
+  const getNormalizedRole = () => {
+    const lower = String(getUserRole() || "").toLowerCase();
+    if (lower === "administrator" || lower === "manager") return "admin";
+    if (lower === "employee") return "user";
+    return lower;
+  };
+
+  const getSearchRoutes = () => {
+    const role = getNormalizedRole();
+    const routes = [
+      { label: "Dashboard", path: "/dashboard", roles: ["admin", "user"] },
+      { label: "Billing", path: "/billing", roles: ["admin", "user"] },
+      { label: "Products", path: "/product", roles: ["admin"] },
+      { label: "Employee", path: "/employee", roles: ["admin"] },
+      { label: "Supplier", path: "/supplier", roles: ["admin"] },
+      { label: "Client", path: "/client", roles: ["admin"] },
+      { label: "User", path: "/user", roles: ["admin"] },
+    ];
+
+    return routes.filter((route) => route.roles.includes(role));
+  };
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+
+    const query = searchText.trim().toLowerCase();
+    if (!query) {
+      toast.error("Please type a page name");
+      return;
+    }
+
+    const routes = getSearchRoutes();
+    const matched = routes.find((route) => {
+      const normalizedPath = route.path.replace("/", "");
+      return (
+        route.label.toLowerCase().includes(query) ||
+        normalizedPath.includes(query)
+      );
+    });
+
+    if (!matched) {
+      toast.error("No matching page found");
+      return;
+    }
+
+    navigate(matched.path);
+  };
+
   return (
     <header id="page-topbar">
       <div className="navbar-header">
@@ -193,26 +246,52 @@ const Topbar = ({ onSidebarToggle }) => {
           </div>
 
           <div className="d-flex align-items-center gap-2">
-            <form className="app-search d-none d-lg-block">
+            <form
+              className="app-search d-none d-lg-block"
+              onSubmit={handleSearchSubmit}
+            >
               <div className="position-relative">
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Search..."
+                  placeholder="Search pages..."
+                  value={searchText}
+                  onChange={(event) => setSearchText(event.target.value)}
+                  list="topbar-search-routes"
                 />
                 <span className="fab fa-sistrix fs-17 align-middle"></span>
+                <datalist id="topbar-search-routes">
+                  {getSearchRoutes().map((route) => (
+                    <option key={route.path} value={route.label} />
+                  ))}
+                </datalist>
               </div>
             </form>
 
-            <div className="d-inline-block activities">
+            <div className="dropdown d-inline-block activities">
               <button
                 type="button"
                 className="btn btn-sm top-icon"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvas-rightsidabar"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
               >
-                <i className="fas fa-table align-middle"></i>
+                <i className="mdi mdi-calendar-month align-middle"></i>
               </button>
+              <div
+                className="dropdown-menu dropdown-menu-end p-3"
+                style={{ minWidth: "260px" }}
+              >
+                <label className="form-label mb-2 fw-semibold">Calendar</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={calendarDate}
+                  onChange={(event) => setCalendarDate(event.target.value)}
+                />
+                <div className="small text-muted mt-2">
+                  Selected: {calendarDate}
+                </div>
+              </div>
             </div>
 
             {isLoggedIn() ? (
@@ -259,7 +338,10 @@ const Topbar = ({ onSidebarToggle }) => {
                           <span className="rich-list-subtitle text-white">
                             {profile.email || ""}
                           </span>
-                          <span className="rich-list-subtitle text-white" style={{ fontSize: "0.85rem" }}>
+                          <span
+                            className="rich-list-subtitle text-white"
+                            style={{ fontSize: "0.85rem" }}
+                          >
                             Logged in as {normalizeRole(getUserRole())}
                           </span>
                         </div>
