@@ -1,23 +1,14 @@
 import { Navigate } from "react-router-dom";
-import { isLoggedIn, getUserRole } from "../Api/authApi.js";
+import { isLoggedIn, getUserRole, normalizeRole } from "../Api/authApi.js";
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const loggedIn = isLoggedIn();
-  const role = getUserRole();
+  const normalizedRole = normalizeRole(getUserRole());
 
-  const normalizeRole = (r) => {
-    if (!r) return null;
-    const lower = String(r).toLowerCase();
-    if (lower === "employee") return "user";
-    if (lower === "administrator") return "admin";
-    if (lower === "manager") return "admin";
-    return lower; // 'admin', 'user', etc.
-  };
-
-  const normalizedRole = normalizeRole(role);
-
+  // Login nahi — signin pe bhejo
   if (!loggedIn) return <Navigate to="/signin" replace />;
 
+  // Role allowed nahi — apne default page pe bhejo
   if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
     return (
       <Navigate

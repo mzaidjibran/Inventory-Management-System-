@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import createProduct from "../../api/ProductApi.js";
+import createProduct from "../../Api/ProductApi.js";
 import toast from "react-hot-toast";
 
 const ProductForm = ({ onSaved, editData, onClearEdit }) => {
@@ -49,7 +49,7 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
       }
 
       if (editData) {
-        const { updateProduct } = await import("../../api/ProductApi.js");
+        const { updateProduct } = await import("../../Api/ProductApi.js");
         await updateProduct(editData._id, formData);
         toast.success("Product updated successfully");
       } else {

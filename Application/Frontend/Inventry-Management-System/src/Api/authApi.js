@@ -1,16 +1,25 @@
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
 
 const decodeToken = (token) => {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
-    const decoded = JSON.parse(atob(parts[1]));
-    return decoded;
+    return JSON.parse(atob(parts[1]));
   } catch {
     return null;
   }
 };
 
+export const normalizeRole = (r) => {
+  if (!r) return null;
+  const lower = String(r).toLowerCase();
+  if (lower === "employee" || lower === "user") return "user";
+  if (lower === "administrator" || lower === "admin" || lower === "manager")
+    return "admin";
+  return lower;
+};
+
+// ─── Sign In ───────────────────────────────────────────────────────────────
 export const signIn = async (email, password) => {
   const response = await fetch(`${API_BASE}/api/account/SignIn`, {
     method: "POST",
@@ -20,57 +29,72 @@ export const signIn = async (email, password) => {
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Login failed");
 
+  // Tokens save karo
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
 
+  // Role sirf JWT se lo — UI se nahi
   const decoded = decodeToken(data.accessToken);
-  if (decoded) {
-    localStorage.setItem("userRole", decoded.role || "");
-    localStorage.setItem(
-      "userId",
-      decoded._id || decoded.userId || decoded.id || "",
-    );
-  }
+  const rawRole = decoded?.role || null;
+  const role = normalizeRole(rawRole);
+  localStorage.setItem("userRole", role || "user");
+  localStorage.setItem(
+    "userId",
+    decoded?._id || decoded?.userId || decoded?.id || "",
+  );
 
-  // fetch profile for persistent caching
+  // Profile cache
   try {
     const profileRes = await fetch(`${API_BASE}/api/account/me`, {
-      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${data.accessToken}`,
       },
     });
-    const profileData = await profileRes.json();
     if (profileRes.ok) {
+      const profileData = await profileRes.json();
       const user = profileData.data || profileData;
       localStorage.setItem("userName", user.Name || user.name || "");
       localStorage.setItem("userEmail", user.email || "");
       localStorage.setItem("userImage", user.image || "");
     }
   } catch (e) {
-    console.error("Error fetching user profile:", e);
+    console.error("Profile fetch error:", e);
   }
 
+  return { ...data, normalizedRole: role };
+};
+
+// ─── Sign Up ───────────────────────────────────────────────────────────────
+export const signUp = async (userData) => {
+  const response = await fetch(`${API_BASE}/api/account/SignUp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Signup failed");
   return data;
 };
 
+// ─── Log Out ───────────────────────────────────────────────────────────────
 export const logOut = async () => {
   const refreshToken = localStorage.getItem("refreshToken");
-  await fetch(`${API_BASE}/api/account/logOut`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
-  });
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("userRole");
-  localStorage.removeItem("userId");
-  localStorage.removeItem("userName");
-  localStorage.removeItem("userEmail");
-  localStorage.removeItem("userImage");
+  try {
+    await fetch(`${API_BASE}/api/account/logOut`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+  } catch (e) {
+    // Network error ho to bhi logout karo
+    console.error("Logout API error:", e);
+  }
+  // Sab kuch clear karo
+  localStorage.clear();
 };
 
+// ─── Token Refresh ─────────────────────────────────────────────────────────
 export const refreshAccessToken = async () => {
   const refreshToken = localStorage.getItem("refreshToken");
   const response = await fetch(`${API_BASE}/api/account/refresh`, {
@@ -83,20 +107,21 @@ export const refreshAccessToken = async () => {
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
   const decoded = decodeToken(data.accessToken);
-  if (decoded && decoded.role) {
-    localStorage.setItem("userRole", decoded.role);
+  if (decoded?.role) {
+    localStorage.setItem("userRole", normalizeRole(decoded.role));
   }
   return data;
 };
 
+// ─── Helpers ───────────────────────────────────────────────────────────────
 export const isLoggedIn = () => !!localStorage.getItem("accessToken");
 export const getUserRole = () => localStorage.getItem("userRole") || null;
 export const getUserId = () => localStorage.getItem("userId") || null;
-export const isAdmin = () => getUserRole() === "admin";
+export const isAdmin = () => normalizeRole(getUserRole()) === "admin";
 
+// ─── Profile ───────────────────────────────────────────────────────────────
 export const getMyProfile = async () => {
   const response = await fetch(`${API_BASE}/api/account/me`, {
-    method: "GET",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -125,29 +150,16 @@ export const updateMyProfile = async (data) => {
   return responseData;
 };
 
-export const signUp = async (userData) => {
-  const response = await fetch(`${API_BASE}/api/account/SignUp`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || "Signup failed");
-  return data;
-};
-
+// ─── Forgot / Reset Password ───────────────────────────────────────────────
 export const forgotPassword = async (email) => {
   const response = await fetch(`${API_BASE}/api/account/forgot-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
   });
-
   const data = await response.json();
-  if (!response.ok) {
+  if (!response.ok)
     throw new Error(data.message || "Forgot password request failed");
-  }
-
   return data;
 };
 
@@ -157,12 +169,8 @@ export const verifyOtp = async (email, otp) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, otp }),
   });
-
   const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || "OTP verification failed");
-  }
-
+  if (!response.ok) throw new Error(data.message || "OTP verification failed");
   return data;
 };
 
@@ -172,11 +180,7 @@ export const resetPassword = async (resetToken, newPassword) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ resetToken, newPassword }),
   });
-
   const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || "Password reset failed");
-  }
-
+  if (!response.ok) throw new Error(data.message || "Password reset failed");
   return data;
 };

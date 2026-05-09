@@ -1,7 +1,7 @@
 import { useState } from "react";
-import EmployeeHook from "../../hook/EmployeeHook.jsx";
+import EmployeeHook from "../../Hook/EmployeeHook.jsx";
 import EmployeeForm from "./EmployeeForm.jsx";
-import { deleteEmployee } from "../../api/EmployeeApi.js";
+import { deleteEmployee } from "../../Api/EmployeeApi.js";
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/confirmToast.js";
 

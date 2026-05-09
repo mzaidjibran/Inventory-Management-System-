@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ProductHook from "../../hook/ProductHook.jsx";
+import ProductHook from "../../Hook/ProductHook.jsx";
 import ProductForm from "./ProductForm.jsx";
 import { deleteProduct } from "../../Api/ProductApi.js";
 import toast from "react-hot-toast";

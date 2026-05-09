@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema(
     image: {
       type: String,
     },
+    createdBy: {
+      type: String,
+      default: "Admin",
+    },
   },
   { timestamps: true },
 );

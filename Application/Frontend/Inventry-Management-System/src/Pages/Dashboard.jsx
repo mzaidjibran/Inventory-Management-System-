@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import ReactApexChart from "react-apexcharts";
 const Chart = ReactApexChart.default || ReactApexChart;
 import Topbar from "../components/Topbar.jsx";
@@ -14,11 +16,14 @@ const fetchDashboard = async () => {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to fetch dashboard");
+  if (!res.ok) {
+    const err = new Error(data.message || "Failed to fetch dashboard");
+    err.status = res.status;
+    throw err;
+  }
   return data.data;
 };
 
-// ── Greeting helper ──────────────────────────────────────────────────────────
 const getGreeting = () => {
   const hour = new Date().getHours();
   if (hour < 12) return "Good Morning";
@@ -27,6 +32,7 @@ const getGreeting = () => {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -39,16 +45,27 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboard()
       .then(setStats)
-      .catch((e) => setError(e.message))
+      .catch((e) => {
+        if (e && e.status === 401) {
+          toast.error("Session expired — please sign in again");
+          // clear tokens and redirect
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          navigate("/signin");
+          return;
+        }
+        setError(e.message || String(e));
+      })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     // Thoda wait karo taake DOM fully render ho jaye
     const timer = setTimeout(() => {
-
       // Fullscreen
-      const fullscreenBtn = document.querySelector('[data-toggle="fullscreen"]');
+      const fullscreenBtn = document.querySelector(
+        '[data-toggle="fullscreen"]',
+      );
       if (fullscreenBtn) {
         fullscreenBtn.onclick = () => {
           if (!document.fullscreenElement) {
@@ -74,13 +91,11 @@ export default function Dashboard() {
         };
       }
 
-
       // Saved theme load karo
       const savedTheme = localStorage.getItem("theme");
       if (savedTheme === "dark") {
         document.documentElement.setAttribute("data-bs-theme", "dark");
       }
-
     }, 500); // 500ms wait
 
     return () => clearTimeout(timer);
@@ -88,7 +103,7 @@ export default function Dashboard() {
 
   // ── Chart: Last 7 Days Bar Chart ─────────────────────────────────────────
   const barChartOptions = {
-    chart: { type: "bar", toolbar: { show: false }, },
+    chart: { type: "bar", toolbar: { show: false } },
     plotOptions: { bar: { borderRadius: 4, columnWidth: "50%" } },
     dataLabels: { enabled: false },
     xaxis: {
@@ -116,7 +131,7 @@ export default function Dashboard() {
 
   // ── Chart: Last 6 Months Line Chart ──────────────────────────────────────
   const lineChartOptions = {
-    chart: { type: "area", toolbar: { show: false }, },
+    chart: { type: "area", toolbar: { show: false } },
     dataLabels: { enabled: false },
     stroke: { curve: "smooth", width: 2 },
     xaxis: {
@@ -161,11 +176,11 @@ export default function Dashboard() {
       pie: { donut: { size: "65%" } },
     },
   };
- const donutSeries = [
-  stats?.total?.paymentMethods?.cash || 0,
-  stats?.total?.paymentMethods?.card || 0,
-  stats?.total?.paymentMethods?.online || 0,
-];
+  const donutSeries = [
+    stats?.total?.paymentMethods?.cash || 0,
+    stats?.total?.paymentMethods?.card || 0,
+    stats?.total?.paymentMethods?.online || 0,
+  ];
 
   if (loading) {
     return (
@@ -195,7 +210,6 @@ export default function Dashboard() {
       <div className="main-content">
         <div className="page-content">
           <div className="container-fluid">
-
             {/* ── Page Title ── */}
             <div className="row">
               <div className="col-12">
@@ -234,7 +248,9 @@ export default function Dashboard() {
                         <i className="mdi mdi-cash-multiple mt-1"></i>
                       </div>
                       <div className="flex-grow-1">
-                        <p className="text-muted mb-1 text-truncate">Today's Sales</p>
+                        <p className="text-muted mb-1 text-truncate">
+                          Today's Sales
+                        </p>
                         <h4 className="mb-0">
                           Rs {Number(stats?.daily?.sales || 0).toLocaleString()}
                         </h4>
@@ -257,9 +273,12 @@ export default function Dashboard() {
                         <i className="mdi mdi-trending-up mt-1"></i>
                       </div>
                       <div className="flex-grow-1">
-                        <p className="text-muted mb-1 text-truncate">Monthly Sales</p>
+                        <p className="text-muted mb-1 text-truncate">
+                          Monthly Sales
+                        </p>
                         <h4 className="mb-0">
-                          Rs {Number(stats?.monthly?.sales || 0).toLocaleString()}
+                          Rs{" "}
+                          {Number(stats?.monthly?.sales || 0).toLocaleString()}
                         </h4>
                       </div>
                       <div className="text-success ms-2">
@@ -281,9 +300,14 @@ export default function Dashboard() {
                           <i className="mdi mdi-bank mt-1"></i>
                         </div>
                         <div className="flex-grow-1">
-                          <p className="text-muted mb-1 text-truncate">Total Revenue</p>
+                          <p className="text-muted mb-1 text-truncate">
+                            Total Revenue
+                          </p>
                           <h4 className="mb-0">
-                            Rs {Number(stats?.total?.revenue || 0).toLocaleString()}
+                            Rs{" "}
+                            {Number(
+                              stats?.total?.revenue || 0,
+                            ).toLocaleString()}
                           </h4>
                         </div>
                         <div className="text-muted ms-2">
@@ -304,10 +328,12 @@ export default function Dashboard() {
                         <i className="mdi mdi-package-variant mt-1"></i>
                       </div>
                       <div className="flex-grow-1">
-                        <p className="text-muted mb-1 text-truncate">Total Products</p>
+                        <p className="text-muted mb-1 text-truncate">
+                          Total Products
+                        </p>
                         <h4 className="mb-0">{stats?.total?.products || 0}</h4>
                       </div>
-                      {(stats?.lowStockProducts?.length > 0) && (
+                      {stats?.lowStockProducts?.length > 0 && (
                         <div className="text-danger ms-2">
                           <i className="mdi mdi-alert me-1"></i>
                           <small>{stats?.lowStockProducts?.length} low</small>
@@ -332,10 +358,14 @@ export default function Dashboard() {
                         </div>
                         <div className="flex-grow-1">
                           <p className="text-muted mb-1">Total Employees</p>
-                          <h4 className="mb-0">{stats?.total?.employees || 0}</h4>
+                          <h4 className="mb-0">
+                            {stats?.total?.employees || 0}
+                          </h4>
                         </div>
                         <div className="text-success ms-2">
-                          <small>{stats?.total?.activeEmployees || 0} active</small>
+                          <small>
+                            {stats?.total?.activeEmployees || 0} active
+                          </small>
                         </div>
                       </div>
                     </div>
@@ -369,7 +399,9 @@ export default function Dashboard() {
                     <div className="card-body py-2">
                       <div className="d-flex align-items-center gap-2 flex-wrap">
                         <i className="mdi mdi-alert-circle text-danger fs-5"></i>
-                        <strong className="text-danger">Low Stock Alert:</strong>
+                        <strong className="text-danger">
+                          Low Stock Alert:
+                        </strong>
                         {stats.lowStockProducts.map((p) => (
                           <span key={p._id} className="badge bg-danger">
                             {p.title} ({p.stockQuantity} left)
@@ -472,7 +504,10 @@ export default function Dashboard() {
                         <tbody>
                           {stats?.recentBills?.length === 0 ? (
                             <tr>
-                              <td colSpan={5} className="text-center text-muted py-4">
+                              <td
+                                colSpan={5}
+                                className="text-center text-muted py-4"
+                              >
                                 Koi bill nahi mila
                               </td>
                             </tr>
@@ -485,29 +520,40 @@ export default function Dashboard() {
                                   </span>
                                 </td>
                                 <td className="fw-bold text-success">
-                                  Rs {Number(bill.totalAmount || 0).toLocaleString()}
+                                  Rs{" "}
+                                  {Number(
+                                    bill.totalAmount || 0,
+                                  ).toLocaleString()}
                                 </td>
                                 <td>
-                                  <span className={`badge ${bill.paymentMethod === "cash"
-                                      ? "bg-success"
-                                      : bill.paymentMethod === "card"
-                                        ? "bg-primary"
-                                        : "bg-info"
-                                    }`}>
+                                  <span
+                                    className={`badge ${
+                                      bill.paymentMethod === "cash"
+                                        ? "bg-success"
+                                        : bill.paymentMethod === "card"
+                                          ? "bg-primary"
+                                          : "bg-info"
+                                    }`}
+                                  >
                                     {bill.paymentMethod || "—"}
                                   </span>
                                 </td>
                                 <td>
-                                  <span className={`badge ${bill.status === "completed"
-                                      ? "bg-success"
-                                      : "bg-warning"
-                                    }`}>
+                                  <span
+                                    className={`badge ${
+                                      bill.status === "completed"
+                                        ? "bg-success"
+                                        : "bg-warning"
+                                    }`}
+                                  >
                                     {bill.status || "—"}
                                   </span>
                                 </td>
                                 <td className="text-muted">
                                   {bill.createdAt
-                                    ? new Date(bill.createdAt).toLocaleDateString("en-PK")
+                                    ? new Date(
+                                        bill.createdAt,
+                                      ).toLocaleDateString("en-PK")
                                     : "—"}
                                 </td>
                               </tr>
@@ -542,7 +588,10 @@ export default function Dashboard() {
                           <tbody>
                             {stats?.lowStockProducts?.length === 0 ? (
                               <tr>
-                                <td colSpan={2} className="text-center text-muted py-4">
+                                <td
+                                  colSpan={2}
+                                  className="text-center text-muted py-4"
+                                >
                                   <i className="mdi mdi-check-circle text-success me-1"></i>
                                   Sab stock theek hai
                                 </td>
@@ -552,12 +601,15 @@ export default function Dashboard() {
                                 <tr key={p._id}>
                                   <td className="fw-semibold">{p.title}</td>
                                   <td>
-                                    <span className={`badge ${p.stockQuantity === 0
-                                        ? "bg-danger"
-                                        : p.stockQuantity <= 3
-                                          ? "bg-warning"
-                                          : "bg-info"
-                                      }`}>
+                                    <span
+                                      className={`badge ${
+                                        p.stockQuantity === 0
+                                          ? "bg-danger"
+                                          : p.stockQuantity <= 3
+                                            ? "bg-warning"
+                                            : "bg-info"
+                                      }`}
+                                    >
                                       {p.stockQuantity} left
                                     </span>
                                   </td>
@@ -640,7 +692,8 @@ export default function Dashboard() {
                             {stats?.daily?.bills || 0} bills generated today
                           </h4>
                           <p className="rich-list-subtitle mb-0">
-                            Total: Rs {Number(stats?.daily?.sales || 0).toLocaleString()}
+                            Total: Rs{" "}
+                            {Number(stats?.daily?.sales || 0).toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -659,7 +712,11 @@ export default function Dashboard() {
                             Monthly target progress
                           </h4>
                           <p className="rich-list-subtitle mb-0">
-                            Rs {Number(stats?.monthly?.sales || 0).toLocaleString()} this month
+                            Rs{" "}
+                            {Number(
+                              stats?.monthly?.sales || 0,
+                            ).toLocaleString()}{" "}
+                            this month
                           </p>
                         </div>
                       </div>
@@ -707,11 +764,17 @@ export default function Dashboard() {
                           },
                         ].map((item) => (
                           <div className="col-6" key={item.label}>
-                            <div className={`border rounded p-3 border-${item.color}-subtle`}>
+                            <div
+                              className={`border rounded p-3 border-${item.color}-subtle`}
+                            >
                               <div className="d-flex align-items-center gap-2">
-                                <i className={`${item.icon} text-${item.color} fs-4`}></i>
+                                <i
+                                  className={`${item.icon} text-${item.color} fs-4`}
+                                ></i>
                                 <div>
-                                  <p className="text-muted mb-0 small">{item.label}</p>
+                                  <p className="text-muted mb-0 small">
+                                    {item.label}
+                                  </p>
                                   <h5 className="mb-0 fw-bold">{item.value}</h5>
                                 </div>
                               </div>
@@ -724,7 +787,6 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
@@ -737,8 +799,7 @@ export default function Dashboard() {
               </div>
               <div className="col-sm-6">
                 <div className="text-sm-end d-none d-sm-block">
-                  Crafted with{" "}
-                  <i className="mdi mdi-heart text-danger"></i> by{" "}
+                  Crafted with <i className="mdi mdi-heart text-danger"></i> by{" "}
                   <a href="#" className="text-muted">
                     Mango Technologies
                   </a>
@@ -774,7 +835,10 @@ export default function Dashboard() {
           <div className="card-header bg-light">
             <h6 className="card-title text-uppercase">Activities</h6>
             <div className="card-addon">
-              <button className="btn btn-label-danger" data-bs-dismiss="offcanvas">
+              <button
+                className="btn btn-label-danger"
+                data-bs-dismiss="offcanvas"
+              >
                 <i className="fa fa-times"></i>
               </button>
             </div>
@@ -822,7 +886,10 @@ export default function Dashboard() {
                   <h4 className="fs-16 mb-2">
                     Rs {Number(stats?.total?.revenue || 0).toLocaleString()}
                   </h4>
-                  <div className="progress progress-sm" style={{ height: "4px" }}>
+                  <div
+                    className="progress progress-sm"
+                    style={{ height: "4px" }}
+                  >
                     <div
                       className="progress-bar bg-info"
                       style={{ width: "80%" }}
@@ -848,7 +915,9 @@ export default function Dashboard() {
                         </p>
                         <span className="text-muted" style={{ fontSize: 11 }}>
                           {bill.createdAt
-                            ? new Date(bill.createdAt).toLocaleDateString("en-PK")
+                            ? new Date(bill.createdAt).toLocaleDateString(
+                                "en-PK",
+                              )
                             : ""}
                         </span>
                       </div>
@@ -860,7 +929,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

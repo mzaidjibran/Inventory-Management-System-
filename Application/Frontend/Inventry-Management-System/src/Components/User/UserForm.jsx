@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import addUser from "../../api/UserApi.js";
+import { useState, useEffect } from "react";
+import addUser from "../../Api/UserApi.js";
 import toast from "react-hot-toast";
 
 const UserForm = ({ onSaved, editData, onClearEdit }) => {
@@ -45,7 +45,7 @@ const UserForm = ({ onSaved, editData, onClearEdit }) => {
       }
 
       if (editData) {
-        const { updateUser } = await import("../../api/UserApi.js");
+        const { updateUser } = await import("../../Api/UserApi.js");
         await updateUser(editData._id, value);
         toast.success("User updated successfully");
       } else {

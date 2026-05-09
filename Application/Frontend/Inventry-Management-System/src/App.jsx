@@ -11,29 +11,33 @@ import Supplier from "./Pages/supplier.jsx";
 import Client from "./Pages/client.jsx";
 import Billing from "./pages/Billing.jsx";
 
-// Login ke baad role ke hisaab se redirect
-const normalizeRole = (r) => {
+export const normalizeRole = (r) => {
   if (!r) return null;
   const lower = String(r).toLowerCase();
-  if (lower === "employee") return "employee";
-  if (lower === "administrator") return "admin";
-  if (lower === "manager") return "admin";
+  if (lower === "employee" || lower === "user") return "user";
+  if (lower === "administrator" || lower === "admin" || lower === "manager")
+    return "admin";
   return lower;
 };
 
-const defaultRoute = () => {
-  if (!isLoggedIn()) return "/signin";
-  return "/dashboard";
-}
-
 function App() {
+  // Har baar component render ho, fresh se role check ho
+  const getDefaultRoute = () => {
+    if (!isLoggedIn()) return "/signin";
+    const role = normalizeRole(getUserRole());
+    return role === "admin" ? "/product" : "/billing";
+  };
+
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
-      <Route path="/" element={<Navigate to={defaultRoute()} replace />} />
 
-      {/* Employee + Admin dono ke liye */}
+      {/* Root always goes to signin if not logged in, else role-based */}
+      <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
+
+      {/* Admin + User dono ke liye */}
       <Route
         path="/dashboard"
         element={
@@ -93,7 +97,8 @@ function App() {
         }
       />
 
-      <Route path="*" element={<Navigate to={defaultRoute()} replace />} />
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
     </Routes>
   );
 }

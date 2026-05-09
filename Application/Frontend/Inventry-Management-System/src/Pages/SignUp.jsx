@@ -15,7 +15,7 @@ export default function SignUpPage() {
     e.preventDefault();
     try {
       await signUp(form);
-      toast.success("Account ban gaya! Ab login karo.");
+      toast.success("Account created! Please sign in.");
       navigate("/signin");
     } catch (err) {
       toast.error(err.message);
@@ -65,7 +65,7 @@ export default function SignUpPage() {
           </button>
         </form>
         <p className="text-center mt-3">
-          Pehle se account hai? <a href="/signin">Sign In karo</a>
+          Already have an account? <a href="/signin">Sign In</a>
         </p>
       </div>
 

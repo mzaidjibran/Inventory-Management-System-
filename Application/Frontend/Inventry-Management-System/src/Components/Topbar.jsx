@@ -6,7 +6,9 @@ import {
   logOut,
   updateMyProfile,
   getUserRole,
+  signUp,
 } from "../Api/authApi.js";
+import { getAllUsers, deleteUser } from "../Api/UserApi.js";
 import toast from "react-hot-toast";
 
 const API_BASE = "http://localhost:3000";
@@ -39,6 +41,14 @@ const Topbar = ({ onSidebarToggle }) => {
     return { Name: "", email: "", image: "" };
   });
   const [uploading, setUploading] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    Name: "",
+    email: "",
+    password: "",
+  });
+  const [existingUsers, setExistingUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -122,6 +132,102 @@ const Topbar = ({ onSidebarToggle }) => {
     } finally {
       setUploading(false);
       event.target.value = "";
+    }
+  };
+
+  const isAdmin = () => {
+    const r = getNormalizedRole();
+    return r === "admin";
+  };
+
+  const openCreateUser = () => setCreateOpen(true);
+  const closeCreateUser = () => setCreateOpen(false);
+
+  useEffect(() => {
+    let active = true;
+    const loadUsers = async () => {
+      if (!isLoggedIn()) return;
+      setLoadingUsers(true);
+      try {
+        const res = await getAllUsers();
+        if (!active) return;
+        setExistingUsers(res.data || []);
+      } catch (err) {
+        console.error("Failed to load users:", err);
+      } finally {
+        if (active) setLoadingUsers(false);
+      }
+    };
+
+    if (createOpen) loadUsers();
+    return () => {
+      active = false;
+    };
+  }, [createOpen]);
+
+  const handleCreateChange = (e) => {
+    setCreateForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  };
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await signUp({
+        Name: createForm.Name,
+        email: createForm.email,
+        password: createForm.password,
+      });
+      toast.success(
+        "User created successfully. Share credentials with employee.",
+      );
+      closeCreateUser();
+      setCreateForm({ Name: "", email: "", password: "" });
+      // store approved email locally so only admin-provisioned emails can sign in
+      try {
+        const raw = localStorage.getItem("approvedUsers");
+        const list = raw ? JSON.parse(raw) : [];
+        if (!list.includes(createForm.email)) {
+          list.push(createForm.email);
+          localStorage.setItem("approvedUsers", JSON.stringify(list));
+        }
+      } catch (e) {
+        console.error("Failed to update approvedUsers in localStorage:", e);
+        localStorage.setItem(
+          "approvedUsers",
+          JSON.stringify([createForm.email]),
+        );
+      }
+      // refresh list
+      try {
+        const res = await getAllUsers();
+        setExistingUsers(res.data || []);
+      } catch (err) {
+        console.error("Failed to refresh users after create:", err);
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to create user");
+    }
+  };
+
+  const handleDeleteUser = async (id, email) => {
+    if (!confirm(`Delete user ${email}? This cannot be undone.`)) return;
+    try {
+      await deleteUser(id);
+      toast.success("User deleted");
+      // remove from existingUsers list
+      setExistingUsers((prev) => prev.filter((u) => u._id !== id));
+      // also remove from approvedUsers localStorage if present
+      try {
+        const raw = localStorage.getItem("approvedUsers");
+        const list = raw ? JSON.parse(raw) : [];
+        const newList = list.filter((e) => e !== email);
+        localStorage.setItem("approvedUsers", JSON.stringify(newList));
+      } catch (e) {
+        console.error("Failed to update approvedUsers in localStorage:", e);
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error(err.message || "Failed to delete user");
     }
   };
 
@@ -233,14 +339,7 @@ const Topbar = ({ onSidebarToggle }) => {
                   <i className="mdi mdi-login align-middle me-1"></i>
                   Sign In
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm fs-14"
-                  onClick={() => navigate("/signup")}
-                >
-                  <i className="mdi mdi-account-plus align-middle me-1"></i>
-                  Sign Up
-                </button>
+                {/* Public Sign Up removed: accounts must be created by admin */}
               </>
             ) : null}
           </div>
@@ -358,6 +457,15 @@ const Topbar = ({ onSidebarToggle }) => {
                         >
                           {uploading ? "Uploading..." : "Change Photo"}
                         </button>
+                        {isAdmin() && (
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={openCreateUser}
+                          >
+                            Create User
+                          </button>
+                        )}
                         <input
                           ref={imageInputRef}
                           type="file"
@@ -391,6 +499,99 @@ const Topbar = ({ onSidebarToggle }) => {
           </div>
         </div>
       </div>
+      {createOpen && (
+        <div className="modal-backdrop-fixed">
+          <div className="card p-3 create-user-modal" style={{ width: 360 }}>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <h5 className="mb-0">Create User</h5>
+              <button
+                className="btn btn-sm btn-light"
+                onClick={closeCreateUser}
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleCreateSubmit}>
+              <div className="mb-2">
+                <label className="form-label">Name</label>
+                <input
+                  name="Name"
+                  className="form-control"
+                  value={createForm.Name}
+                  onChange={handleCreateChange}
+                  required
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label">Email</label>
+                <input
+                  name="email"
+                  type="email"
+                  className="form-control"
+                  value={createForm.email}
+                  onChange={handleCreateChange}
+                  required
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label">Password</label>
+                <input
+                  name="password"
+                  type="password"
+                  className="form-control"
+                  value={createForm.password}
+                  onChange={handleCreateChange}
+                  required
+                />
+              </div>
+              <div className="d-flex gap-2">
+                <button type="submit" className="btn btn-primary">
+                  Create
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={closeCreateUser}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+            <div className="mt-3">
+              <h6 className="mb-2">Existing Users</h6>
+              {loadingUsers ? (
+                <div className="small text-muted">Loading...</div>
+              ) : existingUsers.length === 0 ? (
+                <div className="small text-muted">No users found.</div>
+              ) : (
+                <div className="list-group list-group-flush">
+                  {existingUsers.map((u) => (
+                    <div
+                      key={u._id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <div className="fw-semibold">
+                          {u.User_Name || u.Name || u.name || u.email}
+                        </div>
+                        <div className="small text-muted">{u.email}</div>
+                      </div>
+                      <div>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleDeleteUser(u._id, u.email)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

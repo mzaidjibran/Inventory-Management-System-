@@ -8,8 +8,13 @@ import {
 } from "../Api/authApi.js";
 import toast from "react-hot-toast";
 
+// .env se super-admin credentials
+const SUPER_ADMIN_EMAIL = import.meta.env.VITE_SUPER_ADMIN_EMAIL || "";
+const SUPER_ADMIN_PASSWORD = import.meta.env.VITE_SUPER_ADMIN_PASSWORD || "";
+
 export default function SignInPage() {
-  const [form, setForm] = useState({ email: "", password: "", role: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("email");
   const [forgotForm, setForgotForm] = useState({
@@ -27,33 +32,47 @@ export default function SignInPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.role) {
-      toast.error("Select Role ");
-      return;
-    }
-    try {
-      await signIn(form.email, form.password);
-      // Normalize selected role and persist it so UI can reflect user choice
-      const normalizeRole = (r) => {
-        if (!r) return null;
-        const lower = String(r).toLowerCase();
-        if (lower === "employee") return "user";
-        if (lower === "administrator") return "admin";
-        return lower;
-      };
+    setLoading(true);
 
-      const selected = normalizeRole(form.role);
-      if (selected) localStorage.setItem("userRole", selected);
-      const role = localStorage.getItem("userRole");
+    try {
+      // ── Case 1: Super Admin (env credentials) ──────────────────────────
+      const isSuperAdmin =
+        SUPER_ADMIN_EMAIL &&
+        SUPER_ADMIN_PASSWORD &&
+        form.email === SUPER_ADMIN_EMAIL &&
+        form.password === SUPER_ADMIN_PASSWORD;
+
+      if (isSuperAdmin) {
+        // Local-only super admin — no DB call needed
+        localStorage.setItem("accessToken", "super-admin-token");
+        localStorage.setItem("refreshToken", "super-admin-refresh");
+        localStorage.setItem("userRole", "admin");
+        localStorage.setItem("userName", "Super Admin");
+        localStorage.setItem("userEmail", SUPER_ADMIN_EMAIL);
+        toast.success("Welcome, Super Admin!");
+        navigate("/product");
+        return;
+      }
+
+      // ── Case 2: DB users (created by admin) ────────────────────────────
+      // signIn will hit the backend; if email not found, backend returns 401/error
+      const result = await signIn(form.email, form.password);
+
+      const role = result.normalizedRole || localStorage.getItem("userRole");
       toast.success("Login successful!");
+
+      // Role ke hisaab se redirect
       navigate(role === "admin" ? "/product" : "/billing");
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Login failed. Check credentials.");
+    } finally {
+      setLoading(false);
     }
   }
 
+  // ── Forgot Password helpers ──────────────────────────────────────────────
   function openForgotPassword() {
-    setForgotForm((prev) => ({ ...prev, email: form.email || prev.email }));
+    setForgotForm((prev) => ({ ...prev, email: form.email || "" }));
     setForgotStep("email");
     setResetToken("");
     setForgotOpen(true);
@@ -68,10 +87,10 @@ export default function SignInPage() {
 
   async function handleSendOtp(event) {
     event.preventDefault();
-    if (!forgotForm.email.trim()) return toast.error("Please enter Email");
+    if (!forgotForm.email.trim()) return toast.error("Please enter your email");
     try {
       const result = await forgotPassword(forgotForm.email.trim());
-      toast.success(result.message || "OTP Sent!");
+      toast.success(result.message || "OTP sent!");
       setForgotStep("otp");
     } catch (err) {
       toast.error(err.message);
@@ -80,14 +99,14 @@ export default function SignInPage() {
 
   async function handleVerifyOtp(event) {
     event.preventDefault();
-    if (!forgotForm.otp.trim()) return toast.error("Please Enter OTP");
+    if (!forgotForm.otp.trim()) return toast.error("Please enter the OTP");
     try {
       const result = await verifyOtp(
         forgotForm.email.trim(),
         forgotForm.otp.trim(),
       );
       setResetToken(result.resetToken);
-      toast.success(result.message || "OTP verified successfully!");
+      toast.success(result.message || "OTP verified!");
       setForgotStep("reset");
     } catch (err) {
       toast.error(err.message);
@@ -115,37 +134,26 @@ export default function SignInPage() {
   return (
     <div className="signin-container">
       <div className="card signin-card">
-        <h4 className="mb-4 text-center">Sign In</h4>
+        <div className="signin-logo">
+          <span className="logo-icon">⚡</span>
+        </div>
+        <h4 className="mb-1 text-center signin-title">Welcome Back</h4>
+        <p className="text-center signin-subtitle mb-4">
+          Sign in to your account
+        </p>
 
         <form onSubmit={handleSubmit}>
-          {/* Role Dropdown */}
           <div className="mb-3">
-            <label className="form-label">Role</label>
-            <select
-              name="role"
-              className="form-select"
-              value={form.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="" disabled>
-                -- Select your role --
-              </option>
-              <option value="admin">🛡️ Admin</option>
-              <option value="user">👷 Employee</option>
-              
-            </select>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Email</label>
+            <label className="form-label">Email Address</label>
             <input
               name="email"
               type="email"
               className="form-control"
-              placeholder="Enter email"
+              placeholder="Enter your email"
+              value={form.email}
               onChange={handleChange}
               required
+              autoFocus
             />
           </div>
 
@@ -155,17 +163,32 @@ export default function SignInPage() {
               name="password"
               type="password"
               className="form-control"
-              placeholder="Enter password"
+              placeholder="Enter your password"
+              value={form.password}
               onChange={handleChange}
               required
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-100 mb-3">
-            Sign In
+          <button
+            type="submit"
+            className="btn btn-primary w-100 mb-3"
+            disabled={loading}
+          >
+            {loading ? (
+              <span>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                />
+                Signing in...
+              </span>
+            ) : (
+              "Sign In"
+            )}
           </button>
 
-          <div className="d-flex justify-content-between">
+          <div className="text-center">
             <button
               type="button"
               className="btn btn-link text-decoration-none p-0"
@@ -175,18 +198,14 @@ export default function SignInPage() {
             </button>
           </div>
         </form>
-
-        <p className="text-center mt-3">
-          Don't have account? <a href="/signup">Sign Up here</a>
-        </p>
       </div>
 
-      {/* Forgot Password Modal */}
+      {/* ── Forgot Password Modal ── */}
       {forgotOpen && (
         <div className="forgot-modal-backdrop">
           <div className="card forgot-modal-card">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="mb-0">Forgot Password</h5>
+              <h5 className="mb-0">Reset Password</h5>
               <button
                 type="button"
                 className="btn btn-sm btn-light"
@@ -229,7 +248,7 @@ export default function SignInPage() {
             {forgotStep === "otp" && (
               <form onSubmit={handleVerifyOtp}>
                 <div className="mb-3">
-                  <label className="form-label">OTP</label>
+                  <label className="form-label">Enter OTP</label>
                   <input
                     type="text"
                     className="form-control"
@@ -237,7 +256,7 @@ export default function SignInPage() {
                     onChange={(e) =>
                       setForgotForm((p) => ({ ...p, otp: e.target.value }))
                     }
-                    placeholder="Enter OTP"
+                    placeholder="6-digit OTP"
                     required
                   />
                 </div>
@@ -308,69 +327,85 @@ export default function SignInPage() {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .signin-container {
           display: flex;
           justify-content: center;
           align-items: center;
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          animation: fadeIn 0.8s ease-out;
+          background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+          animation: fadeIn 0.6s ease-out;
+        }
+        .signin-logo {
+          text-align: center;
+          margin-bottom: 0.5rem;
+        }
+        .logo-icon {
+          font-size: 2.5rem;
+          filter: drop-shadow(0 0 12px rgba(102,126,234,0.8));
+        }
+        .signin-title {
+          font-weight: 700;
+          color: #1a1a2e;
+          letter-spacing: -0.5px;
+        }
+        .signin-subtitle {
+          color: #888;
+          font-size: 0.9rem;
         }
         .signin-card {
-          width: 400px;
-          padding: 2rem;
-          border-radius: 1rem;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(2px);
-          box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
-          transition:
-            transform 0.3s ease,
-            box-shadow 0.3s ease;
+          width: 420px;
+          padding: 2.5rem;
+          border-radius: 1.25rem;
+          background: rgba(255,255,255,0.97);
+          box-shadow: 0 25px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+          animation: slideUp 0.5s ease-out;
         }
-        .signin-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 25px 40px rgba(0, 0, 0, 0.25);
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: scale(0.96);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
-        .btn-link {
-          color: #667eea;
-          font-size: 0.9rem;
-          transition: color 0.2s;
+        .form-control {
+          border-radius: 0.6rem;
+          border: 1.5px solid #e2e8f0;
+          padding: 0.65rem 0.9rem;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .btn-link:hover {
-          color: #5a67d8;
-          text-decoration: underline !important;
-        }
-        .btn-link:focus {
-          box-shadow: none;
+        .form-control:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+          outline: none;
         }
         .btn-primary {
           background: linear-gradient(90deg, #667eea, #764ba2);
           border: none;
-          transition: opacity 0.2s;
+          border-radius: 0.6rem;
+          padding: 0.7rem;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          transition: opacity 0.2s, transform 0.1s;
         }
-        .btn-primary:hover {
-          opacity: 0.9;
-          background: linear-gradient(90deg, #667eea, #764ba2);
+        .btn-primary:hover:not(:disabled) {
+          opacity: 0.92;
+          transform: translateY(-1px);
         }
-        .form-select:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        .btn-primary:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
         }
+        .btn-link {
+          color: #667eea;
+          font-size: 0.875rem;
+        }
+        .btn-link:hover { color: #5a67d8; }
         .forgot-modal-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.45);
+          background: rgba(0,0,0,0.55);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -380,20 +415,14 @@ export default function SignInPage() {
         .forgot-modal-card {
           width: 100%;
           max-width: 420px;
-          padding: 1.5rem;
+          padding: 1.75rem;
           border-radius: 1rem;
-          background: rgba(255, 255, 255, 0.98);
-          box-shadow: 0 20px 35px rgba(0, 0, 0, 0.22);
-          animation: fadeIn 0.2s ease-out;
+          background: #fff;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+          animation: slideUp 0.2s ease-out;
         }
         @media (max-width: 480px) {
-          .signin-card {
-            width: 90%;
-            padding: 1.5rem;
-          }
-          .forgot-modal-card {
-            max-width: 100%;
-          }
+          .signin-card { width: 90%; padding: 1.75rem; }
         }
       `}</style>
     </div>

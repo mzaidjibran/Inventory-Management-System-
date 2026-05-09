@@ -1,5 +1,5 @@
 import { useState } from "react";
-import createEmployee from "../../api/EmployeeApi.js";
+import createEmployee from "../../Api/EmployeeApi.js";
 import toast from "react-hot-toast";
 
 const API_BASE = "http://localhost:3000";
@@ -80,7 +80,7 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
       }
 
       if (editData) {
-        const { updateEmployee } = await import("../../api/EmployeeApi.js");
+        const { updateEmployee } = await import("../../Api/EmployeeApi.js");
         await updateEmployee(editData._id, payload);
         toast.success("Employee updated successfully");
       } else {
