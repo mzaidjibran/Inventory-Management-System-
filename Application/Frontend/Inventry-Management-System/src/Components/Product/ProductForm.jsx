@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import createProduct from "../../Api/ProductApi.js";
+import createProduct from "../../api/ProductApi.js";
 import toast from "react-hot-toast";
 
 const ProductForm = ({ onSaved, editData, onClearEdit }) => {
@@ -49,12 +49,12 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
       }
 
       if (editData) {
-        const { updateProduct } = await import("../../Api/ProductApi.js");
+        const { updateProduct } = await import("../../api/ProductApi.js");
         await updateProduct(editData._id, formData);
-        toast.success("Product updated successfully");
+        notify.success("Product updated successfully");
       } else {
         await createProduct(formData);
-        toast.success("Product added successfully");
+        notify.success("Product added successfully");
       }
       setValue(empty);
       setImageFile(null);
@@ -64,7 +64,7 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
       const bsModal = window.bootstrap?.Modal?.getInstance(modal);
       bsModal?.hide();
     } catch (err) {
-      toast.error("Error: " + err.message);
+      notify.error("Error: " + err.message);
     }
   }
 

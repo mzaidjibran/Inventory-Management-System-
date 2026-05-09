@@ -1,5 +1,5 @@
 import { useState } from "react";
-import createEmployee from "../../Api/EmployeeApi.js";
+import createEmployee from "../../api/EmployeeApi.js";
 import toast from "react-hot-toast";
 
 const API_BASE = "http://localhost:3000";
@@ -80,12 +80,12 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
       }
 
       if (editData) {
-        const { updateEmployee } = await import("../../Api/EmployeeApi.js");
+        const { updateEmployee } = await import("../../api/EmployeeApi.js");
         await updateEmployee(editData._id, payload);
-        toast.success("Employee updated successfully");
+        notify.success("Employee updated successfully");
       } else {
         await createEmployee(payload);
-        toast.success("Employee added successfully");
+        notify.success("Employee added successfully");
       }
       updateValue({ ...EMPTY_EMPLOYEE_FORM });
       setSelectedImage(null);
@@ -96,7 +96,7 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
       const bsModal = window.bootstrap?.Modal?.getInstance(modal);
       bsModal?.hide();
     } catch (err) {
-      toast.error("Error: " + err.message);
+      notify.error("Error: " + err.message);
     }
   }
 

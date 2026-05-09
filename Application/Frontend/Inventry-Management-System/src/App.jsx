@@ -11,7 +11,8 @@ import Supplier from "./Pages/supplier.jsx";
 import Client from "./Pages/client.jsx";
 import Billing from "./pages/Billing.jsx";
 
-export const normalizeRole = (r) => {
+// Login ke baad role ke hisaab se redirect
+const normalizeRole = (r) => {
   if (!r) return null;
   const lower = String(r).toLowerCase();
   if (lower === "employee" || lower === "user") return "user";
@@ -19,25 +20,37 @@ export const normalizeRole = (r) => {
     return "admin";
   return lower;
 };
+const defaultRoute = () => {
+  if (!isLoggedIn()) return "/signin";
+  let role = getUserRole();
+  // If role not present, try to decode it from accessToken and persist
+  if (!role) {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        const parts = token.split(".");
+        if (parts.length === 3) {
+          const decoded = JSON.parse(atob(parts[1]));
+          role = decoded?.role || decoded?.Role || null;
+          if (role) localStorage.setItem("userRole", role);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to decode token for role:", e);
+    }
+  }
 
+  const norm = normalizeRole(role);
+  return norm === "admin" ? "/product" : "/billing";
+};
 function App() {
-  // Har baar component render ho, fresh se role check ho
-  const getDefaultRoute = () => {
-    if (!isLoggedIn()) return "/signin";
-    const role = normalizeRole(getUserRole());
-    return role === "admin" ? "/product" : "/billing";
-  };
-
   return (
     <Routes>
-      {/* Public routes */}
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/" element={<Navigate to={defaultRoute()} replace />} />
 
-      {/* Root always goes to signin if not logged in, else role-based */}
-      <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
-
-      {/* Admin + User dono ke liye */}
+      {/* Employee + Admin dono ke liye */}
       <Route
         path="/dashboard"
         element={
@@ -97,8 +110,7 @@ function App() {
         }
       />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
+      <Route path="*" element={<Navigate to={defaultRoute()} replace />} />
     </Routes>
   );
 }

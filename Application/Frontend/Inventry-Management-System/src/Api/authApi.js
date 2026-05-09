@@ -91,7 +91,6 @@ export const logOut = async () => {
     console.error("Logout API error:", e);
   }
   // Sab kuch clear karo
-  localStorage.clear();
 };
 
 // ─── Token Refresh ─────────────────────────────────────────────────────────
