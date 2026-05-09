@@ -8,8 +8,11 @@ import {
 } from "../controllers/clientcontroler.js";
 import upload from "../middleware/multerniddleware.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
+
 //client routers
+
 router.post("/", authMiddleware, upload.single("image"), createclient);
 router.get("/", getAllclients);
 router.get("/:id", getSingleClient);

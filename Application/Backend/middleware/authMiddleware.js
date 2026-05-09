@@ -8,17 +8,28 @@ export const authMiddleware = (req, res, next) => {
       : authHeader;
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "No token provided" });
+      return res.status(401).json({
+        success: false,
+        error: true,
+        message: "No token provided"
+      });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+
     req.userId = decoded.userId;
+
+    req.userRole = decoded.role; // setting role
+
     next();
+
   } catch (err) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Invalid or expired token" });
+    return res.status(401).json({
+      success: false,
+      error: true,
+      message: "Invalid or expired token"
+    });
   }
 };
+
+export const verifyToken = authMiddleware;

@@ -20,8 +20,11 @@ const createsuppliers = async (request, response) => {
     });
   }
 };
+
 export { createsuppliers };
+
 //get all suppliers
+
 export const getAllsuppliers = async (request, response) => {
   try {
     const suppliers = await Supplier.find();
@@ -40,7 +43,9 @@ export const getAllsuppliers = async (request, response) => {
     });
   }
 };
+
 //get supplier by id
+
 export const getSingleSupplier = async (request, response) => {
   try {
     const supplier = await Supplier.findById(request.params.id);
@@ -65,7 +70,9 @@ export const getSingleSupplier = async (request, response) => {
     });
   }
 };
+
 //update supplier
+
 export const updateSupplier = async (request, response) => {
   try {
     const updatedSupplier = await Supplier.findByIdAndUpdate(
@@ -102,7 +109,9 @@ export const updateSupplier = async (request, response) => {
     });
   }
 };
+
 //delete supplier
+
 export const deleteSupplier = async (request, response) => {
   try {
     const deletedSupplier = await Supplier.findByIdAndDelete(request.params.id);

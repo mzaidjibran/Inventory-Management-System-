@@ -795,13 +795,13 @@ export default function Dashboard() {
           <div className="container-fluid">
             <div className="row align-items-center">
               <div className="col-sm-6">
-                {new Date().getFullYear()} © Mango Technologies
+                {new Date().getFullYear()} © NexByte Solutions
               </div>
               <div className="col-sm-6">
                 <div className="text-sm-end d-none d-sm-block">
-                  Crafted with <i className="mdi mdi-heart text-danger"></i> by{" "}
+                  Designed & Developed by{" "}
                   <a href="#" className="text-muted">
-                    Mango Technologies
+                    NexByte Solutions
                   </a>
                 </div>
               </div>

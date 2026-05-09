@@ -4,7 +4,8 @@ import { signUp } from "../Api/authApi.js";
 import toast from "react-hot-toast";
 
 export default function SignUpPage() {
-  const [form, setForm] = useState({ Name: "", email: "", password: "" });
+  const [form, setForm] = useState({ Name: "", email: "", password: "", role: "employee" });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   function handleChange(e) {
@@ -13,12 +14,15 @@ export default function SignUpPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
     try {
       await signUp(form);
       toast.success("Account created! Please sign in.");
       navigate("/signin");
     } catch (err) {
       toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -28,12 +32,13 @@ export default function SignUpPage() {
         <h4 className="mb-3 text-center">Sign Up</h4>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label className="form-label">Name</label>
+            <label className="form-label">Full Name</label>
             <input
               name="Name"
               type="text"
               className="form-control"
-              placeholder="Enter name"
+              placeholder="Enter your full name"
+              value={form.Name}
               onChange={handleChange}
               required
             />
@@ -44,7 +49,8 @@ export default function SignUpPage() {
               name="email"
               type="email"
               className="form-control"
-              placeholder="Enter email"
+              placeholder="Enter your email"
+              value={form.email}
               onChange={handleChange}
               required
             />
@@ -55,13 +61,35 @@ export default function SignUpPage() {
               name="password"
               type="password"
               className="form-control"
-              placeholder="Enter password"
+              placeholder="Enter your password"
+              value={form.password}
               onChange={handleChange}
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100">
-            Sign Up
+
+          {/* Role - Employee Only */}
+          <div className="mb-3">
+            <label className="form-label">Role</label>
+            <input
+              type="text"
+              className="form-control"
+              value="Employee"
+              disabled
+              readOnly
+            />
+            <small className="text-muted d-block mt-1">
+              ✓ Employees have access to Billing & Dashboard
+            </small>
+          </div>
+
+          <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+            {loading ? (
+              <span>
+                <span className="spinner-border spinner-border-sm me-2" role="status" />
+                Creating Account...
+              </span>
+            ) : "Sign Up"}
           </button>
         </form>
         <p className="text-center mt-3">

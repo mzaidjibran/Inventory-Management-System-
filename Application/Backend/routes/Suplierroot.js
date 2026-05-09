@@ -8,8 +8,11 @@ import {
 } from "../controllers/supliercontroler.js";
 import upload from "../middleware/multerniddleware.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
+
 //supplier routers
+
 router.post("/", upload.single("image"), createsuppliers);
 router.get("/", getAllsuppliers);
 router.get("/:id", getSingleSupplier);

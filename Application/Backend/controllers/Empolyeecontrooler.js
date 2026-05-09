@@ -4,28 +4,33 @@ import path from "path";
 function normalizePayload(body, file) {
   const data = { ...body };
   if (data.Name) {
-  const parts = String(data.Name || "").trim().split(/\s+/);
-  data.firstName = parts[0] || "";
-  data.lastName = parts.slice(1).join(" ") || parts[0] || "";
-  delete data.Name;
-}
+    const parts = String(data.Name || "").trim().split(/\s+/);
+    data.firstName = parts[0] || "";
+    data.lastName = parts.slice(1).join(" ") || parts[0] || "";
+    delete data.Name;
+  }
   if (data.cnic && !data.CNIC) {
     data.CNIC = data.cnic;
     delete data.cnic;
   }
+
   if (data.dateofBirth && !data.dateOfBirth) {
     data.dateOfBirth = data.dateofBirth;
     delete data.dateofBirth;
   }
+
   if (data.dateOfJoining && !data.dateOfJoining) {
   }
+
   if (data.gender && typeof data.gender === "string") {
     const g = data.gender.toLowerCase();
     if (g === "male") data.gender = "Male";
     else if (g === "female") data.gender = "Female";
     else data.gender = "Other";
   }
+
   // normalize status
+
   if (data.status && typeof data.status === "string") {
     const s = data.status.toLowerCase();
     if (s === "active") data.status = "Active";
@@ -33,17 +38,22 @@ function normalizePayload(body, file) {
     else if (s === "terminated") data.status = "Terminated";
     else if (s === "leave" || s === "on leave") data.status = "On Leave";
   }
+
   if (file) data.profileImage = `/image/${file.filename}`;
   return data;
 }
 
 function transformEmployeeDoc(doc) {
   if (!doc) return doc;
+
   // if doc is a mongoose document, use _doc to avoid prototypes
+
   const raw = doc.toObject ? doc.toObject() : { ...doc };
+
   return {
     ...raw,
     // keep original model fields but also add keys expected by frontend
+
     Name: `${raw.firstName || ""} ${raw.lastName || ""}`.trim(),
     cnic: raw.CNIC || raw.cnic || "",
     dateofBirth: raw.dateOfBirth || raw.dateofBirth || null,
@@ -62,13 +72,14 @@ export const createEmployee = async (request, response) => {
     const employee = await Employee.create(employeeData);
     response.status(201).json(transformEmployeeDoc(employee));
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    response.status(400).json({
+      message: error.message
+    });
   }
 };
 
-
-
 // Get all employees
+
 export const getAllEmployees = async (request, response) => {
   try {
     const employees = await Employee.find();
@@ -79,6 +90,7 @@ export const getAllEmployees = async (request, response) => {
       message: "Employees fetched successfully",
       data: mapped,
     });
+
   } catch (error) {
     response.status(500).json({
       success: false,
@@ -90,6 +102,7 @@ export const getAllEmployees = async (request, response) => {
 };
 
 // Get employee by id
+
 export const getSingleEmployee = async (request, response) => {
   try {
     const employee = await Employee.findById(request.params.id);
@@ -116,6 +129,7 @@ export const getSingleEmployee = async (request, response) => {
 };
 
 // Update employee
+
 export const updateEmployee = async (request, response) => {
   try {
     const updateData = normalizePayload(request.body, request.file);
@@ -127,9 +141,11 @@ export const updateEmployee = async (request, response) => {
       },
     );
     if (!updatedEmployee) {
-      return response
-        .status(404)
-        .json({ success: false, error: true, message: "Employee not found" });
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Employee not found"
+      });
     }
     response.status(200).json({
       success: true,
@@ -147,13 +163,16 @@ export const updateEmployee = async (request, response) => {
 };
 
 // Delete employee
+
 export const deleteEmployee = async (request, response) => {
   try {
     const deletedEmployee = await Employee.findByIdAndDelete(request.params.id);
     if (!deletedEmployee) {
-      return response
-        .status(404)
-        .json({ success: false, error: true, message: "Employee not found" });
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Employee not found"
+      });
     }
     response.status(200).json({
       success: true,

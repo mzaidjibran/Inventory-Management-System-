@@ -3,6 +3,7 @@ import Product from "../models/Productmodal.js";
 import Billing from "../models/Bilingmodal.js";
 
 // Helper: Auto-generate sequential session ID
+
 const generateSessionId = async () => {
   try {
     const lastSession = await ScanSession.findOne().sort({ createdAt: -1 });
@@ -17,10 +18,11 @@ const generateSessionId = async () => {
 };
 
 // 1. CREATE NEW SCAN SESSION (Auto-generates sessionId)
+
 export const createScanSession = async (request, response) => {
   try {
     const sessionId = await generateSessionId();
-    
+
     const scanSession = await ScanSession.create({
       sessionId,
       items: [],
@@ -45,6 +47,7 @@ export const createScanSession = async (request, response) => {
 };
 
 // 2. ADD PRODUCT TO SCAN BY BARCODE
+
 export const addProductToScan = async (request, response) => {
   try {
     const { sessionId, barcode, quantity = 1 } = request.body;
@@ -58,6 +61,7 @@ export const addProductToScan = async (request, response) => {
     }
 
     // Find product by barcode
+
     const product = await Product.findOne({ barcode });
     if (!product) {
       return response.status(404).json({
@@ -68,6 +72,7 @@ export const addProductToScan = async (request, response) => {
     }
 
     // Check stock
+
     const numQuantity = Number(quantity);
     if (product.stockQuantity < numQuantity) {
       return response.status(400).json({
@@ -78,6 +83,7 @@ export const addProductToScan = async (request, response) => {
     }
 
     // Find scan session
+
     let scanSession = await ScanSession.findOne({ sessionId });
     if (!scanSession) {
       return response.status(404).json({
@@ -96,6 +102,7 @@ export const addProductToScan = async (request, response) => {
     }
 
     // Check if product already in cart
+
     const existingItemIndex = scanSession.items.findIndex(
       (item) => item.product.toString() === product._id.toString()
     );
@@ -118,6 +125,7 @@ export const addProductToScan = async (request, response) => {
     }
 
     // Update total
+
     scanSession.totalAmount = scanSession.items.reduce((sum, item) => sum + item.total, 0);
     await scanSession.save();
 
@@ -145,6 +153,7 @@ export const addProductToScan = async (request, response) => {
 };
 
 // 3. REMOVE PRODUCT FROM SCAN
+
 export const removeProductFromScan = async (request, response) => {
   try {
     const { sessionId, barcode } = request.body;
@@ -211,6 +220,7 @@ export const removeProductFromScan = async (request, response) => {
 };
 
 // 4. GET SCAN SESSION DETAILS
+
 export const getScanSession = async (request, response) => {
   try {
     const { sessionId } = request.params;
@@ -240,11 +250,13 @@ export const getScanSession = async (request, response) => {
 };
 
 // 5. FINALIZE BILL (Convert scan to billing)
+
 export const finalizeBill = async (request, response) => {
   try {
     const userId = request.userId;
-    
+
     // sessionId URL params se bhi lo, body se bhi
+
     const sessionId = request.params.sessionId || request.body.sessionId;
     const paymentMethod = request.body.paymentMethod;
     const discount = request.body.discount || 0;
@@ -267,6 +279,7 @@ export const finalizeBill = async (request, response) => {
     }
 
     // Find scan session
+
     const scanSession = await ScanSession.findOne({ sessionId }).populate("items.product");
     if (!scanSession) {
       return response.status(404).json({
@@ -285,6 +298,7 @@ export const finalizeBill = async (request, response) => {
     }
 
     // Verify stock and reduce
+
     for (const item of scanSession.items) {
       const product = await Product.findById(item.product._id);
       if (!product) {
@@ -304,17 +318,20 @@ export const finalizeBill = async (request, response) => {
       }
 
       // Reduce stock
+
       product.stockQuantity -= item.quantity;
       await product.save();
     }
 
     // Calculate totals
+
     const subtotal = scanSession.totalAmount;
     const numDiscount = Number(discount);
     const numTax = Number(tax);
     const totalAmount = subtotal + numTax - numDiscount;
 
     // Create billing
+
     const billing = await Billing.create({
       items: scanSession.items.map((item) => ({
         product: item.product._id,
@@ -332,6 +349,7 @@ export const finalizeBill = async (request, response) => {
     });
 
     // Mark scan as completed
+
     scanSession.status = "completed";
     await scanSession.save();
 
@@ -354,6 +372,7 @@ export const finalizeBill = async (request, response) => {
 };
 
 // 6. SEARCH PRODUCT BY BARCODE
+
 export const searchProductByBarcode = async (request, response) => {
   try {
     const { barcode } = request.body;
@@ -391,6 +410,7 @@ export const searchProductByBarcode = async (request, response) => {
 };
 
 // 7. GET ALL SCANS
+
 export const getAllScans = async (request, response) => {
   try {
     const scans = await ScanSession.find().populate("items.product");
@@ -410,6 +430,7 @@ export const getAllScans = async (request, response) => {
 };
 
 // 8. DELETE SCAN SESSION
+
 export const deleteScanSession = async (request, response) => {
   try {
     const { sessionId } = request.params;

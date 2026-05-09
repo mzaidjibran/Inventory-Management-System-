@@ -22,7 +22,7 @@ const createbilling = async (request, response) => {
       });
     }
 
-    // Check and reduce product stock
+    // --- Check and reduce product stock ---
 
     const updateProductsQueue = [];
 
@@ -82,7 +82,8 @@ const createbilling = async (request, response) => {
       status: request.body.status || "completed",
     });
 
-    // Update product stock after successful billing
+    // --- Update product stock after successful billing ---
+
     for (const { product, quantity } of updateProductsQueue) {
       product.stockQuantity -= quantity;
       await product.save();
@@ -105,7 +106,7 @@ const createbilling = async (request, response) => {
 
 export { createbilling };
 
-//get all billings
+// --- get all billings ---
 
 export const getAllbillings = async (request, response) => {
   try {
@@ -127,7 +128,7 @@ export const getAllbillings = async (request, response) => {
   }
 };
 
-//get bill by id
+// --- get bill by id ---
 
 export const getSingleBilling = async (request, response) => {
   try {
@@ -154,7 +155,7 @@ export const getSingleBilling = async (request, response) => {
   }
 };
 
-//update bill
+// --- update bill ---
 
 export const updateBilling = async (request, response) => {
   try {
@@ -185,7 +186,7 @@ export const updateBilling = async (request, response) => {
   }
 };
 
-//delete bill
+// --- delete bill ---
 
 export const deleteBilling = async (request, response) => {
   try {

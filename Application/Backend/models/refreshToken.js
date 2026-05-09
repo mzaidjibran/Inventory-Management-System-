@@ -7,10 +7,14 @@ const refreshTokenSchema = new mongoose.Schema(
       ref: "UserModel",
       required: true,
     },
+
     token: { type: String, required: true },
     expiresIn: { type: Date },
   },
-  { timestamps: true },
+
+  {
+    timestamps: true
+  },
 );
 
 const RefreshToken =

@@ -8,8 +8,11 @@ import {
   searchProductByBarcode,
 } from "../controllers/Productcotroler.js";
 import upload from "../middleware/multerniddleware.js";
+
 const router = express.Router();
+
 //product routers
+
 router.post("/", upload.single("image"), createProduct);
 router.get("/", getAllProducts);
 router.get("/search/barcode", searchProductByBarcode);

@@ -18,13 +18,19 @@ export const createProduct = async (request, response) => {
         ? `image/${request.file.filename}`
         : request.body.image || "",
     };
+
     const product = await Product.create(productData);
+
     response.status(201).json(product);
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    response.status(400).json({
+      message: error.message
+    });
   }
 };
+
 //get all product
+
 export const getAllProducts = async (request, response) => {
   try {
     const products = await Product.find();
@@ -43,7 +49,9 @@ export const getAllProducts = async (request, response) => {
     });
   }
 };
+
 //get product by id
+
 export const getSingleProduct = async (request, response) => {
   try {
     const product = await Product.findById(request.params.id);
@@ -68,7 +76,9 @@ export const getSingleProduct = async (request, response) => {
     });
   }
 };
+
 //update product
+
 export const updateProduct = async (request, response) => {
   try {
     const updateData = {
@@ -76,7 +86,9 @@ export const updateProduct = async (request, response) => {
     };
 
     if (Object.prototype.hasOwnProperty.call(request.body, "barcode")) {
+
       const barcode = (request.body.barcode || "").trim();
+
       if (!barcode) {
         return response.status(400).json({
           success: false,
@@ -90,11 +102,13 @@ export const updateProduct = async (request, response) => {
     if (request.file) {
       updateData.image = `image/${request.file.filename}`;
     }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       request.params.id,
       updateData,
       { new: true, runValidators: true },
     );
+
     if (!updatedProduct) {
       return response.status(404).json({
         success: false,
@@ -102,6 +116,7 @@ export const updateProduct = async (request, response) => {
         message: "Product not found",
       });
     }
+
     response.status(200).json({
       success: true,
       error: false,
@@ -116,10 +131,13 @@ export const updateProduct = async (request, response) => {
     });
   }
 };
+
 //delete productexport
+
 export const deleteProduct = async (request, response) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(request.params.id);
+
     if (!deletedProduct) {
       return response.status(404).json({
         success: false,
@@ -143,6 +161,7 @@ export const deleteProduct = async (request, response) => {
 };
 
 // Search product by barcode
+
 export const searchProductByBarcode = async (request, response) => {
   try {
     const { barcode } = request.query || request.body;

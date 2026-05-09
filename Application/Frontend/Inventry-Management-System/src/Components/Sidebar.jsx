@@ -1,48 +1,40 @@
 import { Link } from "react-router-dom";
-import { getUserRole, isLoggedIn } from "../Api/authApi.js";
+import { getUserRole, isLoggedIn, normalizeRole } from "../Api/authApi.js";
 
 const Sidebar = ({ isOpen }) => {
-  const userRole = getUserRole();
-  const normalizeRole = (r) => {
-    if (!r) return null;
-    const lower = String(r).toLowerCase();
-    if (lower === "employee") return "user";
-    if (lower === "administrator") return "admin";
-    if (lower === "manager") return "admin";
-    return lower;
-  };
-  const normalizedRole = normalizeRole(userRole);
-  const isAdmin = normalizedRole === "admin";
+  const role = normalizeRole(getUserRole());
+  const isAdmin = role === "admin";
+  const isEmployee = role === "employee";
   const loggedIn = isLoggedIn();
 
   return (
-    <>
-      <div
-        className={`sidebar-left ${isOpen ? "show" : ""}`}
-        style={{ transition: "all 0.3s ease" }}
-      >
-        <div data-simplebar className="h-100">
-          <div id="sidebar-menu">
-            <ul className="left-menu list-unstyled" id="side-menu">
-              {loggedIn && (
+    <div
+      className={`sidebar-left ${isOpen ? "show" : ""}`}
+      style={{ transition: "all 0.3s ease" }}
+    >
+      <div data-simplebar className="h-100">
+        <div id="sidebar-menu">
+          <ul className="left-menu list-unstyled" id="side-menu">
+
+            {/* Dashboard — sab ke liye */}
+            {loggedIn && (
+              <li>
+                <Link to="/dashboard">
+                  <i className="fas fa-home"></i>
+                  <span>Dashboard</span>
+                </Link>
+              </li>
+            )}
+
+            {/* Management — sirf Admin */}
+            {isAdmin && (
+              <>
                 <li>
-                  <Link to="/dashboard">
-                    <i className="fas fa-home"></i>
-                    <span>Dashboard</span>
-                  </Link>
-                </li>
-              )}
-              
-              {isAdmin && (
-                <li>
-                  <Link to="/product">
+                  <a href="#">
                     <i className="fas fa-desktop"></i>
                     <span>Management</span>
-                  </Link>
+                  </a>
                 </li>
-              )}
-
-              {isAdmin && (
                 <li>
                   <ul className="sub-menu" aria-expanded="false">
                     <li>
@@ -65,26 +57,31 @@ const Sidebar = ({ isOpen }) => {
                     </li>
                     <li>
                       <Link to="/client">
-                        <i className="mdi mdi-checkbox-blank-circle align-middle"></i>{" "}
+                        <i className="mdi mdi-checkbox-blank-circle align-middle"></i>
                         Customer
                       </Link>
                     </li>
                   </ul>
                 </li>
-              )}
+              </>
+            )}
+
+            {/* Billing — Admin + Employee */}
+            {(isAdmin || isEmployee) && (
               <li>
                 <Link to="/billing">
-                  <i className="mdi mdi-checkbox-blank-circle align-middle"></i>{" "}
-                  Billing
+                  <i className="mdi mdi-point-of-sale align-middle"></i>
+                  <span>Billing</span>
                 </Link>
               </li>
-            </ul>
-          </div>
-          {/* <!-- Sidebar --> */}
+            )}
+
+            {/* User ko sirf Dashboard — Billing nahi dikhegi */}
+
+          </ul>
         </div>
       </div>
-      {/* <!-- Left Sidebar End --> */}
-    </>
+    </div>
   );
 };
 

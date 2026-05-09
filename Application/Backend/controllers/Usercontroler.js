@@ -1,20 +1,23 @@
 import UserModel from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 
-// ─── Create User (Admin karta hai — DB mein save, login capable) ─────────────
+//  Create User (Admin karta hai — DB mein save, login capable) 
+
 export const createUser = async (request, response) => {
   try {
     const { Name, email, password, role, createdBy } = request.body;
 
     // Required fields check
+
     if (!Name || !email || !password) {
       return response.status(400).json({
         success: false,
-        message: "Name, email aur password zaroori hain",
+        message: "Name, email and password are required",
       });
     }
 
     // Email already exist check
+
     const existing = await UserModel.findOne({
       email: email.toLowerCase().trim(),
     });
@@ -26,6 +29,7 @@ export const createUser = async (request, response) => {
     }
 
     // Password hash karo
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await UserModel.create({
@@ -37,6 +41,7 @@ export const createUser = async (request, response) => {
     });
 
     // Password response mein mat bhejo
+
     const { password: _pw, ...safeUser } = user.toObject();
 
     return response.status(201).json({
@@ -52,7 +57,8 @@ export const createUser = async (request, response) => {
   }
 };
 
-// ─── Get All Users ────────────────────────────────────────────────────────────
+//  Get All Users 
+
 export const getAllusers = async (request, response) => {
   try {
     // Password field exclude karo
@@ -71,7 +77,8 @@ export const getAllusers = async (request, response) => {
   }
 };
 
-// ─── Get Single User ──────────────────────────────────────────────────────────
+//  Get Single User 
+
 export const getSingleuser = async (request, response) => {
   try {
     const singleuser = await UserModel.findById(request.params.id).select(
@@ -98,7 +105,8 @@ export const getSingleuser = async (request, response) => {
   }
 };
 
-// ─── Update User ──────────────────────────────────────────────────────────────
+//  Update User 
+
 export const updatedUser = async (request, response) => {
   try {
     const updateData = { ...request.body };
@@ -135,7 +143,8 @@ export const updatedUser = async (request, response) => {
   }
 };
 
-// ─── Delete User ──────────────────────────────────────────────────────────────
+//  Delete User 
+
 export const deletedUser = async (request, response) => {
   try {
     const deleted = await UserModel.findByIdAndDelete(request.params.id);

@@ -1,4 +1,5 @@
 import Client from "../models/Clientmodal.js";
+
 const createclient = async (request, response) => {
   try {
     const client = await Client.create(request.body);
@@ -7,9 +8,11 @@ const createclient = async (request, response) => {
     response.status(400).json({ message: error.message });
   }
 };
+
 export { createclient };
 
 //get all clients
+
 export const getAllclients = async (request, response) => {
   try {
     const clients = await Client.find();
@@ -28,7 +31,9 @@ export const getAllclients = async (request, response) => {
     });
   }
 };
+
 //get client by id
+
 export const getSingleClient = async (request, response) => {
   try {
     const client = await Client.findById(request.params.id);
@@ -53,7 +58,9 @@ export const getSingleClient = async (request, response) => {
     });
   }
 };
+
 //update client
+
 export const updateClient = async (request, response) => {
   try {
     const updatedClient = await Client.findByIdAndUpdate(
@@ -82,7 +89,9 @@ export const updateClient = async (request, response) => {
     });
   }
 };
+
 //delete client
+
 export const deleteClient = async (request, response) => {
   try {
     const deletedClient = await Client.findByIdAndDelete(request.params.id);

@@ -5,16 +5,18 @@ const otpSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
   otp: {
     type: String,
     required: true,
   },
+
   expiresAt: {
     type: Date,
     required: true,
-
     index: { expires: 0 },
   },
+
 });
 
 const OtpModel = mongoose.models.Otp || mongoose.model("Otp", otpSchema);

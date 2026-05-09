@@ -4,33 +4,51 @@ const userSchema = new mongoose.Schema(
   {
     Name: {
       type: String,
-      required: true,
+      required: true
     },
 
     email: {
       type: String,
       required: true,
-      unique: true,
+      unique: true
     },
 
     password: {
       type: String,
       required: true,
+      unique: true
     },
+
+    resetOTP: {
+      type: String,
+      default: null
+    },
+
+    resetOTPExpiry: {
+      type: Date,
+      default: null
+
+    },
+
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ["admin", "employee"],
+      default: "employee",
     },
+
     image: {
-      type: String,
+      type: String
     },
+
     createdBy: {
       type: String,
-      default: "Admin",
+      default: "admin"
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true
+
+  },
 );
 
 export default mongoose.model("User", userSchema);

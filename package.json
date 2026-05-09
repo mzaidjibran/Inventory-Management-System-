@@ -1,6 +1,9 @@
 {
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "mongoose": "^9.6.2",
     "nodemailer": "^8.0.7",
     "react-apexcharts": "^2.1.0",
     "react-notify": "^3.0.0"
