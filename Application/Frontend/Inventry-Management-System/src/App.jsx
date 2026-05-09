@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { isLoggedIn, getUserRole } from "./Api/authApi.js";
-
 import Product from "./pages/product.jsx";
 import Dashboard from "./Pages/Dashboard.jsx";
 import User from "./pages/user.jsx";
@@ -16,7 +15,7 @@ import Billing from "./pages/Billing.jsx";
 const normalizeRole = (r) => {
   if (!r) return null;
   const lower = String(r).toLowerCase();
-  if (lower === "employee") return "user";
+  if (lower === "employee") return "employee";
   if (lower === "administrator") return "admin";
   if (lower === "manager") return "admin";
   return lower;
@@ -24,9 +23,8 @@ const normalizeRole = (r) => {
 
 const defaultRoute = () => {
   if (!isLoggedIn()) return "/signin";
-  const role = normalizeRole(getUserRole());
-  return role === "admin" ? "/product" : "/billing";
-};
+  return "/dashboard";
+}
 
 function App() {
   return (

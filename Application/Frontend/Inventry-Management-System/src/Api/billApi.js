@@ -65,7 +65,7 @@ export const finalizeBill = async (sessionId, payload) => {
 };
 
 export const getAllBillings = async () => {
-  const response = await fetch(`${API_BASE}/api/biling`, {
+  const response = await fetch(`${API_BASE}/api/billing`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });

@@ -44,13 +44,7 @@ const SupplierForm = ({ onSaved, editData, onClearEdit }) => {
         name: value.name.trim(),
         email: value.email.trim(),
         contact: value.contact.trim(),
-        address: {
-          street: value.address.trim() || "",
-          city: "",
-          state: "",
-          country: "",
-          zipCode: "",
-        },
+        address: value.address.trim() || "",
       };
 
       if (editData) {

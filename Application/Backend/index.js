@@ -13,6 +13,8 @@ import BillingRoutes from "./routes/bilingroute.js";
 import ScanRoutes from "./routes/Scanerroot.js";
 import SuplierRoutes from "./routes/Suplierroot.js";
 import ClientRoutes from "./routes/clientroot.js";
+import DashboardRoutes from "./routes/Dashboardroute.js";
+
 const port = process.env.PORT || 5000;
 
 // Middleware
@@ -49,6 +51,7 @@ app.use("/api/scan", ScanRoutes);
 app.use("/api/billing", BillingRoutes);
 app.use("/api/suplier", SuplierRoutes);
 app.use("/api/client", ClientRoutes);
+app.use("/api/dashboard", DashboardRoutes);
 // test route
 app.get("/", (req, res) => {
   res.send("API is running...");

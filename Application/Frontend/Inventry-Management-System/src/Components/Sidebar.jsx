@@ -24,6 +24,15 @@ const Sidebar = ({ isOpen }) => {
         <div data-simplebar className="h-100">
           <div id="sidebar-menu">
             <ul className="left-menu list-unstyled" id="side-menu">
+              {loggedIn && (
+                <li>
+                  <Link to="/dashboard">
+                    <i className="fas fa-home"></i>
+                    <span>Dashboard</span>
+                  </Link>
+                </li>
+              )}
+              
               {isAdmin && (
                 <li>
                   <Link to="/product">
@@ -63,16 +72,6 @@ const Sidebar = ({ isOpen }) => {
                   </ul>
                 </li>
               )}
-
-              {loggedIn && (
-                <li>
-                  <Link to="/dashboard">
-                    <i className="fas fa-home"></i>
-                    <span>Dashboard</span>
-                  </Link>
-                </li>
-              )}
-
               <li>
                 <Link to="/billing">
                   <i className="mdi mdi-checkbox-blank-circle align-middle"></i>{" "}

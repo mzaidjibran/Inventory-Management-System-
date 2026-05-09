@@ -28,7 +28,7 @@ export default function SignInPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.role) {
-      toast.error("Pehle role select karo");
+      toast.error("Select Role ");
       return;
     }
     try {
@@ -39,7 +39,6 @@ export default function SignInPage() {
         const lower = String(r).toLowerCase();
         if (lower === "employee") return "user";
         if (lower === "administrator") return "admin";
-        if (lower === "manager") return "admin";
         return lower;
       };
 
@@ -69,10 +68,10 @@ export default function SignInPage() {
 
   async function handleSendOtp(event) {
     event.preventDefault();
-    if (!forgotForm.email.trim()) return toast.error("Email zaroori hai");
+    if (!forgotForm.email.trim()) return toast.error("Please enter Email");
     try {
       const result = await forgotPassword(forgotForm.email.trim());
-      toast.success(result.message || "OTP bhej diya gaya");
+      toast.success(result.message || "OTP Sent!");
       setForgotStep("otp");
     } catch (err) {
       toast.error(err.message);
@@ -81,14 +80,14 @@ export default function SignInPage() {
 
   async function handleVerifyOtp(event) {
     event.preventDefault();
-    if (!forgotForm.otp.trim()) return toast.error("OTP zaroori hai");
+    if (!forgotForm.otp.trim()) return toast.error("Please Enter OTP");
     try {
       const result = await verifyOtp(
         forgotForm.email.trim(),
         forgotForm.otp.trim(),
       );
       setResetToken(result.resetToken);
-      toast.success(result.message || "OTP verify ho gaya");
+      toast.success(result.message || "OTP verified successfully!");
       setForgotStep("reset");
     } catch (err) {
       toast.error(err.message);
@@ -98,15 +97,15 @@ export default function SignInPage() {
   async function handleResetPassword(event) {
     event.preventDefault();
     if (!forgotForm.newPassword.trim())
-      return toast.error("New password zaroori hai");
+      return toast.error("Enter new password");
     if (forgotForm.newPassword !== forgotForm.confirmPassword)
-      return toast.error("Passwords match nahi kar rahe");
+      return toast.error("Passwords do not match!");
     try {
       const result = await resetPassword(
         resetToken,
         forgotForm.newPassword.trim(),
       );
-      toast.success(result.message || "Password reset ho gaya");
+      toast.success(result.message || "Password reset successfully!");
       closeForgotPassword();
     } catch (err) {
       toast.error(err.message);
@@ -130,10 +129,11 @@ export default function SignInPage() {
               required
             >
               <option value="" disabled>
-                -- Role select karo --
+                -- Select your role --
               </option>
+              <option value="admin">🛡️ Admin</option>
               <option value="user">👷 Employee</option>
-              <option value="admin">🛡️ Administrator</option>
+              
             </select>
           </div>
 
@@ -177,7 +177,7 @@ export default function SignInPage() {
         </form>
 
         <p className="text-center mt-3">
-          Account nahi hai? <a href="/signup">Sign Up karo</a>
+          Don't have account? <a href="/signup">Sign Up here</a>
         </p>
       </div>
 
