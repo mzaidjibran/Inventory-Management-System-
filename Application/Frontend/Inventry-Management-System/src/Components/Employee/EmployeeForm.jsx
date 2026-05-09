@@ -82,10 +82,10 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
       if (editData) {
         const { updateEmployee } = await import("../../api/EmployeeApi.js");
         await updateEmployee(editData._id, payload);
-        notify.success("Employee updated successfully");
+        toast.success("Employee updated successfully");
       } else {
         await createEmployee(payload);
-        notify.success("Employee added successfully");
+        toast.success("Employee added successfully");
       }
       updateValue({ ...EMPTY_EMPLOYEE_FORM });
       setSelectedImage(null);
@@ -96,7 +96,7 @@ const EmployeeForm = ({ onSaved, editData, onClearEdit }) => {
       const bsModal = window.bootstrap?.Modal?.getInstance(modal);
       bsModal?.hide();
     } catch (err) {
-      notify.error("Error: " + err.message);
+      toast.error("Error: " + err.message);
     }
   }
 

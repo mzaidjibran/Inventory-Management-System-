@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 
 export default function SignInPage() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("email");
   const [forgotForm, setForgotForm] = useState({

@@ -51,10 +51,10 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
       if (editData) {
         const { updateProduct } = await import("../../api/ProductApi.js");
         await updateProduct(editData._id, formData);
-        notify.success("Product updated successfully");
+        toast.success("Product updated successfully");
       } else {
         await createProduct(formData);
-        notify.success("Product added successfully");
+        toast.success("Product added successfully");
       }
       setValue(empty);
       setImageFile(null);
@@ -64,7 +64,7 @@ const ProductForm = ({ onSaved, editData, onClearEdit }) => {
       const bsModal = window.bootstrap?.Modal?.getInstance(modal);
       bsModal?.hide();
     } catch (err) {
-      notify.error("Error: " + err.message);
+      toast.error("Error: " + err.message);
     }
   }
 
