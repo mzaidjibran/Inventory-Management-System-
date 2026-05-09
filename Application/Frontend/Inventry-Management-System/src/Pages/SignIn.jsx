@@ -11,7 +11,6 @@ import toast from "react-hot-toast";
 
 export default function SignInPage() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("email");
   const [forgotForm, setForgotForm] = useState({
@@ -41,7 +40,7 @@ export default function SignInPage() {
   }
 
   function openForgotPassword() {
-    setForgotForm((prev) => ({ ...prev, email: form.email || "" }));
+    setForgotForm((prev) => ({ ...prev, email: form.email || prev.email }));
     setForgotStep("email");
     setResetToken("");
     setForgotOpen(true);
@@ -56,21 +55,21 @@ export default function SignInPage() {
 
   async function handleSendOtp(event) {
     event.preventDefault();
-    if (!forgotForm.email.trim()) return toast.error("Please enter your email");
+    if (!forgotForm.email.trim()) return toast.error("Please enter Email");
     try {
       const result = await forgotPassword(forgotForm.email.trim());
-      toast.success(result.message || "OTP sent!");
+      toast.success(result.message || "OTP Sent!");
       setForgotStep("otp");
     } catch (err) { toast.error(err.message); }
   }
 
   async function handleVerifyOtp(event) {
     event.preventDefault();
-    if (!forgotForm.otp.trim()) return toast.error("Please enter the OTP");
+    if (!forgotForm.otp.trim()) return toast.error("Please Enter OTP");
     try {
       const result = await verifyOtp(forgotForm.email.trim(), forgotForm.otp.trim());
       setResetToken(result.resetToken);
-      toast.success(result.message || "OTP verified!");
+      toast.success(result.message || "OTP verified successfully!");
       setForgotStep("reset");
     } catch (err) { toast.error(err.message); }
   }
@@ -98,7 +97,7 @@ export default function SignInPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email</label>
             <input
               name="email" type="email" className="form-control"
               placeholder="Enter your email" value={form.email}
