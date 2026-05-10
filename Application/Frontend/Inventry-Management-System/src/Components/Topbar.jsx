@@ -22,7 +22,7 @@ const normalizeRole = (r) => {
   return "User";
 };
 
-const Topbar = ({ onSidebarToggle }) => {
+const Topbar = () => {
   const navigate = useNavigate();
   const imageInputRef = useRef(null);
   const [searchText, setSearchText] = useState("");
@@ -293,9 +293,9 @@ const Topbar = ({ onSidebarToggle }) => {
             </span>
             <span className="logo-lg">
               <img
-                src="assets/images/logo-dark.png"
-                alt="logo-dark"
-                height="18"
+                src="assets/images/Al-Nasri-shop-logo.png"
+                alt=""
+                height="60"
               />
             </span>
           </a>
@@ -316,15 +316,6 @@ const Topbar = ({ onSidebarToggle }) => {
               />
             </span>
           </a>
-
-          <button
-            type="button"
-            className="btn btn-sm top-icon sidebar-btn"
-            id="sidebar-btn"
-            onClick={onSidebarToggle}
-          >
-            <i className="mdi mdi-menu-open align-middle fs-19"></i>
-          </button>
         </div>
 
         <div className="d-flex justify-content-between menu-sm px-3 ms-auto">

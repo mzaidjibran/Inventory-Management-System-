@@ -2,17 +2,35 @@ import Product from "../models/Productmodal.js";
 
 export const createProduct = async (request, response) => {
   try {
+    const barcode = (request.body.barcode || "").trim();
+    if (!barcode) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Barcode is required",
+      });
+    }
+
     const productData = {
       ...request.body,
-      image: request.file ? request.file.path : request.body.image || "",
+      barcode,
+      image: request.file
+        ? `image/${request.file.filename}`
+        : request.body.image || "",
     };
+
     const product = await Product.create(productData);
+
     response.status(201).json(product);
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    response.status(400).json({
+      message: error.message
+    });
   }
 };
+
 //get all product
+
 export const getAllProducts = async (request, response) => {
   try {
     const products = await Product.find();
@@ -31,7 +49,9 @@ export const getAllProducts = async (request, response) => {
     });
   }
 };
+
 //get product by id
+
 export const getSingleProduct = async (request, response) => {
   try {
     const product = await Product.findById(request.params.id);
@@ -56,20 +76,39 @@ export const getSingleProduct = async (request, response) => {
     });
   }
 };
+
 //update product
+
 export const updateProduct = async (request, response) => {
   try {
     const updateData = {
       ...request.body,
     };
-    if (request.file) {
-      updateData.image = request.file.path;
+
+    if (Object.prototype.hasOwnProperty.call(request.body, "barcode")) {
+
+      const barcode = (request.body.barcode || "").trim();
+
+      if (!barcode) {
+        return response.status(400).json({
+          success: false,
+          error: true,
+          message: "Barcode cannot be empty",
+        });
+      }
+      updateData.barcode = barcode;
     }
+
+    if (request.file) {
+      updateData.image = `image/${request.file.filename}`;
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       request.params.id,
       updateData,
       { new: true, runValidators: true },
     );
+
     if (!updatedProduct) {
       return response.status(404).json({
         success: false,
@@ -77,6 +116,7 @@ export const updateProduct = async (request, response) => {
         message: "Product not found",
       });
     }
+
     response.status(200).json({
       success: true,
       error: false,
@@ -91,10 +131,13 @@ export const updateProduct = async (request, response) => {
     });
   }
 };
-//delete productexport const deleteProduct = async (request, response) => {
+
+//delete productexport
+
 export const deleteProduct = async (request, response) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(request.params.id);
+
     if (!deletedProduct) {
       return response.status(404).json({
         success: false,
@@ -113,6 +156,44 @@ export const deleteProduct = async (request, response) => {
       success: false,
       error: true,
       message: "Error deleting product",
+    });
+  }
+};
+
+// Search product by barcode
+
+export const searchProductByBarcode = async (request, response) => {
+  try {
+    const { barcode } = request.query || request.body;
+
+    if (!barcode) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Barcode is required",
+      });
+    }
+
+    const product = await Product.findOne({ barcode });
+    if (!product) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Product not found with this barcode",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Product found",
+      data: product,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
     });
   }
 };

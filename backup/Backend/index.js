@@ -1,26 +1,35 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import connectDB from "./config/config.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
-import dotenv from "dotenv";
+
+import AuthRoutes from "./routes/Authroute.js";
 import UserRoutes from "./routes/Userroute.js";
-import AccountRoutes from "./routes/Accountroute.js";
 import EmployeeRoutes from "./routes/Epolyeeroute.js";
 import ProductRoutes from "./routes/Productsroot.js";
-import PurchaseRoutes from "./routes/Purchaseroot.js";
-import PayoutRoutes from "./routes/payoutroot.js";
+import BillingRoutes from "./routes/bilingroute.js";
 import ScanRoutes from "./routes/Scanerroot.js";
-dotenv.config();
+import SuplierRoutes from "./routes/Suplierroot.js";
+import ClientRoutes from "./routes/clientroot.js";
+import DashboardRoutes from "./routes/Dashboardroute.js";
+
 const port = process.env.PORT || 5000;
 
 // Middleware
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+//frontend connection
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+app.use("/image", express.static(path.join(__dirname, "image")));
 
 if (process.env.NODE_ENV == "production") {
   app.use(
@@ -35,20 +44,30 @@ if (process.env.NODE_ENV == "production") {
   });
 }
 
-await connectDB();
+
 
 // Routes
+
+app.use("/api/auth", AuthRoutes);
 app.use("/api/user", UserRoutes);
-app.use("/api/account", AccountRoutes);
+
+await connectDB();
+
 app.use("/api/employee", EmployeeRoutes);
 app.use("/api/product", ProductRoutes);
-app.use("/api/purchase", PurchaseRoutes);
-app.use("/api/payout", PayoutRoutes);
 app.use("/api/scan", ScanRoutes);
+app.use("/api/billing", BillingRoutes);
+app.use("/api/suplier", SuplierRoutes);
+app.use("/api/client", ClientRoutes);
+app.use("/api/dashboard", DashboardRoutes);
+
 // test route
+
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
+
+// Start the server
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
