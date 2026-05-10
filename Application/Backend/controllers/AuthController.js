@@ -1,28 +1,37 @@
 import UserModel from "../models/UserModel.js";
 import RefreshToken from "../models/refreshToken.js";
-import bcrypt from "bcrypt";
+import OtpModel from "../models/otpmodal.js";
+import { toSafeUser } from "../utils/userHelpers.js";
+import { sendOtpEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
-// --- Helper: Normalize image path ---
+const signAccess = (userId, role, email) =>
+  jwt.sign(
+    { userId, role, email },
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: "15m" }
+  );
 
-const normalizeUserImage = (image) => {
-  if (!image) return "";
-  return image.startsWith("/image/") ? image : `/image/${image.split(/[\\/]/).pop()}`;
-};
+const signRefresh = (userId) =>
+  jwt.sign(
+    { userId },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: "7d" }
+  );
 
-// --- Helper: Return user without password ---
-const toSafeUser = (user) => {
-  if (!user) return null;
-  const raw = user.toObject ? user.toObject() : user;
-  const { password, ...safeRaw } = raw;
-  return { ...safeRaw, image: normalizeUserImage(raw.image) };
-};
+const saveRefreshToken = (userId, token) =>
+  RefreshToken.create({
+    userId,
+    token,
+    expiresIn: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
 
-// SIGN UP: Only employees can sign up
+// --- Sign Up ---
 
 export const SignUp = async (request, response) => {
   try {
-    const { Name, email, password, role } = request.body;
+    const { Name, email, password } = request.body;
 
     if (!Name || !email || !password) {
       return response.status(400).json({
@@ -32,25 +41,12 @@ export const SignUp = async (request, response) => {
       });
     }
 
-    const userRole = role || "employee";
-
-    if (userRole !== "employee") {
-      return response.status(400).json({
-        success: false,
-        error: true,
-        message: "Only Employee LogIn is allowed!",
-      });
-    }
-
-    const existing = await UserModel.findOne({
-      email: email.toLowerCase().trim(),
-    });
-
+    const existing = await UserModel.findOne({ email: email.toLowerCase().trim() });
     if (existing) {
       return response.status(400).json({
         success: false,
         error: true,
-        message: "This Email is already registered!",
+        message: "This email is already registered!",
       });
     }
 
@@ -67,20 +63,15 @@ export const SignUp = async (request, response) => {
     return response.status(201).json({
       success: true,
       error: false,
-      message: `Employee "${Name}" successfully registered!`,
+      message: "Account created. Please login!",
       data: toSafeUser(newUser),
     });
-
   } catch (error) {
-    response.status(400).json({
-      success: false,
-      error: true,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// SIGN IN
+// --- Sign In ---
 
 export const SignIn = async (request, response) => {
   try {
@@ -94,48 +85,32 @@ export const SignIn = async (request, response) => {
       });
     }
 
-    const user = await UserModel.findOne({
-      email: email.toLowerCase().trim(),
-    });
-
+    const user = await UserModel.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
       return response.status(401).json({
         success: false,
         error: true,
-        message: "Invalid email or password",
+        message: "Invalid email or password!",
       });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return response.status(401).json({
         success: false,
         error: true,
-        message: "Invalid password",
+        message: "Invalid email or password!",
       });
     }
 
-    const accessToken = jwt.sign(
-      { userId: user._id, role: user.role, email: user.email },
-      process.env.JWT_ACCESS_SECRET || "access_secret_key",
-      { expiresIn: "15m" }
-    );
-
-    const refreshToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_REFRESH_SECRET || "refresh_secret_key",
-      { expiresIn: "7d" }
-    );
-
-    await RefreshToken.create({
-      token: refreshToken,
-      userId: user._id,
-    });
+    const accessToken  = signAccess(user._id, user.role, user.email);
+    const refreshToken = signRefresh(user._id);
+    await saveRefreshToken(user._id, refreshToken);
 
     return response.status(200).json({
       success: true,
       error: false,
-      message: `Welcome ${user.Name}! (${user.role})`,
+      message: `Welcome ${user.Name}!`,
       data: {
         user: toSafeUser(user),
         accessToken,
@@ -143,15 +118,11 @@ export const SignIn = async (request, response) => {
       },
     });
   } catch (error) {
-    response.status(500).json({
-      success: false,
-      error: true,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// REFRESH TOKEN
+// --- Refresh Access Token ---
 
 export const RefreshAccessToken = async (request, response) => {
   try {
@@ -161,145 +132,253 @@ export const RefreshAccessToken = async (request, response) => {
       return response.status(400).json({
         success: false,
         error: true,
-        message: "Refresh token required",
+        message: "Refresh token is required!",
       });
     }
 
-    const decoded = jwt.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET || "refresh_secret_key"
-    );
-
-    const tokenRecord = await RefreshToken.findOne({
-      token: refreshToken,
-      userId: decoded.userId,
-    });
-
-    if (!tokenRecord) {
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch {
+      // Token expired or tampered — clean it up
+      await RefreshToken.deleteOne({ token: refreshToken });
       return response.status(401).json({
         success: false,
         error: true,
-        message: "Invalid refresh token",
+        message: "Refresh token is invalid or expired!",
       });
     }
 
-    const user = await UserModel.findById(decoded.userId);
-    if (!user) {
-      return response.status(404).json({
+    const storedToken = await RefreshToken.findOne({
+      token: refreshToken,
+      userId: decoded.userId,
+    }).populate("userId");
+
+    if (!storedToken) {
+      return response.status(401).json({
         success: false,
         error: true,
-        message: "User not found",
+        message: "Refresh token not recognised!",
       });
     }
 
-    const newAccessToken = jwt.sign(
-      { userId: user._id, role: user.role, email: user.email },
-      process.env.JWT_ACCESS_SECRET || "access_secret_key",
-      { expiresIn: "15m" }
-    );
+    // --- delete old, issue new pair ---
+
+    await RefreshToken.deleteOne({ token: refreshToken });
+
+    const user           = storedToken.userId;
+    const newAccessToken  = signAccess(user._id, user.role, user.email);
+    const newRefreshToken = signRefresh(user._id);
+    await saveRefreshToken(user._id, newRefreshToken);
 
     return response.status(200).json({
       success: true,
       error: false,
-      data: {
-        accessToken: newAccessToken,
-      },
+      data: { accessToken: newAccessToken, refreshToken: newRefreshToken },
     });
   } catch (error) {
-    response.status(401).json({
-      success: false,
-      error: true,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// LOGOUT
+// --- Logout ---
 
 export const LogOut = async (request, response) => {
   try {
     const { refreshToken } = request.body;
-
     if (refreshToken) {
       await RefreshToken.deleteOne({ token: refreshToken });
     }
-
     return response.status(200).json({
       success: true,
       error: false,
-      message: "Logged out successfully",
+      message: "Logged out successfully!",
     });
   } catch (error) {
-    response.status(500).json({
-      success: false,
-      error : true,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// GET CURRENT USER
+// --- Authenticated: Get My Profile ---
 
 export const GetCurrentUser = async (request, response) => {
   try {
     const user = await UserModel.findById(request.userId);
-
     if (!user) {
-      return response.status(404).json({
-        success: false,
-        error: true,
-        message: "User not found",
-      });
+      return response.status(404).json({ success: false, error: true, message: "User not found!" });
+    }
+    return response.status(200).json({ success: true, error: false, data: toSafeUser(user) });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
+
+// --- Update My Profile ---
+
+export const UpdateMyProfile = async (request, response) => {
+  try {
+    const updateData = { ...request.body };
+    delete updateData.password;   // password change has its own flow
+    delete updateData.role;       // role cannot be self-changed
+
+    if (request.file) {
+      updateData.image = `/image/${request.file.filename}`;
+    }
+
+    const updated = await UserModel.findByIdAndUpdate(
+      request.userId,
+      updateData,
+      { new: true }
+    );
+
+    if (!updated) {
+      return response.status(404).json({ success: false, error: true, message: "User not found!" });
     }
 
     return response.status(200).json({
       success: true,
       error: false,
-      data: toSafeUser(user),
+      message: "Profile updated successfully.",
+      data: toSafeUser(updated),
     });
-
   } catch (error) {
-    response.status(500).json({
-      success: false,
-      error: true,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// ADMIN-ONLY: Create Employee/Admin
+// --- Forgot Password ---
+
+export const ForgotPassword = async (request, response) => {
+  try {
+    const { email } = request.body;
+
+    // Always return success to avoid email enumeration
+    const user = await UserModel.findOne({ email: email?.toLowerCase().trim() });
+    if (user) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      await OtpModel.deleteMany({ email: user.email });
+      await OtpModel.create({
+        email: user.email,
+        otp,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      });
+      await sendOtpEmail(user.email, otp);
+    }
+
+    return response.status(200).json({
+      success: true,
+      error: false,
+      message: "If this email is registered, an OTP has been sent.",
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
+
+// --- Verify OTP ---
+
+export const VerifyOtp = async (request, response) => {
+  try {
+    const { email, otp } = request.body;
+
+    if (!email || !otp) {
+      return response.status(400).json({ success: false, error: true, message: "Email and OTP are required!" });
+    }
+
+    const otpRecord = await OtpModel.findOne({ email: email.toLowerCase().trim() });
+
+    if (!otpRecord) {
+      return response.status(400).json({ success: false, error: true, message: "OTP not found. Please request again!" });
+    }
+
+    if (new Date() > otpRecord.expiresAt) {
+      await OtpModel.deleteOne({ email });
+      return response.status(400).json({ success: false, error: true, message: "OTP has expired. Please request again!" });
+    }
+
+    if (otpRecord.otp !== otp) {
+      return response.status(400).json({ success: false, error: true, message: "Wrong OTP!" });
+    }
+
+    const resetToken = jwt.sign(
+      { email: email.toLowerCase().trim() },
+      process.env.JWT_RESET_SECRET || process.env.JWT_ACCESS_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    await OtpModel.deleteOne({ email });
+
+    return response.status(200).json({
+      success: true,
+      error: false,
+      message: "OTP verified!",
+      resetToken,
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
+
+// --- Reset Password ---
+
+export const ResetPassword = async (request, response) => {
+  try {
+    const { resetToken, newPassword } = request.body;
+
+    if (!resetToken || !newPassword) {
+      return response.status(400).json({ success: false, error: true, message: "Reset token and new password are required!" });
+    }
+
+    if (newPassword.length < 6) {
+      return response.status(400).json({ success: false, error: true, message: "Password must be at least 6 characters!" });
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(resetToken, process.env.JWT_RESET_SECRET || process.env.JWT_ACCESS_SECRET);
+    } catch {
+      return response.status(400).json({ success: false, error: true, message: "Reset token is invalid or expired!" });
+    }
+
+    const user = await UserModel.findOne({ email: payload.email });
+    if (!user) {
+      return response.status(404).json({ success: false, error: true, message: "User not found!" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    await RefreshToken.deleteMany({ userId: user._id }); // force re-login everywhere
+
+    return response.status(200).json({
+      success: true,
+      error: false,
+      message: "Password reset successfully. Please login again!",
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
+
+// --- Create User (employee or admin) ---
 
 export const AdminCreateUser = async (request, response) => {
   try {
     const { Name, email, password, role } = request.body;
 
     if (!Name || !email || !password || !role) {
-      return response.status(400).json({
-        success: false,
-        message: "Name, email, password aur role zaroori hain",
-      });
+      return response.status(400).json({ success: false, error: true, message: "Name, email, password and role are required!" });
     }
 
-    // Sirf employee aur admin allowed hain
     if (!["employee", "admin"].includes(role)) {
-      return response.status(400).json({
-        success: false,
-        message: "Invalid role — sirf employee ya admin allowed hai",
-      });
+      return response.status(400).json({ success: false, error: true, message: "Role must be 'employee' or 'admin'!" });
     }
 
-    const existing = await UserModel.findOne({
-      email: email.toLowerCase().trim(),
-    });
+    const existing = await UserModel.findOne({ email: email.toLowerCase().trim() });
     if (existing) {
-      return response.status(400).json({
-        success: false,
-        message: "Email pehle se exists karta hai",
-      });
+      return response.status(400).json({ success: false, error: true, message: "This email is already registered!" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = await UserModel.create({
       Name: Name.trim(),
       email: email.toLowerCase().trim(),
@@ -310,113 +389,94 @@ export const AdminCreateUser = async (request, response) => {
 
     return response.status(201).json({
       success: true,
-      message: `${role} "${Name}" successfully created`,
+      error: false,
+      message: `${role} "${Name}" created successfully!`,
       data: toSafeUser(newUser),
     });
   } catch (error) {
-    response.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// ──────────────────────────────────────────────────────────────────────────
-// ADMIN-ONLY: Get All Users
-// ──────────────────────────────────────────────────────────────────────────
+// --- Admin: Get All Users ---
+
 export const AdminGetAllUsers = async (request, response) => {
   try {
     const { role } = request.query;
 
-    let query = {};
-    if (role && ["employee", "admin"].includes(role)) {
-      query.role = role;
-    }
+    const query = {};
+    if (role && ["employee", "admin"].includes(role)) query.role = role;
 
-    const users = await UserModel.find(query).select("-password");
+    const users = await UserModel.find(query).sort({ createdAt: -1 });
 
     return response.status(200).json({
       success: true,
+      error: false,
       total: users.length,
-      data: users,
+      data: users.map(toSafeUser),
     });
   } catch (error) {
-    response.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// ──────────────────────────────────────────────────────────────────────────
-// ADMIN-ONLY: Update User
-// ──────────────────────────────────────────────────────────────────────────
+// --- Admin: Update User ---
+
 export const AdminUpdateUser = async (request, response) => {
   try {
     const { id } = request.params;
     const updateData = { ...request.body };
 
-    if (updateData.password && updateData.password.trim()) {
+    if (updateData.role && !["employee", "admin"].includes(updateData.role)) {
+      return response.status(400).json({ success: false, error: true, message: "Role must be 'employee' or 'admin'!" });
+    }
+
+    if (updateData.password?.trim()) {
       updateData.password = await bcrypt.hash(updateData.password.trim(), 10);
     } else {
       delete updateData.password;
     }
 
-    // Sirf employee aur admin allowed hain
-    if (updateData.role && !["employee", "admin"].includes(updateData.role)) {
-      return response.status(400).json({
-        success: false,
-        message: "Invalid role — sirf employee ya admin allowed hai",
-      });
-    }
-
-    const updated = await UserModel.findByIdAndUpdate(id, updateData, {
-      new: true,
-    }).select("-password");
-
+    const updated = await UserModel.findByIdAndUpdate(id, updateData, { new: true });
     if (!updated) {
-      return response.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      return response.status(404).json({ success: false, error: true, message: "User not found!" });
     }
 
     return response.status(200).json({
       success: true,
-      message: "User updated successfully",
-      data: updated,
+      error: false,
+      message: "User updated successfully!",
+      data: toSafeUser(updated),
     });
   } catch (error) {
-    response.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
 
-// ──────────────────────────────────────────────────────────────────────────
-// ADMIN-ONLY: Delete User
-// ──────────────────────────────────────────────────────────────────────────
+// --- Admin: Delete User ---
+
 export const AdminDeleteUser = async (request, response) => {
   try {
     const { id } = request.params;
 
-    const deleted = await UserModel.findByIdAndDelete(id);
-    if (!deleted) {
-      return response.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+    const userToDelete = await UserModel.findById(id);
+    if (!userToDelete) {
+      return response.status(404).json({ success: false, error: true, message: "User not found!" });
     }
+
+    if (userToDelete.role === "admin" && userToDelete._id.toString() === request.userId) {
+      return response.status(403).json({ success: false, error: true, message: "You cannot delete your own admin account!" });
+    }
+
+    await UserModel.findByIdAndDelete(id);
+    await RefreshToken.deleteMany({ userId: id });
 
     return response.status(200).json({
       success: true,
-      message: "User deleted successfully",
+      error: false,
+      message: "User deleted successfully!",
     });
   } catch (error) {
-    response.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };

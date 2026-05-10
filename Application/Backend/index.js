@@ -8,7 +8,6 @@ import cors from "cors";
 
 import AuthRoutes from "./routes/Authroute.js";
 import UserRoutes from "./routes/Userroute.js";
-import AccountRoutes from "./routes/Accountroute.js";
 import EmployeeRoutes from "./routes/Epolyeeroute.js";
 import ProductRoutes from "./routes/Productsroot.js";
 import BillingRoutes from "./routes/bilingroute.js";
@@ -51,7 +50,6 @@ if (process.env.NODE_ENV == "production") {
 
 app.use("/api/auth", AuthRoutes);
 app.use("/api/user", UserRoutes);
-app.use("/api/account", AccountRoutes);
 
 await connectDB();
 

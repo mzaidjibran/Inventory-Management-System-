@@ -1,20 +1,25 @@
 import express from "express";
-import * as AuthController from "../controllers/AuthController.js";
+import * as Auth from "../controllers/AuthController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
-import { requireAdmin, requireEmployee } from "../middleware/roleMiddleware.js";
+import { requireAdmin } from "../middleware/roleMiddleware.js";
+import upload from "../middleware/multerniddleware.js";
 
 const router = express.Router();
 
-router.post("/signup", AuthController.SignUp);
-router.post("/signin", AuthController.SignIn);
-router.post("/refresh-token", AuthController.RefreshAccessToken);
+router.post("/signup",         Auth.SignUp);
+router.post("/signin",         Auth.SignIn);
+router.post("/refresh-token",  Auth.RefreshAccessToken);
+router.post("/forgot-password", Auth.ForgotPassword);
+router.post("/verify-otp",     Auth.VerifyOtp);
+router.post("/reset-password", Auth.ResetPassword);
 
-router.post("/logout", verifyToken, AuthController.LogOut);
-router.get("/me", verifyToken, AuthController.GetCurrentUser);
+router.post("/logout",         verifyToken, Auth.LogOut);
+router.get("/me",              verifyToken, Auth.GetCurrentUser);
+router.put("/me",              verifyToken, upload.single("image"), Auth.UpdateMyProfile);
 
-router.post("/admin/create-user", verifyToken, requireAdmin, AuthController.AdminCreateUser);
-router.get("/admin/all-users", verifyToken, requireAdmin, AuthController.AdminGetAllUsers);
-router.put("/admin/update-user/:id", verifyToken, requireAdmin, AuthController.AdminUpdateUser);
-router.delete("/admin/delete-user/:id", verifyToken, requireAdmin, AuthController.AdminDeleteUser);
+router.post("/admin/users",          verifyToken, requireAdmin, Auth.AdminCreateUser);
+router.get("/admin/users",           verifyToken, requireAdmin, Auth.AdminGetAllUsers);
+router.put("/admin/users/:id",       verifyToken, requireAdmin, Auth.AdminUpdateUser);
+router.delete("/admin/users/:id",    verifyToken, requireAdmin, Auth.AdminDeleteUser);
 
 export default router;
