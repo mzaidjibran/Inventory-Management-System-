@@ -57,7 +57,7 @@ export const signIn = async (email, password) => {
 
 export const logOut = async () => {
   const refreshToken = localStorage.getItem("refreshToken");
-  await fetch(`${API_BASE}/api/account/logOut`, {
+  await fetch(`${API_BASE}/api/auth/logout`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
@@ -73,7 +73,7 @@ export const logOut = async () => {
 
 export const refreshAccessToken = async () => {
   const refreshToken = localStorage.getItem("refreshToken");
-  const response = await fetch(`${API_BASE}/api/account/refresh`, {
+  const response = await fetch(`${API_BASE}/api/auth/refresh-token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
@@ -95,7 +95,7 @@ export const getUserId = () => localStorage.getItem("userId") || null;
 export const isAdmin = () => normalizeRole(getUserRole()) === "admin";
 
 export const getMyProfile = async () => {
-  const response = await fetch(`${API_BASE}/api/account/me`, {
+  const response = await fetch(`${API_BASE}/api/auth/me`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -109,7 +109,7 @@ export const getMyProfile = async () => {
 
 export const updateMyProfile = async (data) => {
   const isFormData = data instanceof FormData;
-  const response = await fetch(`${API_BASE}/api/account/me`, {
+  const response = await fetch(`${API_BASE}/api/auth/me`, {
     method: "PUT",
     headers: isFormData
       ? { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
@@ -137,7 +137,7 @@ export const signUp = async (userData) => {
 };
 
 export const forgotPassword = async (email) => {
-  const response = await fetch(`${API_BASE}/api/account/forgot-password`, {
+  const response = await fetch(`${API_BASE}/api/auth/forgot-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
@@ -149,7 +149,7 @@ export const forgotPassword = async (email) => {
 };
 
 export const verifyOtp = async (email, otp) => {
-  const response = await fetch(`${API_BASE}/api/account/verify-otp`, {
+  const response = await fetch(`${API_BASE}/api/auth/verify-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, otp }),
@@ -160,7 +160,7 @@ export const verifyOtp = async (email, otp) => {
 };
 
 export const resetPassword = async (resetToken, newPassword) => {
-  const response = await fetch(`${API_BASE}/api/account/reset-password`, {
+  const response = await fetch(`${API_BASE}/api/auth/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ resetToken, newPassword }),
@@ -172,7 +172,7 @@ export const resetPassword = async (resetToken, newPassword) => {
 
 // Admin: Employee create
 export const createEmployeeApi = async (employeeData) => {
-  const response = await fetch(`${API_BASE}/api/account/users`, {
+  const response = await fetch(`${API_BASE}/api/auth/admin/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -187,7 +187,7 @@ export const createEmployeeApi = async (employeeData) => {
 
 
 export const getAllUsersApi = async () => {
-  const response = await fetch(`${API_BASE}/api/account/users`, {
+  const response = await fetch(`${API_BASE}/api/auth/admin/users`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -201,7 +201,7 @@ export const getAllUsersApi = async () => {
 
 
 export const deleteUserApi = async (id) => {
-  const response = await fetch(`${API_BASE}/api/account/users/${id}`, {
+  const response = await fetch(`${API_BASE}/api/auth/admin/users/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
