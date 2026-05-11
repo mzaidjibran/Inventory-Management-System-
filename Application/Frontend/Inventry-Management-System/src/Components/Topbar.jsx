@@ -293,7 +293,7 @@ const Topbar = () => {
             </span>
             <span className="logo-lg">
               <img
-                src="assets/images/Al-Nasri-shop-logo.png"
+                src="assets/images/mango_transparent.png"
                 alt=""
                 height="60"
               />
