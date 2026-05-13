@@ -1,6 +1,7 @@
 import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
 import BillingPage from "../components/Billing/BillingPage.jsx";
+import Footer from "../components/Footer.jsx";
 
 const Billing = () => {
   return (
@@ -22,6 +23,7 @@ const Billing = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

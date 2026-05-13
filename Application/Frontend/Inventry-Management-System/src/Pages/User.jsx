@@ -2,6 +2,7 @@ import { useState } from "react";
 import UserTable from "../components/User/UserTable.jsx";
 import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
+import Footer from "../components/Footer.jsx";
 
 export default function User() {
   return (
@@ -15,6 +16,7 @@ export default function User() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

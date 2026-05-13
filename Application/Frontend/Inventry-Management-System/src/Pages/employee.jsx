@@ -1,6 +1,7 @@
 import EmployeeTable from "../components/Employee/EmployeeTable.jsx";
 import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
+import Footer from "../components/Footer.jsx";
 
 const Employee = () => {
   return (
@@ -11,8 +12,8 @@ const Employee = () => {
       <Topbar />
       <Sidebar />
       <div className="main-content">
-        <div className="page-content" style={{ padding: "24px 20px" }}>
-          <div className="container-fluid">
+        <div className="page-content" style={{ padding: "24px 8px" }}>
+          <div className="container-fluid px-0">
             {/* ── Page Header ── */}
             <div
               style={{
@@ -92,44 +93,8 @@ const Employee = () => {
             <EmployeeTable />
           </div>
         </div>
-
-        {/* ── Footer ── */}
-        <footer
-          style={{
-            borderTop: "1px solid #e8dcc8",
-            padding: "14px 15px",
-            background: "#fffdf9",
-            fontFamily: "Nunito, sans-serif",
-          }}
-        >
-          <div className="container-fluid">
-            <div className="row align-items-center">
-              <div
-                className="col-sm-6"
-                style={{ fontSize: 12, color: "#b89060", fontWeight: 600 }}
-              >
-                {new Date().getFullYear()} © Mango Technologies
-              </div>
-              <div
-                className="col-sm-6 text-sm-end d-none d-sm-block"
-                style={{ fontSize: 12, color: "#b89060" }}
-              >
-                Designed & Developed by{" "}
-                <a
-                  href="#"
-                  style={{
-                    color: "#c8965a",
-                    fontWeight: 700,
-                    textDecoration: "none",
-                  }}
-                >
-                  Mango Technologies
-                </a>
-              </div>
-            </div>
-          </div>
-        </footer>
       </div>
+      <Footer />
     </div>
   );
 };

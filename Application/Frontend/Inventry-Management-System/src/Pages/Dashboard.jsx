@@ -5,6 +5,7 @@ import ReactApexChart from "react-apexcharts";
 const Chart = ReactApexChart.default || ReactApexChart;
 import Topbar from "../components/Topbar.jsx";
 import Sidebar from "../components/Sidebar.jsx";
+import Footer from "../components/Footer.jsx";
 import { getUserRole } from "../Api/authApi.js";
 
 const API_BASE = "http://localhost:3000";
@@ -1269,43 +1270,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
-          {/* ── Footer ── */}
-          <footer
-            style={{
-              borderTop: "1px solid #e8dcc8",
-              padding: "14px 24px",
-              background: "#fffdf9",
-              fontFamily: "Nunito, sans-serif",
-            }}
-          >
-            <div className="container-fluid">
-              <div className="row align-items-center">
-                <div
-                  className="col-sm-6"
-                  style={{ fontSize: 12, color: "#b89060", fontWeight: 600 }}
-                >
-                  {new Date().getFullYear()} © Mango Technologies
-                </div>
-                <div
-                  className="col-sm-6 text-sm-end d-none d-sm-block"
-                  style={{ fontSize: 12, color: "#b89060" }}
-                >
-                  Designed & Developed by{" "}
-                  <a
-                    href="#"
-                    style={{
-                      color: "#c8965a",
-                      fontWeight: 700,
-                      textDecoration: "none",
-                    }}
-                  >
-                    Mango Technologies
-                  </a>
-                </div>
-              </div>
-            </div>
-          </footer>
         </div>
 
         {/* ── Right Sidebar (offcanvas) ── */}
@@ -1433,6 +1397,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

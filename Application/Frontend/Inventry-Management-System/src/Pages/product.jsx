@@ -1,22 +1,22 @@
 import ProductTable from "../components/Product/ProductTable.jsx";
 import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
+import Footer from "../components/Footer.jsx";
 
 const Product = () => {
   return (
-    <>
-      <div id="layout-wrapper">
-        <Topbar />
-        <Sidebar />
-        <div className="main-content">
-          <div className="page-content">
-            <div className="container-fluid">
-              <ProductTable />
-            </div>
+    <div id="layout-wrapper">
+      <Topbar />
+      <Sidebar />
+      <div className="main-content">
+        <div className="page-content">
+          <div className="container-fluid">
+            <ProductTable />
           </div>
         </div>
       </div>
-    </>
+      <Footer />
+    </div>
   );
 };
 
