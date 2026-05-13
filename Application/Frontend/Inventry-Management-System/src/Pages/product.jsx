@@ -1,20 +1,13 @@
-import { useState } from "react"
-import ProductTable from "../components/Product/ProductTable.jsx"
-import Topbar from "../components/topbar.jsx"
-import Sidebar from "../components/sidebar.jsx"
+import ProductTable from "../components/Product/ProductTable.jsx";
+import Topbar from "../components/topbar.jsx";
+import Sidebar from "../components/sidebar.jsx";
 
 const Product = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
- 
   return (
     <>
       <div id="layout-wrapper">
-        <Topbar onSidebarToggle={toggleSidebar} />
-        <Sidebar isOpen={sidebarOpen} />
+        <Topbar />
+        <Sidebar />
         <div className="main-content">
           <div className="page-content">
             <div className="container-fluid">
@@ -24,7 +17,7 @@ const Product = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Product
+export default Product;

@@ -4,17 +4,11 @@ import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
 
 const Client = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
     <>
       <div id="layout-wrapper">
-        <Topbar onSidebarToggle={toggleSidebar} />
-        <Sidebar isOpen={sidebarOpen} />
+        <Topbar />
+        <Sidebar />
         <div className="main-content">
           <div className="page-content">
             <div className="container-fluid">

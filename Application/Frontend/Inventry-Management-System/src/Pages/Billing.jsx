@@ -1,15 +1,12 @@
-import { useState } from "react";
 import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
 import BillingPage from "../components/Billing/BillingPage.jsx";
 
 const Billing = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
     <div id="layout-wrapper">
-      <Topbar onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
-      <Sidebar isOpen={sidebarOpen} />
+      <Topbar />
+      <Sidebar />
       <div className="main-content">
         <div className="page-content">
           <div className="container-fluid">

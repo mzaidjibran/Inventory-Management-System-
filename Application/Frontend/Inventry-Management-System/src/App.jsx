@@ -44,11 +44,46 @@ function App() {
       />
 
       {/* Sirf Admin */}
-      <Route path="/product" element={<ProtectedRoute allowedRoles={["admin"]}><Product /></ProtectedRoute>} />
-      <Route path="/employee" element={<ProtectedRoute allowedRoles={["admin"]}><Employee /></ProtectedRoute>} />
-      <Route path="/supplier" element={<ProtectedRoute allowedRoles={["admin"]}><Supplier /></ProtectedRoute>} />
-      <Route path="/client" element={<ProtectedRoute allowedRoles={["admin"]}><Client /></ProtectedRoute>} />
-      <Route path="/user" element={<ProtectedRoute allowedRoles={["admin"]}><User /></ProtectedRoute>} />
+      <Route
+        path="/product"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Product />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employee"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Employee />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/supplier"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Supplier />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Client />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <User />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
     </Routes>

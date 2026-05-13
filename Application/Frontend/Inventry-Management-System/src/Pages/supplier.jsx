@@ -1,20 +1,14 @@
-import { useState } from "react"
-import SupplierTable from "../Components/Supplier/SupplierTable.jsx"
-import Topbar from "../components/topbar.jsx"
-import Sidebar from "../components/sidebar.jsx"
+import { useState } from "react";
+import SupplierTable from "../Components/Supplier/SupplierTable.jsx";
+import Topbar from "../components/topbar.jsx";
+import Sidebar from "../components/sidebar.jsx";
 
 const Supplier = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
- 
   return (
     <>
       <div id="layout-wrapper">
-        <Topbar onSidebarToggle={toggleSidebar} />
-        <Sidebar isOpen={sidebarOpen} />
+        <Topbar />
+        <Sidebar />
         <div className="main-content">
           <div className="page-content">
             <div className="container-fluid">
@@ -24,7 +18,7 @@ const Supplier = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Supplier
+export default Supplier;
