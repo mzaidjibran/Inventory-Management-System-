@@ -1308,25 +1308,6 @@ export default function Dashboard() {
           </footer>
         </div>
 
-        {/* ── Theme Changer ──
-        <div className="custom-setting bg-primary pe-0 d-flex flex-column rounded-start">
-          <button
-            type="button"
-            className="btn btn-wide border-0 text-white fs-20 avatar-sm rounded-end-0"
-            id="light-dark-mode"
-          >
-            <i className="mdi mdi-brightness-7 align-middle" />
-            <i className="mdi mdi-white-balance-sunny align-middle" />
-          </button>
-          <button
-            type="button"
-            className="btn btn-wide border-0 text-white fs-20 avatar-sm"
-            data-toggle="fullscreen"
-          >
-            <i className="mdi mdi-arrow-expand-all align-middle" />
-          </button>
-        </div> */}
-
         {/* ── Right Sidebar (offcanvas) ── */}
         <div className="offcanvas offcanvas-end" id="offcanvas-rightsidabar">
           <div
