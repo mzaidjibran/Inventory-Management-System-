@@ -310,9 +310,9 @@ const Topbar = () => {
             </span>
             <span className="logo-lg">
               <img
-                src="assets/images/logo-light.png"
+                src="assets/images/mango_transparent.png"
                 alt="logo-light"
-                height="18"
+                height="60"
               />
             </span>
           </a>

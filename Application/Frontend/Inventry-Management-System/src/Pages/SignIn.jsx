@@ -91,7 +91,7 @@ export default function SignInPage() {
     <div className="signin-container">
       <div className="card signin-card">
         <div className="signin-logo">
-          <span className="logo-icon">⚡</span>
+        <img src="assets\images\mango_transparent.png" alt="" />
         </div>
         <h4 className="mb-1 text-center signin-title">Welcome Back</h4>
         <p className="text-center signin-subtitle mb-4">Sign in to your account</p>
