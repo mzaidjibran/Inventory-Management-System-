@@ -10,6 +10,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Supplier from "./Pages/supplier.jsx";
 import Client from "./Pages/client.jsx";
 import Billing from "./pages/Billing.jsx";
+import ProductInventory from "./Pages/ProductInventory.jsx";
+import BillingHistory from "./Pages/BillingHistory.jsx";
 
 function App() {
   const getDefaultRoute = () => {
@@ -81,6 +83,26 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <User />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin only — Product Inventory */}
+      <Route
+        path="/inventory"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <ProductInventory />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin + Employee — Billing History */}
+      <Route
+        path="/billing-history"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "employee"]}>
+            <BillingHistory />
           </ProtectedRoute>
         }
       />

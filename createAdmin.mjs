@@ -14,8 +14,7 @@ async function seed() {
   try {
     const mongoURI =
       process.env.MONGO_URI ||
-      "mongodb://127.0.0.1:27017/inventory_management_system";
-    //  "mongodb://127.0.0.1:27017/inventory_management_system";
+      "mongodb://127.0.0.1:27017/Ecommerce";
     console.log("Connecting to MongoDB...", mongoURI);
 
     // Precompute password hash and admin payload
@@ -40,8 +39,7 @@ async function seed() {
     await client.connect();
     console.log("Connection Successful!");
 
-    const db = client.db("inventory_management_system");
-    //  const db = client.db("inventory_management_system");
+    const db = client.db("Ecommerce");
     const usersCollection = db.collection("users");
 
     // Upsert admin

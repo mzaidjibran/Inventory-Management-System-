@@ -56,6 +56,13 @@ const productSchema = new mongoose.Schema(
       default: "",
       maxlength: 1000,
     },
+
+    initialStockQuantity: {
+      type: Number,
+      default: function() {
+        return this.stockQuantity || 0;
+      }
+    },
   },
   {
     timestamps: true,

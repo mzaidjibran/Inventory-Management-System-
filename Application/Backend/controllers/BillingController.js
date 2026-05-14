@@ -90,7 +90,12 @@ export const createBilling = async (request, response) => {
 
 export const getAllBillings = async (request, response) => {
   try {
-    const billings = await Billing.find().sort({ createdAt: -1 });
+    const billings = await Billing.find()
+      .populate({
+        path: "items.product",
+        select: "title name price"
+      })
+      .sort({ createdAt: -1 });
 
     return response.status(200).json({
       success: true,
@@ -107,7 +112,11 @@ export const getAllBillings = async (request, response) => {
 
 export const getSingleBilling = async (request, response) => {
   try {
-    const billing = await Billing.findById(request.params.id);
+    const billing = await Billing.findById(request.params.id)
+      .populate({
+        path: "items.product",
+        select: "title name price"
+      });
     if (!billing) {
       return response.status(404).json({ success: false, error: true, message: "Bill not found!" });
     }
