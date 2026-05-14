@@ -15,7 +15,10 @@ export default function SignInPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("email");
   const [forgotForm, setForgotForm] = useState({
-    email: "", otp: "", newPassword: "", confirmPassword: "",
+    email: "",
+    otp: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [resetToken, setResetToken] = useState("");
   const navigate = useNavigate();
@@ -29,7 +32,9 @@ export default function SignInPage() {
     setLoading(true);
     try {
       const result = await signIn(form.email, form.password);
-      const role = normalizeRole(result.role || localStorage.getItem("userRole"));
+      const role = normalizeRole(
+        result.role || localStorage.getItem("userRole"),
+      );
       toast.success("Login successful!");
       // Sab dashboard pe jayein
       navigate("/dashboard");
@@ -61,69 +66,105 @@ export default function SignInPage() {
       const result = await forgotPassword(forgotForm.email.trim());
       toast.success(result.message || "OTP Sent!");
       setForgotStep("otp");
-    } catch (err) { toast.error(err.message); }
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   async function handleVerifyOtp(event) {
     event.preventDefault();
     if (!forgotForm.otp.trim()) return toast.error("Please Enter OTP");
     try {
-      const result = await verifyOtp(forgotForm.email.trim(), forgotForm.otp.trim());
+      const result = await verifyOtp(
+        forgotForm.email.trim(),
+        forgotForm.otp.trim(),
+      );
       setResetToken(result.resetToken);
       toast.success(result.message || "OTP verified successfully!");
       setForgotStep("reset");
-    } catch (err) { toast.error(err.message); }
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   async function handleResetPassword(event) {
     event.preventDefault();
-    if (!forgotForm.newPassword.trim()) return toast.error("Enter new password");
+    if (!forgotForm.newPassword.trim())
+      return toast.error("Enter new password");
     if (forgotForm.newPassword !== forgotForm.confirmPassword)
       return toast.error("Passwords do not match!");
     try {
-      const result = await resetPassword(resetToken, forgotForm.newPassword.trim());
+      const result = await resetPassword(
+        resetToken,
+        forgotForm.newPassword.trim(),
+      );
       toast.success(result.message || "Password reset successfully!");
       closeForgotPassword();
-    } catch (err) { toast.error(err.message); }
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   return (
     <div className="signin-container">
       <div className="card signin-card">
-        <div className="signin-logo">
-        <img src="assets\images\mango_transparent.png" alt="" />
+        <div className="signin-logo ">
+          <img src="/assets/images/Al-Nasri-shop-logo.png" alt="logo" />
         </div>
         <h4 className="mb-1 text-center signin-title">Welcome Back</h4>
-        <p className="text-center signin-subtitle mb-4">Sign in to your account</p>
+        <p className="text-center signin-subtitle mb-4">
+          Sign in to your account
+        </p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label className="form-label">Email</label>
             <input
-              name="email" type="email" className="form-control"
-              placeholder="Enter your email" value={form.email}
-              onChange={handleChange} required autoFocus
+              name="email"
+              type="email"
+              className="form-control"
+              placeholder="Enter your email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              autoFocus
             />
           </div>
           <div className="mb-3">
             <label className="form-label">Password</label>
             <input
-              name="password" type="password" className="form-control"
-              placeholder="Enter your password" value={form.password}
-              onChange={handleChange} required
+              name="password"
+              type="password"
+              className="form-control"
+              placeholder="Enter your password"
+              value={form.password}
+              onChange={handleChange}
+              required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100 mb-3" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-primary w-100 mb-3"
+            disabled={loading}
+          >
             {loading ? (
               <span>
-                <span className="spinner-border spinner-border-sm me-2" role="status" />
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                />
                 Signing in...
               </span>
-            ) : "Sign In"}
+            ) : (
+              "Sign In"
+            )}
           </button>
           <div className="text-center">
-            <button type="button" className="btn btn-link text-decoration-none p-0"
-              onClick={openForgotPassword}>
+            <button
+              type="button"
+              className="btn btn-link text-decoration-none p-0"
+              onClick={openForgotPassword}
+            >
               Forgot Password?
             </button>
           </div>
@@ -139,20 +180,41 @@ export default function SignInPage() {
           <div className="card forgot-modal-card">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="mb-0">Reset Password</h5>
-              <button type="button" className="btn btn-sm btn-light" onClick={closeForgotPassword}>×</button>
+              <button
+                type="button"
+                className="btn btn-sm btn-light"
+                onClick={closeForgotPassword}
+              >
+                ×
+              </button>
             </div>
 
             {forgotStep === "email" && (
               <form onSubmit={handleSendOtp}>
                 <div className="mb-3">
                   <label className="form-label">Registered Email</label>
-                  <input type="email" className="form-control" value={forgotForm.email}
-                    onChange={(e) => setForgotForm((p) => ({ ...p, email: e.target.value }))}
-                    placeholder="Enter registered email" required />
+                  <input
+                    type="email"
+                    className="form-control"
+                    value={forgotForm.email}
+                    onChange={(e) =>
+                      setForgotForm((p) => ({ ...p, email: e.target.value }))
+                    }
+                    placeholder="Enter registered email"
+                    required
+                  />
                 </div>
                 <div className="d-flex gap-2">
-                  <button type="submit" className="btn btn-primary w-100">Send OTP</button>
-                  <button type="button" className="btn btn-outline-secondary" onClick={closeForgotPassword}>Cancel</button>
+                  <button type="submit" className="btn btn-primary w-100">
+                    Send OTP
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={closeForgotPassword}
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             )}
@@ -161,14 +223,28 @@ export default function SignInPage() {
               <form onSubmit={handleVerifyOtp}>
                 <div className="mb-3">
                   <label className="form-label">Enter OTP</label>
-                  <input type="text" className="form-control" value={forgotForm.otp}
-                    onChange={(e) => setForgotForm((p) => ({ ...p, otp: e.target.value }))}
-                    placeholder="6-digit OTP" required />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={forgotForm.otp}
+                    onChange={(e) =>
+                      setForgotForm((p) => ({ ...p, otp: e.target.value }))
+                    }
+                    placeholder="6-digit OTP"
+                    required
+                  />
                 </div>
                 <div className="d-flex gap-2">
-                  <button type="submit" className="btn btn-primary w-100">Verify OTP</button>
-                  <button type="button" className="btn btn-outline-secondary"
-                    onClick={() => setForgotStep("email")}>Back</button>
+                  <button type="submit" className="btn btn-primary w-100">
+                    Verify OTP
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => setForgotStep("email")}
+                  >
+                    Back
+                  </button>
                 </div>
               </form>
             )}
@@ -177,19 +253,47 @@ export default function SignInPage() {
               <form onSubmit={handleResetPassword}>
                 <div className="mb-3">
                   <label className="form-label">New Password</label>
-                  <input type="password" className="form-control" value={forgotForm.newPassword}
-                    onChange={(e) => setForgotForm((p) => ({ ...p, newPassword: e.target.value }))}
-                    placeholder="Enter new password" required />
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={forgotForm.newPassword}
+                    onChange={(e) =>
+                      setForgotForm((p) => ({
+                        ...p,
+                        newPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter new password"
+                    required
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Confirm Password</label>
-                  <input type="password" className="form-control" value={forgotForm.confirmPassword}
-                    onChange={(e) => setForgotForm((p) => ({ ...p, confirmPassword: e.target.value }))}
-                    placeholder="Confirm new password" required />
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={forgotForm.confirmPassword}
+                    onChange={(e) =>
+                      setForgotForm((p) => ({
+                        ...p,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Confirm new password"
+                    required
+                  />
                 </div>
                 <div className="d-flex gap-2">
-                  <button type="submit" className="btn btn-primary w-100">Update Password</button>
-                  <button type="button" className="btn btn-outline-secondary" onClick={closeForgotPassword}>Cancel</button>
+                  <button type="submit" className="btn btn-primary w-100">
+                    Update Password
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={closeForgotPassword}
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             )}
@@ -200,6 +304,7 @@ export default function SignInPage() {
       <style>{`
         .signin-container { display:flex; justify-content:center; align-items:center; min-height:100vh; background:linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%); animation:fadeIn 0.6s ease-out; }
         .signin-logo { text-align:center; margin-bottom:0.5rem; }
+        .signin-logo img { max-width:120px; max-height:120px; object-fit:contain; }
         .logo-icon { font-size:2.5rem; filter:drop-shadow(0 0 12px rgba(102,126,234,0.8)); }
         .signin-title { font-weight:700; color:#1a1a2e; letter-spacing:-0.5px; }
         .signin-subtitle { color:#888; font-size:0.9rem; }

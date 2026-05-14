@@ -1,30 +1,23 @@
-import { useState } from "react"
-import ProductTable from "../components/Product/ProductTable.jsx"
-import Topbar from "../components/topbar.jsx"
-import Sidebar from "../components/sidebar.jsx"
+import ProductTable from "../components/Product/ProductTable.jsx";
+import Topbar from "../components/topbar.jsx";
+import Sidebar from "../components/sidebar.jsx";
+import Footer from "../components/Footer.jsx";
 
 const Product = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
- 
   return (
-    <>
-      <div id="layout-wrapper">
-        <Topbar onSidebarToggle={toggleSidebar} />
-        <Sidebar isOpen={sidebarOpen} />
-        <div className="main-content">
-          <div className="page-content">
-            <div className="container-fluid">
-              <ProductTable />
-            </div>
+    <div id="layout-wrapper">
+      <Topbar />
+      <Sidebar />
+      <div className="main-content">
+        <div className="page-content">
+          <div className="container-fluid">
+            <ProductTable />
           </div>
         </div>
       </div>
-    </>
-  )
-}
+      <Footer />
+    </div>
+  );
+};
 
-export default Product
+export default Product;
