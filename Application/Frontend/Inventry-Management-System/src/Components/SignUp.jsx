@@ -1,77 +1,80 @@
-import { useState } from 'react';
-import axios from 'axios';
-import '../styles/Auth.css';
+import { useState } from "react";
+import axios from "axios";
+import "../styles/Auth.css";
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
-    Name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'employee', // Default role
+    Name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "employee", // Default role
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     setLoading(true);
 
     if (!formData.Name || !formData.email || !formData.password) {
-      setError('All fields are required');
+      setError("All fields are required");
       setLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/signup', {
-        Name: formData.Name,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:3000/api/auth/signup",
+        {
+          Name: formData.Name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        },
+      );
 
       if (response.data.success) {
         setSuccess(`✅ ${response.data.message}`);
         setFormData({
-          Name: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          role: 'employee',
+          Name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          role: "employee",
         });
-        
+
         // Redirect to login after 2 seconds
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = "/login";
         }, 2000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -81,7 +84,7 @@ export default function SignUp() {
     <div className="auth-container">
       <div className="auth-card">
         <h2>Create Account</h2>
-        
+
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
@@ -140,7 +143,7 @@ export default function SignUp() {
 
           {/* Submit Button */}
           <button type="submit" disabled={loading} className="btn-submit">
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
@@ -151,8 +154,12 @@ export default function SignUp() {
         <div className="role-info">
           <h4>Account Types:</h4>
           <ul>
-            <li><strong>Employee:</strong> Full billing management + dashboard</li>
-            <li><strong>Admin:</strong> Only available through admin portal</li>
+            <li>
+              <strong>Employee:</strong> Full billing management + dashboard
+            </li>
+            <li>
+              <strong>Admin:</strong> Only available through admin portal
+            </li>
           </ul>
         </div>
       </div>

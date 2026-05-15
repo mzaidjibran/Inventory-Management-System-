@@ -371,7 +371,7 @@ const EmployeeTable = () => {
                         <div style={{ textAlign: "center", marginBottom: 22 }}>
                           {viewData.profileImage ? (
                             <img
-                              src={`http://localhost:3000${viewData.profileImage}`}
+                              src={`http://127.0.0.1:3000${viewData.profileImage}`}
                               alt={viewData.Name || "Employee"}
                               className="emp-profile-img"
                             />

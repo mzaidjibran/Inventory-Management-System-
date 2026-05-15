@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:3000";
 
 const decodeToken = (token) => {
   try {
@@ -181,10 +181,10 @@ export const createEmployeeApi = async (employeeData) => {
     body: JSON.stringify(employeeData),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.message || "Failed to create employee");
+  if (!response.ok)
+    throw new Error(data.message || "Failed to create employee");
   return data;
 };
-
 
 export const getAllUsersApi = async () => {
   const response = await fetch(`${API_BASE}/api/auth/admin/users`, {
@@ -198,7 +198,6 @@ export const getAllUsersApi = async () => {
   if (!response.ok) throw new Error(data.message || "Failed to fetch users");
   return data;
 };
-
 
 export const deleteUserApi = async (id) => {
   const response = await fetch(`${API_BASE}/api/auth/admin/users/${id}`, {

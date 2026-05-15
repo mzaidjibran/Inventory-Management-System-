@@ -1,7 +1,6 @@
 import EmployeeTable from "../components/Employee/EmployeeTable.jsx";
 import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
-import Footer from "../components/Footer.jsx";
 
 const Employee = () => {
   return (
@@ -94,7 +93,6 @@ const Employee = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

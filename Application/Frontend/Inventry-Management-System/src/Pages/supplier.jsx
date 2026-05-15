@@ -1,7 +1,6 @@
 import SupplierTable from "../Components/Supplier/SupplierTable.jsx";
 import Topbar from "../components/topbar.jsx";
 import Sidebar from "../components/sidebar.jsx";
-import Footer from "../components/Footer.jsx";
 
 const Supplier = () => {
   return (
@@ -95,7 +94,6 @@ const Supplier = () => {
             <SupplierTable />
           </div>
         </div>
-        <Footer />
       </div>
     </div>
   );

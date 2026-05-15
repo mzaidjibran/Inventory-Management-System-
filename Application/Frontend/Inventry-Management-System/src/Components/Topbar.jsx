@@ -11,7 +11,7 @@ import {
 import { getAllUsers, deleteUser } from "../Api/UserApi.js";
 import toast from "react-hot-toast";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = "http://127.0.0.1:3000";
 
 const normalizeRole = (r) => {
   if (!r) return "User";
