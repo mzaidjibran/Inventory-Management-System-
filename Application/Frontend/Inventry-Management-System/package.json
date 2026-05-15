@@ -11,10 +11,14 @@
   },
   "dependencies": {
     "apexcharts": "^4.7.0",
+    "axios": "^1.16.1",
+    "framer-motion": "^12.38.0",
     "react": "^19.2.5",
     "react-apexcharts": "^1.9.0",
+    "react-countup": "^6.5.3",
     "react-dom": "^19.2.5",
     "react-hot-toast": "^2.6.0",
+    "react-loading-skeleton": "^3.5.0",
     "react-router-dom": "^7.14.2"
   },
   "devDependencies": {

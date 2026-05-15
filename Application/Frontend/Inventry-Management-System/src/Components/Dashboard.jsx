@@ -1,14 +1,21 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
+import CountUp from "react-countup";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-// ── Fixed SimpleChart — fully inline, no CSS file needed ─────────────────────
+// ── Fixed SimpleChart with Framer Motion ─────────────────────────────────────
 const SimpleChart = ({ data, title }) => {
   console.log(`📊 SimpleChart "${title}" received:`, data);
 
   if (!data || data.length === 0) {
     console.warn(`⚠️ No data for chart: ${title}`);
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
         style={{
           background: "#fffdf9",
           border: "1px solid #e8dcc8",
@@ -27,14 +34,18 @@ const SimpleChart = ({ data, title }) => {
       >
         <div style={{ fontSize: 40, marginBottom: 10 }}>📊</div>
         No data available
-      </div>
+      </motion.div>
     );
   }
 
   const maxValue = Math.max(...data.map((d) => d.value || 0));
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.3 }}
       style={{
         background: "#fffdf9",
         border: "1px solid #e8dcc8",
@@ -68,8 +79,11 @@ const SimpleChart = ({ data, title }) => {
         }}
       >
         {data.map((item, idx) => (
-          <div
+          <motion.div
             key={idx}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "100%" }}
+            transition={{ delay: idx * 0.05, duration: 0.4 }}
             style={{
               flex: 1,
               display: "flex",
@@ -119,93 +133,137 @@ const SimpleChart = ({ data, title }) => {
             >
               {item.label}
             </span>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-// ── Stat Card ─────────────────────────────────────────────────────────────────
-const StatCard = ({ icon, title, value, sub }) => (
-  <div
-    style={{
-      background: "#fffdf9",
-      border: "1px solid #e8dcc8",
-      borderRadius: 14,
-      padding: "20px 22px",
-      fontFamily: "Nunito, sans-serif",
-      display: "flex",
-      alignItems: "flex-start",
-      gap: 14,
-    }}
-  >
-    <div
+// ── Stat Card with CountUp animation ─────────────────────────────────────────
+const StatCard = ({ icon, title, value, sub }) => {
+  // Check if value is numeric
+  const isNumeric = typeof value === "number";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.3 }}
       style={{
-        fontSize: 26,
-        lineHeight: 1,
-        marginTop: 2,
+        background: "#fffdf9",
+        border: "1px solid #e8dcc8",
+        borderRadius: 14,
+        padding: "20px 22px",
+        fontFamily: "Nunito, sans-serif",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 14,
+        cursor: "pointer",
       }}
     >
-      {icon}
-    </div>
-    <div style={{ flex: 1 }}>
-      <p
+      <div
         style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: "#b89060",
-          margin: "0 0 4px",
-          textTransform: "uppercase",
-          letterSpacing: "0.8px",
-        }}
-      >
-        {title}
-      </p>
-      <p
-        style={{
-          fontSize: 22,
-          fontWeight: 800,
-          color: "#3d2a10",
-          margin: "0 0 4px",
+          fontSize: 26,
           lineHeight: 1,
+          marginTop: 2,
         }}
       >
-        {value}
-      </p>
-      <p style={{ fontSize: 11, color: "#c8a87a", margin: 0, fontWeight: 600 }}>
-        {sub}
-      </p>
-    </div>
-  </div>
-);
+        {icon}
+      </div>
+      <div style={{ flex: 1 }}>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#b89060",
+            margin: "0 0 4px",
+            textTransform: "uppercase",
+            letterSpacing: "0.8px",
+          }}
+        >
+          {title}
+        </p>
+        <p
+          style={{
+            fontSize: 22,
+            fontWeight: 800,
+            color: "#3d2a10",
+            margin: "0 0 4px",
+            lineHeight: 1,
+          }}
+        >
+          {isNumeric ? (
+            <CountUp
+              start={0}
+              end={value}
+              duration={1.8}
+              separator=","
+              preserveValue={true}
+            />
+          ) : (
+            value
+          )}
+        </p>
+        <p
+          style={{ fontSize: 11, color: "#c8a87a", margin: 0, fontWeight: 600 }}
+        >
+          {sub}
+        </p>
+      </div>
+    </motion.div>
+  );
+};
 
 // ── Mini Stat Row ─────────────────────────────────────────────────────────────
-const MiniStat = ({ label, value }) => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "10px 14px",
-      background: "#fffdf9",
-      border: "1px solid #e8dcc8",
-      borderRadius: 10,
-      fontFamily: "Nunito, sans-serif",
-    }}
-  >
-    <span style={{ fontSize: 13, color: "#b89060", fontWeight: 600 }}>
-      {label}
-    </span>
-    <strong style={{ fontSize: 13, color: "#3d2a10", fontWeight: 800 }}>
-      {value}
-    </strong>
-  </div>
-);
+const MiniStat = ({ label, value }) => {
+  // Check if value is numeric
+  const isNumeric = typeof value === "number";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.3 }}
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px 14px",
+        background: "#fffdf9",
+        border: "1px solid #e8dcc8",
+        borderRadius: 10,
+        fontFamily: "Nunito, sans-serif",
+      }}
+    >
+      <span style={{ fontSize: 13, color: "#b89060", fontWeight: 600 }}>
+        {label}
+      </span>
+      <strong style={{ fontSize: 13, color: "#3d2a10", fontWeight: 800 }}>
+        {isNumeric ? (
+          <CountUp
+            start={0}
+            end={value}
+            duration={1.8}
+            separator=","
+            preserveValue={true}
+          />
+        ) : (
+          value
+        )}
+      </strong>
+    </motion.div>
+  );
+};
 
 // ── Section Heading ───────────────────────────────────────────────────────────
 const SectionHeading = ({ children }) => (
-  <h3
+  <motion.h3
+    initial={{ opacity: 0, y: -5 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
     style={{
       fontSize: 13,
       fontWeight: 800,
@@ -217,7 +275,7 @@ const SectionHeading = ({ children }) => (
     }}
   >
     {children}
-  </h3>
+  </motion.h3>
 );
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -270,20 +328,63 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "60vh",
-          fontFamily: "Nunito, sans-serif",
-          fontSize: 15,
-          fontWeight: 700,
-          color: "#b89060",
-        }}
-      >
-        Loading Dashboard…
-      </div>
+      <SkeletonTheme baseColor="#fffdf9" highlightColor="#f3e5d8">
+        <div style={{ padding: "24px", fontFamily: "Nunito, sans-serif" }}>
+          {/* Header Skeleton */}
+          <div style={{ marginBottom: 28 }}>
+            <Skeleton height={30} width={200} style={{ marginBottom: 8 }} />
+            <Skeleton height={24} width={300} />
+          </div>
+
+          {/* Stats Grid Skeleton */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+              gap: 14,
+              marginBottom: 20,
+            }}
+          >
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "20px",
+                  background: "#fffdf9",
+                  border: "1px solid #e8dcc8",
+                  borderRadius: 14,
+                }}
+              >
+                <Skeleton height={60} style={{ marginBottom: 8 }} />
+                <Skeleton height={20} width="80%" />
+              </div>
+            ))}
+          </div>
+
+          {/* Charts Skeleton */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: 14,
+            }}
+          >
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "20px",
+                  background: "#fffdf9",
+                  border: "1px solid #e8dcc8",
+                  borderRadius: 12,
+                }}
+              >
+                <Skeleton height={200} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </SkeletonTheme>
     );
   }
 
