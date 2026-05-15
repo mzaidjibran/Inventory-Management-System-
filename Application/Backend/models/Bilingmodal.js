@@ -6,50 +6,46 @@ const saleSchema = new mongoose.Schema(
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product"
+          ref: "Product",
         },
         quantity: {
           type: Number,
-          required: true
+          required: true,
         },
         price: {
           type: Number,
-          required: true
+          required: true,
         },
         total: {
           type: Number,
-          required: true
+          required: true,
         },
       },
     ],
 
     totalAmount: {
-      type: Number
-    },
-
-    discount:
-    {
       type: Number,
-      default: 0
     },
 
-    tax:
-    {
+    discount: {
       type: Number,
-      default: 0
+      default: 0,
     },
 
-    paymentMethod:
-    {
+    tax: {
+      type: Number,
+      default: 0,
+    },
+
+    paymentMethod: {
       type: String,
       enum: ["cash", "card", "online"],
       required: true,
     },
 
-    invoiceNumber:
-    {
+    invoiceNumber: {
       type: String,
-      unique: true
+      unique: true,
     },
 
     createdBy: {
@@ -58,15 +54,20 @@ const saleSchema = new mongoose.Schema(
       required: true,
     },
 
+    // ── Customer Info ──
+    customer: {
+      name: { type: String, default: "" },
+      phone: { type: String, default: "" },
+      address: { type: String, default: "" },
+    },
+
     status: {
       type: String,
       enum: ["completed", "pending"],
       default: "completed",
     },
-
   },
 
   { timestamps: true },
-
 );
 export default mongoose.model("Billing", saleSchema);

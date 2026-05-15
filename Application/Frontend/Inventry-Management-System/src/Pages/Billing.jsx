@@ -28,42 +28,6 @@ const Billing = () => {
                 fontFamily: "Nunito, sans-serif",
               }}
             >
-              <div>
-                <p
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 800,
-                    letterSpacing: "1.4px",
-                    textTransform: "uppercase",
-                    color: "#c8a87a",
-                    margin: "0 0 4px",
-                  }}
-                >
-                  Sales
-                </p>
-                <h2
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 800,
-                    color: "#3d2a10",
-                    margin: 0,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  Billing
-                </h2>
-                <p
-                  style={{
-                    color: "#b89060",
-                    fontSize: 13,
-                    margin: "4px 0 0",
-                    fontWeight: 600,
-                  }}
-                >
-                  Create and manage customer bills
-                </p>
-              </div>
-
               <nav style={{ display: "flex", gap: 6, alignItems: "center" }}>
                 <span
                   style={{ fontSize: 12, color: "#b89060", fontWeight: 600 }}

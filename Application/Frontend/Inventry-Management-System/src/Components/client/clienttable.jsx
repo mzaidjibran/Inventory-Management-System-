@@ -1,6 +1,5 @@
 import { useState } from "react";
 import ClientHook from "../../Hook/clienthook.jsx";
-import ClientForm from "./clientform.jsx";
 import { deleteClient } from "../../Api/client.js";
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/confirmToast.js";
@@ -160,26 +159,34 @@ function formatAddress(address) {
   if (!address) return "-";
   if (typeof address === "string") return address;
   if (typeof address === "object") {
-    return (
-      [
-        address.street,
-        address.city,
-        address.state,
-        address.country,
-        address.zipCode,
-      ]
-        .filter(Boolean)
-        .join(", ") || "-"
+    const composed = [
+      address.street,
+      address.city,
+      address.state,
+      address.country,
+      address.zipCode,
+      address.address,
+      address.line1,
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    if (composed) return composed;
+
+    // Last fallback for unexpected address object shapes
+    const rawValues = Object.values(address).filter(
+      (value) => typeof value === "string" && value.trim(),
     );
+    if (rawValues.length) return rawValues.join(", ");
+
+    return "-";
   }
   return "-";
 }
 
 const ClientTable = () => {
   const { clients, loadClients } = ClientHook();
-  const [editData, setEditData] = useState(null);
   const [viewData, setViewData] = useState(null);
-  const [showForm, setShowForm] = useState(false);
   const [showView, setShowView] = useState(false);
 
   function handleDelete(id) {
@@ -194,19 +201,9 @@ const ClientTable = () => {
     });
   }
 
-  function handleEdit(client) {
-    setEditData(client);
-    setShowForm(true);
-  }
-
   function handleView(client) {
     setViewData(client);
     setShowView(true);
-  }
-
-  function handleAdd() {
-    setEditData(null);
-    setShowForm(true);
   }
 
   return (
@@ -217,9 +214,6 @@ const ClientTable = () => {
           {/* Header */}
           <div className="ct-card-header">
             <h4 className="ct-card-title">Customers</h4>
-            <button className="ct-add-btn" onClick={handleAdd}>
-              + Add Customer
-            </button>
           </div>
 
           {/* Table */}
@@ -229,7 +223,7 @@ const ClientTable = () => {
                 <tr>
                   <th>Name</th>
                   <th>Contact</th>
-                  <th>Email</th>
+
                   <th>Address</th>
                   <th>Actions</th>
                 </tr>
@@ -241,9 +235,7 @@ const ClientTable = () => {
                     <td className={!client.contact ? "muted" : ""}>
                       {client.contact || "-"}
                     </td>
-                    <td className={!client.email ? "muted" : ""}>
-                      {client.email || "-"}
-                    </td>
+
                     <td>{formatAddress(client.address)}</td>
                     <td>
                       <button
@@ -252,13 +244,6 @@ const ClientTable = () => {
                         onClick={() => handleView(client)}
                       >
                         <i className="mdi mdi-eye" />
-                      </button>
-                      <button
-                        className="ct-action-btn ct-btn-edit"
-                        title="Edit"
-                        onClick={() => handleEdit(client)}
-                      >
-                        <i className="mdi mdi-pencil" />
                       </button>
                       <button
                         className="ct-action-btn ct-btn-delete"
@@ -275,16 +260,6 @@ const ClientTable = () => {
           </div>
         </div>
       </div>
-
-      {/* Add/Edit Form Modal */}
-      <ClientForm
-        key={editData?._id || "new-client"}
-        isOpen={showForm}
-        onClose={() => setShowForm(false)}
-        onSaved={loadClients}
-        editData={editData}
-        onClearEdit={() => setEditData(null)}
-      />
 
       {/* View Modal */}
       {showView && viewData && (
@@ -313,7 +288,7 @@ const ClientTable = () => {
               <div className="cv-grid">
                 {[
                   { label: "Name", value: viewData.name },
-                  { label: "Email", value: viewData.email },
+
                   { label: "Contact", value: viewData.contact },
                   {
                     label: "Address",

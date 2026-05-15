@@ -21,14 +21,6 @@ const clientSchema = new mongoose.Schema(
       country: String,
       zipCode: String,
     },
-    email: {
-      type: String,
-      unique: true,
-      required: [true, "Client email is required"],
-      lowercase: true,
-      trim: true,
-      maxlength: [100, "Email cannot exceed 100 characters"],
-    },
   },
   { timestamps: true },
 );

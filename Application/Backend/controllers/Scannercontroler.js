@@ -1,6 +1,7 @@
 import ScanSession from "../models/Scannermodal.js";
 import Product from "../models/Productmodal.js";
 import Billing from "../models/Bilingmodal.js";
+import Client from "../models/Clientmodal.js";
 
 // Helper: Auto-generate sequential session ID
 
@@ -104,7 +105,7 @@ export const addProductToScan = async (request, response) => {
     // Check if product already in cart
 
     const existingItemIndex = scanSession.items.findIndex(
-      (item) => item.product.toString() === product._id.toString()
+      (item) => item.product.toString() === product._id.toString(),
     );
 
     const total = numQuantity * product.price;
@@ -126,7 +127,10 @@ export const addProductToScan = async (request, response) => {
 
     // Update total
 
-    scanSession.totalAmount = scanSession.items.reduce((sum, item) => sum + item.total, 0);
+    scanSession.totalAmount = scanSession.items.reduce(
+      (sum, item) => sum + item.total,
+      0,
+    );
     await scanSession.save();
 
     response.status(200).json({
@@ -185,7 +189,7 @@ export const removeProductFromScan = async (request, response) => {
     }
 
     const removedItem = scanSession.items.find(
-      (item) => item.product.toString() === product._id.toString()
+      (item) => item.product.toString() === product._id.toString(),
     );
 
     if (!removedItem) {
@@ -197,10 +201,13 @@ export const removeProductFromScan = async (request, response) => {
     }
 
     scanSession.items = scanSession.items.filter(
-      (item) => item.product.toString() !== product._id.toString()
+      (item) => item.product.toString() !== product._id.toString(),
     );
 
-    scanSession.totalAmount = scanSession.items.reduce((sum, item) => sum + item.total, 0);
+    scanSession.totalAmount = scanSession.items.reduce(
+      (sum, item) => sum + item.total,
+      0,
+    );
 
     await scanSession.save();
 
@@ -225,7 +232,9 @@ export const getScanSession = async (request, response) => {
   try {
     const { sessionId } = request.params;
 
-    const scanSession = await ScanSession.findOne({ sessionId }).populate("items.product");
+    const scanSession = await ScanSession.findOne({ sessionId }).populate(
+      "items.product",
+    );
     if (!scanSession) {
       return response.status(404).json({
         success: false,
@@ -256,11 +265,13 @@ export const finalizeBill = async (request, response) => {
     const userId = request.userId;
 
     // sessionId URL params se bhi lo, body se bhi
-
     const sessionId = request.params.sessionId || request.body.sessionId;
     const paymentMethod = request.body.paymentMethod;
     const discount = request.body.discount || 0;
     const tax = request.body.tax || 0;
+    const customerName = request.body.customerName || "";
+    const customerPhone = request.body.customerPhone || "";
+    const customerAddress = request.body.customerAddress || "";
 
     if (!userId) {
       return response.status(401).json({
@@ -279,8 +290,9 @@ export const finalizeBill = async (request, response) => {
     }
 
     // Find scan session
-
-    const scanSession = await ScanSession.findOne({ sessionId }).populate("items.product");
+    const scanSession = await ScanSession.findOne({ sessionId }).populate(
+      "items.product",
+    );
     if (!scanSession) {
       return response.status(404).json({
         success: false,
@@ -298,7 +310,6 @@ export const finalizeBill = async (request, response) => {
     }
 
     // Verify stock and reduce
-
     for (const item of scanSession.items) {
       const product = await Product.findById(item.product._id);
       if (!product) {
@@ -318,20 +329,17 @@ export const finalizeBill = async (request, response) => {
       }
 
       // Reduce stock
-
       product.stockQuantity -= item.quantity;
       await product.save();
     }
 
     // Calculate totals
-
     const subtotal = scanSession.totalAmount;
     const numDiscount = Number(discount);
     const numTax = Number(tax);
     const totalAmount = subtotal + numTax - numDiscount;
 
-    // Create billing
-
+    // Create billing with customer info
     const billing = await Billing.create({
       items: scanSession.items.map((item) => ({
         product: item.product._id,
@@ -344,12 +352,62 @@ export const finalizeBill = async (request, response) => {
       tax: numTax,
       paymentMethod,
       invoiceNumber: `INV-${sessionId}-${Date.now()}`,
+      // ── Save customer info ──
+      customer: {
+        name: customerName,
+        phone: customerPhone,
+        address: customerAddress,
+      },
       createdBy: userId,
       status: "completed",
     });
 
-    // Mark scan as completed
+    // Auto-save customer and backfill missing profile fields
+    if (customerName && customerPhone) {
+      try {
+        const existingClient = await Client.findOne({ contact: customerPhone });
+        const normalizedAddress = customerAddress
+          ? { street: customerAddress }
+          : null;
 
+        if (existingClient) {
+          let shouldSave = false;
+
+          if (!existingClient.name && customerName) {
+            existingClient.name = customerName;
+            shouldSave = true;
+          }
+
+          if (
+            normalizedAddress &&
+            ![
+              existingClient.address?.street,
+              existingClient.address?.city,
+              existingClient.address?.state,
+              existingClient.address?.country,
+              existingClient.address?.zipCode,
+            ].filter(Boolean).length
+          ) {
+            existingClient.address = normalizedAddress;
+            shouldSave = true;
+          }
+
+          if (shouldSave) {
+            await existingClient.save();
+          }
+        } else {
+          await Client.create({
+            name: customerName,
+            contact: customerPhone,
+            address: normalizedAddress || {},
+          });
+        }
+      } catch (clientErr) {
+        console.error("Auto-save customer note:", clientErr.message);
+      }
+    }
+
+    // Mark scan as completed
     scanSession.status = "completed";
     await scanSession.save();
 
