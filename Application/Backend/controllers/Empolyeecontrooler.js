@@ -4,7 +4,9 @@ import path from "path";
 function normalizePayload(body, file) {
   const data = { ...body };
   if (data.Name) {
-    const parts = String(data.Name || "").trim().split(/\s+/);
+    const parts = String(data.Name || "")
+      .trim()
+      .split(/\s+/);
     data.firstName = parts[0] || "";
     data.lastName = parts.slice(1).join(" ") || parts[0] || "";
     delete data.Name;
@@ -68,12 +70,23 @@ function transformEmployeeDoc(doc) {
 
 export const createEmployee = async (request, response) => {
   try {
+    const userId = request.userId;
+    if (!userId) {
+      return response.status(401).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: User ID not found",
+      });
+    }
     const employeeData = normalizePayload(request.body, request.file);
-    const employee = await Employee.create(employeeData);
+    const employee = await Employee.create({
+      ...employeeData,
+      user: userId,
+    });
     response.status(201).json(transformEmployeeDoc(employee));
   } catch (error) {
     response.status(400).json({
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -82,7 +95,18 @@ export const createEmployee = async (request, response) => {
 
 export const getAllEmployees = async (request, response) => {
   try {
-    const employees = await Employee.find();
+    const userId = request.userId;
+    if (!userId) {
+      return response.status(401).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: User ID not found",
+        data: null,
+      });
+    }
+    const employees = await Employee.find({
+      $or: [{ user: userId }, { user: null }, { user: { $exists: false } }],
+    });
     const mapped = employees.map(transformEmployeeDoc);
     response.status(200).json({
       success: true,
@@ -90,7 +114,6 @@ export const getAllEmployees = async (request, response) => {
       message: "Employees fetched successfully",
       data: mapped,
     });
-
   } catch (error) {
     response.status(500).json({
       success: false,
@@ -132,21 +155,44 @@ export const getSingleEmployee = async (request, response) => {
 
 export const updateEmployee = async (request, response) => {
   try {
-    const updateData = normalizePayload(request.body, request.file);
+    const userId = request.userId;
+    const employeeId = request.params.id;
+
+    // Verify the employee belongs to the current user
+    const existingEmployee = await Employee.findById(employeeId);
+    if (!existingEmployee) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Employee not found",
+      });
+    }
+
+    // Check if user owns this employee (with backward compatibility)
+    if (
+      existingEmployee.user &&
+      existingEmployee.user.toString() !== userId.toString()
+    ) {
+      return response.status(403).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: You can only update your own employees",
+      });
+    }
+
+    const updateData = {
+      ...normalizePayload(request.body, request.file),
+      user: userId,
+    };
+
     const updatedEmployee = await Employee.findByIdAndUpdate(
-      request.params.id,
+      employeeId,
       updateData,
       {
         new: true,
       },
     );
-    if (!updatedEmployee) {
-      return response.status(404).json({
-        success: false,
-        error: true,
-        message: "Employee not found"
-      });
-    }
+
     response.status(200).json({
       success: true,
       error: false,
@@ -166,14 +212,33 @@ export const updateEmployee = async (request, response) => {
 
 export const deleteEmployee = async (request, response) => {
   try {
-    const deletedEmployee = await Employee.findByIdAndDelete(request.params.id);
-    if (!deletedEmployee) {
+    const userId = request.userId;
+    const employeeId = request.params.id;
+
+    // Verify the employee belongs to the current user
+    const existingEmployee = await Employee.findById(employeeId);
+    if (!existingEmployee) {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Employee not found"
+        message: "Employee not found",
       });
     }
+
+    // Check if user owns this employee (with backward compatibility)
+    if (
+      existingEmployee.user &&
+      existingEmployee.user.toString() !== userId.toString()
+    ) {
+      return response.status(403).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: You can only delete your own employees",
+      });
+    }
+
+    const deletedEmployee = await Employee.findByIdAndDelete(employeeId);
+
     response.status(200).json({
       success: true,
       error: false,

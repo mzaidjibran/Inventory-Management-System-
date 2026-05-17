@@ -13,10 +13,10 @@ const router = express.Router();
 
 //supplier routers
 
-router.post("/", upload.single("image"), createsuppliers);
-router.get("/", getAllsuppliers);
-router.get("/:id", getSingleSupplier);
-router.put("/:id", upload.single("image"), updateSupplier);
-router.delete("/:id", deleteSupplier);
+router.post("/", authMiddleware, upload.single("image"), createsuppliers);
+router.get("/", authMiddleware, getAllsuppliers);
+router.get("/:id", authMiddleware, getSingleSupplier);
+router.put("/:id", authMiddleware, upload.single("image"), updateSupplier);
+router.delete("/:id", authMiddleware, deleteSupplier);
 
 export default router;

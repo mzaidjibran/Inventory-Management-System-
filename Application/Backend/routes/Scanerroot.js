@@ -15,14 +15,14 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 
-router.post("/", createScanSession);
-router.get("/", getAllScans);
-router.get("/:sessionId", getScanSession);
-router.delete("/:sessionId", deleteScanSession);
+router.post("/", authMiddleware, createScanSession);
+router.get("/", authMiddleware, getAllScans);
+router.get("/:sessionId", authMiddleware, getScanSession);
+router.delete("/:sessionId", authMiddleware, deleteScanSession);
 
-router.post("/search-barcode", searchProductByBarcode);
-router.post("/:sessionId/add", addProductToScan);
-router.post("/:sessionId/remove", removeProductFromScan);
+router.post("/search-barcode", authMiddleware, searchProductByBarcode);
+router.post("/:sessionId/add", authMiddleware, addProductToScan);
+router.post("/:sessionId/remove", authMiddleware, removeProductFromScan);
 
 router.post("/:sessionId/finalize", authMiddleware, finalizeBill);
 

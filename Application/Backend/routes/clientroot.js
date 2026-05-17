@@ -14,9 +14,9 @@ const router = express.Router();
 //client routers
 
 router.post("/", authMiddleware, upload.single("image"), createclient);
-router.get("/", getAllclients);
-router.get("/:id", getSingleClient);
-router.put("/:id", upload.single("image"), updateClient);
-router.delete("/:id", deleteClient);
+router.get("/", authMiddleware, getAllclients);
+router.get("/:id", authMiddleware, getSingleClient);
+router.put("/:id", authMiddleware, upload.single("image"), updateClient);
+router.delete("/:id", authMiddleware, deleteClient);
 
 export default router;

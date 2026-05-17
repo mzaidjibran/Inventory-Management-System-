@@ -57,7 +57,7 @@ const saleSchema = new mongoose.Schema(
     // ── Customer Info ──
     customer: {
       name: { type: String, default: "" },
-      phone: { type: String, default: "" },
+      contact: { type: String, default: "" },
       address: { type: String, default: "" },
     },
 

@@ -1,9 +1,13 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:3000";
 
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
-});
+const getHeaders = () => {
+  const token = localStorage.getItem("accessToken");
+  console.log("Client API - Token present:", !!token);
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token || ""}`,
+  };
+};
 
 const createClient = async (data) => {
   const response = await fetch(`${API_BASE}/api/client`, {

@@ -16,7 +16,7 @@ const supplierSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      required: true,
+      required: false,
       maxlength: [50, "Address cannot exceed 50 characters"],
     },
     email: {
@@ -27,10 +27,11 @@ const supplierSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Email cannot exceed 100 characters"],
     },
-    user: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true },
 );

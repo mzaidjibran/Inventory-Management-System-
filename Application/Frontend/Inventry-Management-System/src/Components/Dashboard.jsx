@@ -462,6 +462,16 @@ export default function Dashboard() {
           >
             Welcome back, {user?.Name || "User"}
           </p>
+          <p
+            style={{
+              color: "#c8a87a",
+              fontSize: 12,
+              margin: "3px 0 0",
+              fontWeight: 500,
+            }}
+          >
+            📧 {user?.email || "user@example.com"}
+          </p>
         </div>
 
         <div
@@ -511,7 +521,7 @@ export default function Dashboard() {
             <StatCard
               icon="💰"
               title="Total Revenue"
-              value={`Rs. ${dashboardData.total?.revenue?.toLocaleString()}`}
+              value={`Rs. ${(dashboardData.total?.revenue || 0).toLocaleString()}`}
               sub={`Total Bills: ${dashboardData.total?.bills}`}
             />
             <StatCard
@@ -547,7 +557,7 @@ export default function Dashboard() {
             >
               <MiniStat
                 label="Daily Sales"
-                value={`Rs. ${dashboardData.daily?.sales?.toLocaleString()}`}
+                value={`Rs. ${(dashboardData.daily?.sales || 0).toLocaleString()}`}
               />
               <MiniStat
                 label="Bills Created"
@@ -672,13 +682,13 @@ export default function Dashboard() {
             <StatCard
               icon="💰"
               title="Total Revenue"
-              value={`Rs. ${dashboardData.total?.revenue?.toLocaleString()}`}
+              value={`Rs. ${(dashboardData.total?.revenue || 0).toLocaleString()}`}
               sub={`Total Bills: ${dashboardData.total?.bills}`}
             />
             <StatCard
               icon="📊"
               title="Today's Sales"
-              value={`Rs. ${dashboardData.daily?.sales?.toLocaleString()}`}
+              value={`Rs. ${(dashboardData.daily?.sales || 0).toLocaleString()}`}
               sub={`Bills: ${dashboardData.daily?.bills}`}
             />
             <StatCard
@@ -714,7 +724,7 @@ export default function Dashboard() {
             >
               <MiniStat
                 label="Monthly Sales"
-                value={`Rs. ${dashboardData.monthly?.sales?.toLocaleString()}`}
+                value={`Rs. ${(dashboardData.monthly?.sales || 0).toLocaleString()}`}
               />
               <MiniStat
                 label="Bills This Month"

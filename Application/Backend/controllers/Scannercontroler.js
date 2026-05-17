@@ -52,6 +52,7 @@ export const createScanSession = async (request, response) => {
 export const addProductToScan = async (request, response) => {
   try {
     const { sessionId, barcode, quantity = 1 } = request.body;
+    const userId = request.userId;
 
     if (!sessionId || !barcode) {
       return response.status(400).json({
@@ -85,7 +86,10 @@ export const addProductToScan = async (request, response) => {
 
     // Find scan session
 
-    let scanSession = await ScanSession.findOne({ sessionId });
+    let scanSession = await ScanSession.findOne({
+      sessionId,
+      createdBy: userId,
+    });
     if (!scanSession) {
       return response.status(404).json({
         success: false,
@@ -161,6 +165,7 @@ export const addProductToScan = async (request, response) => {
 export const removeProductFromScan = async (request, response) => {
   try {
     const { sessionId, barcode } = request.body;
+    const userId = request.userId;
 
     if (!sessionId || !barcode) {
       return response.status(400).json({
@@ -179,7 +184,10 @@ export const removeProductFromScan = async (request, response) => {
       });
     }
 
-    const scanSession = await ScanSession.findOne({ sessionId });
+    const scanSession = await ScanSession.findOne({
+      sessionId,
+      createdBy: userId,
+    });
     if (!scanSession) {
       return response.status(404).json({
         success: false,
@@ -231,10 +239,12 @@ export const removeProductFromScan = async (request, response) => {
 export const getScanSession = async (request, response) => {
   try {
     const { sessionId } = request.params;
+    const userId = request.userId;
 
-    const scanSession = await ScanSession.findOne({ sessionId }).populate(
-      "items.product",
-    );
+    const scanSession = await ScanSession.findOne({
+      sessionId,
+      createdBy: userId,
+    }).populate("items.product");
     if (!scanSession) {
       return response.status(404).json({
         success: false,
@@ -270,7 +280,7 @@ export const finalizeBill = async (request, response) => {
     const discount = request.body.discount || 0;
     const tax = request.body.tax || 0;
     const customerName = request.body.customerName || "";
-    const customerPhone = request.body.customerPhone || "";
+    const customerContact = request.body.customerContact || "";
     const customerAddress = request.body.customerAddress || "";
 
     if (!userId) {
@@ -290,9 +300,10 @@ export const finalizeBill = async (request, response) => {
     }
 
     // Find scan session
-    const scanSession = await ScanSession.findOne({ sessionId }).populate(
-      "items.product",
-    );
+    const scanSession = await ScanSession.findOne({
+      sessionId,
+      createdBy: userId,
+    }).populate("items.product");
     if (!scanSession) {
       return response.status(404).json({
         success: false,
@@ -355,7 +366,7 @@ export const finalizeBill = async (request, response) => {
       // ── Save customer info ──
       customer: {
         name: customerName,
-        phone: customerPhone,
+        contact: customerContact,
         address: customerAddress,
       },
       createdBy: userId,
@@ -363,9 +374,11 @@ export const finalizeBill = async (request, response) => {
     });
 
     // Auto-save customer and backfill missing profile fields
-    if (customerName && customerPhone) {
+    if (customerName && customerContact) {
       try {
-        const existingClient = await Client.findOne({ contact: customerPhone });
+        const existingClient = await Client.findOne({
+          contact: customerContact,
+        });
         const normalizedAddress = customerAddress
           ? { street: customerAddress }
           : null;
@@ -398,8 +411,9 @@ export const finalizeBill = async (request, response) => {
         } else {
           await Client.create({
             name: customerName,
-            contact: customerPhone,
+            contact: customerContact,
             address: normalizedAddress || {},
+            createdBy: userId,
           });
         }
       } catch (clientErr) {
@@ -434,6 +448,7 @@ export const finalizeBill = async (request, response) => {
 export const searchProductByBarcode = async (request, response) => {
   try {
     const { barcode } = request.body;
+    const userId = request.userId;
 
     if (!barcode) {
       return response.status(400).json({
@@ -443,7 +458,10 @@ export const searchProductByBarcode = async (request, response) => {
       });
     }
 
-    const product = await Product.findOne({ barcode });
+    const product = await Product.findOne({
+      barcode,
+      createdBy: userId,
+    });
     if (!product) {
       return response.status(404).json({
         success: false,
@@ -471,7 +489,16 @@ export const searchProductByBarcode = async (request, response) => {
 
 export const getAllScans = async (request, response) => {
   try {
-    const scans = await ScanSession.find().populate("items.product");
+    const userId = request.userId;
+    const scans = await ScanSession.find({
+      $or: [
+        { createdBy: userId },
+        { createdBy: null },
+        { createdBy: { $exists: false } }
+      ]
+    }).populate(
+      "items.product",
+    );
     response.status(200).json({
       success: true,
       error: false,
@@ -492,8 +519,12 @@ export const getAllScans = async (request, response) => {
 export const deleteScanSession = async (request, response) => {
   try {
     const { sessionId } = request.params;
+    const userId = request.userId;
 
-    const deletedScan = await ScanSession.findOneAndDelete({ sessionId });
+    const deletedScan = await ScanSession.findOneAndDelete({
+      sessionId,
+      createdBy: userId,
+    });
     if (!deletedScan) {
       return response.status(404).json({
         success: false,

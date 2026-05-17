@@ -2,6 +2,14 @@ import Product from "../models/Productmodal.js";
 
 export const createProduct = async (request, response) => {
   try {
+    const userId = request.userId;
+    if (!userId) {
+      return response.status(401).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: User ID not found",
+      });
+    }
     const barcode = (request.body.barcode || "").trim();
     if (!barcode) {
       return response.status(400).json({
@@ -14,6 +22,7 @@ export const createProduct = async (request, response) => {
     const productData = {
       ...request.body,
       barcode,
+      createdBy: userId,
       image: request.file
         ? `image/${request.file.filename}`
         : request.body.image || "",
@@ -24,7 +33,7 @@ export const createProduct = async (request, response) => {
     response.status(201).json(product);
   } catch (error) {
     response.status(400).json({
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -33,7 +42,23 @@ export const createProduct = async (request, response) => {
 
 export const getAllProducts = async (request, response) => {
   try {
-    const products = await Product.find();
+    const userId = request.userId;
+    if (!userId) {
+      return response.status(401).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: User ID not found",
+        data: null,
+      });
+    }
+    // Find products created by user OR legacy products without createdBy
+    const products = await Product.find({
+      $or: [
+        { createdBy: userId },
+        { createdBy: null },
+        { createdBy: { $exists: false } },
+      ],
+    });
     response.status(200).json({
       success: true,
       error: false,
@@ -81,12 +106,37 @@ export const getSingleProduct = async (request, response) => {
 
 export const updateProduct = async (request, response) => {
   try {
+    const userId = request.userId;
+    const productId = request.params.id;
+
+    // Verify the product belongs to the current user
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Product not found",
+      });
+    }
+
+    // Check if user owns this product (with backward compatibility)
+    if (
+      existingProduct.createdBy &&
+      existingProduct.createdBy.toString() !== userId.toString()
+    ) {
+      return response.status(403).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: You can only update your own products",
+      });
+    }
+
     const updateData = {
       ...request.body,
+      createdBy: userId,
     };
 
     if (Object.prototype.hasOwnProperty.call(request.body, "barcode")) {
-
       const barcode = (request.body.barcode || "").trim();
 
       if (!barcode) {
@@ -104,18 +154,10 @@ export const updateProduct = async (request, response) => {
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
-      request.params.id,
+      productId,
       updateData,
       { new: true, runValidators: true },
     );
-
-    if (!updatedProduct) {
-      return response.status(404).json({
-        success: false,
-        error: true,
-        message: "Product not found",
-      });
-    }
 
     response.status(200).json({
       success: true,
@@ -136,15 +178,33 @@ export const updateProduct = async (request, response) => {
 
 export const deleteProduct = async (request, response) => {
   try {
-    const deletedProduct = await Product.findByIdAndDelete(request.params.id);
+    const userId = request.userId;
+    const productId = request.params.id;
 
-    if (!deletedProduct) {
+    // Verify the product belongs to the current user
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
       return response.status(404).json({
         success: false,
         error: true,
         message: "Product not found",
       });
     }
+
+    // Check if user owns this product (with backward compatibility)
+    if (
+      existingProduct.createdBy &&
+      existingProduct.createdBy.toString() !== userId.toString()
+    ) {
+      return response.status(403).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: You can only delete your own products",
+      });
+    }
+
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+
     response.status(200).json({
       success: true,
       error: false,
@@ -165,6 +225,7 @@ export const deleteProduct = async (request, response) => {
 export const searchProductByBarcode = async (request, response) => {
   try {
     const { barcode } = request.query || request.body;
+    const userId = request.userId;
 
     if (!barcode) {
       return response.status(400).json({
@@ -174,7 +235,10 @@ export const searchProductByBarcode = async (request, response) => {
       });
     }
 
-    const product = await Product.findOne({ barcode });
+    const product = await Product.findOne({
+      barcode,
+      createdBy: userId,
+    });
     if (!product) {
       return response.status(404).json({
         success: false,

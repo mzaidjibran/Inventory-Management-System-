@@ -69,23 +69,23 @@ export const createBilling = async (request, response) => {
       // ── Save customer info ──
       customer: {
         name: request.body.customerName || "",
-        phone: request.body.customerPhone || "",
+        contact: request.body.customerContact || "",
         address: request.body.customerAddress || "",
       },
       createdBy: userId,
       status: request.body.status || "completed",
     });
 
-    // ── Auto-save new customer if name & phone provided ──
-    if (request.body.customerName && request.body.customerPhone) {
+    // ── Auto-save new customer if name & contact provided ──
+    if (request.body.customerName && request.body.customerContact) {
       const existingClient = await Client.findOne({
-        phone: request.body.customerPhone,
+        contact: request.body.customerContact,
       });
       if (!existingClient) {
         try {
           await Client.create({
             name: request.body.customerName,
-            phone: request.body.customerPhone,
+            contact: request.body.customerContact,
             address: request.body.customerAddress || "",
           });
         } catch (clientErr) {
@@ -117,7 +117,21 @@ export const createBilling = async (request, response) => {
 
 export const getAllBillings = async (request, response) => {
   try {
-    const billings = await Billing.find()
+    const userId = request.userId;
+    if (!userId) {
+      return response.status(401).json({
+        success: false,
+        error: true,
+        message: "Unauthorized: User ID not found",
+      });
+    }
+    const billings = await Billing.find({
+      $or: [
+        { createdBy: userId },
+        { createdBy: null },
+        { createdBy: { $exists: false } }
+      ]
+    })
       .populate({
         path: "items.product",
         select: "title name price",

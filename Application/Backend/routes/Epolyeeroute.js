@@ -7,15 +7,16 @@ import {
   deleteEmployee,
 } from "../controllers/Empolyeecontrooler.js";
 import upload from "../middleware/multerniddleware.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 //employee routers
 
-router.post("/", upload.single("profileImage"), createEmployee);
-router.get("/", getAllEmployees);
-router.get("/:id", getSingleEmployee);
-router.put("/:id", upload.single("profileImage"), updateEmployee);
-router.delete("/:id", deleteEmployee);
+router.post("/", authMiddleware, upload.single("profileImage"), createEmployee);
+router.get("/", authMiddleware, getAllEmployees);
+router.get("/:id", authMiddleware, getSingleEmployee);
+router.put("/:id", authMiddleware, upload.single("profileImage"), updateEmployee);
+router.delete("/:id", authMiddleware, deleteEmployee);
 
 export default router;

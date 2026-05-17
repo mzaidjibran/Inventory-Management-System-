@@ -1,5 +1,10 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:3000";
 
+const getHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+});
+
 const parseApiError = async (response, fallback) => {
   try {
     const errorData = await response.json();
@@ -17,7 +22,7 @@ const parseApiError = async (response, fallback) => {
 const createSupplier = async (data) => {
   const response = await fetch(`${API_BASE}/api/suplier`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -32,7 +37,7 @@ export default createSupplier;
 export const getAllSuppliers = async () => {
   const response = await fetch(`${API_BASE}/api/suplier`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
   });
   if (!response.ok) {
     await parseApiError(response, `Get all failed: ${response.status}`);
@@ -45,7 +50,7 @@ export const getAllSuppliers = async () => {
 export const getSingleSupplier = async (id) => {
   const response = await fetch(`${API_BASE}/api/suplier/${id}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
   });
   if (!response.ok) {
     await parseApiError(response, `Get failed: ${response.status}`);
@@ -58,7 +63,7 @@ export const getSingleSupplier = async (id) => {
 export const updateSuppliers = async (id, data) => {
   const response = await fetch(`${API_BASE}/api/suplier/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -72,7 +77,7 @@ export const updateSuppliers = async (id, data) => {
 export const deleteSupplier = async (id) => {
   const response = await fetch(`${API_BASE}/api/suplier/${id}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
   });
   if (!response.ok) {
     await parseApiError(response, `Delete failed: ${response.status}`);

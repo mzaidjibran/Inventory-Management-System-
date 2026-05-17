@@ -2,10 +2,10 @@
   "note": "Admin document to insert into the users collection. PasswordPlain is provided for convenience.",
   "document": {
     "Name": "Admin",
-    "email": "admin@mango.com",
+    "email": "admin@manngo.com",
     "password": "$2b$10$oI0eZqocH4Ktifti.0wXcuGvYu57.yh0gRT8z2FbikxF19rfL7i8a",
     "role": "admin"
   },
   "passwordPlain": "admin123",
-  "mongoShellInsert": "db.users.insertOne({\n  \"Name\": \"Admin\",\n  \"email\": \"admin@mango.com\",\n  \"password\": \"$2b$10$oI0eZqocH4Ktifti.0wXcuGvYu57.yh0gRT8z2FbikxF19rfL7i8a\",\n  \"role\": \"admin\"\n})"
+  "mongoShellInsert": "db.users.insertOne({\n  \"Name\": \"Admin\",\n  \"email\": \"admin@manngo.com\",\n  \"password\": \"$2b$10$oI0eZqocH4Ktifti.0wXcuGvYu57.yh0gRT8z2FbikxF19rfL7i8a\",\n  \"role\": \"admin\"\n})"
 }

@@ -274,8 +274,8 @@ function buildInvoiceHTML(bill, customer, cashier, items, totals) {
           </p>
 
           <p>
-            <span class="label">Phone:</span>
-            ${customer?.phone || "-"}
+            <span class="label">Contact:</span>
+            ${customer?.contact || "-"}
           </p>
 
           <p>
@@ -413,7 +413,7 @@ const BillingPage = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [customer, setCustomer] = useState({
     name: "",
-    phone: "",
+    contact: "",
     address: "",
   });
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -474,7 +474,7 @@ const BillingPage = () => {
       setCartItems([]);
       setLastBill(null);
       setShowReceipt(false);
-      setCustomer({ name: "", phone: "", address: "" });
+      setCustomer({ name: "", contact: "", address: "" });
       setDiscount(0);
       setTax(0);
       setPaymentMethod("cash");
@@ -584,7 +584,7 @@ const BillingPage = () => {
         discount: Number(discount),
         tax: Number(tax),
         customerName: customer.name,
-        customerPhone: customer.phone,
+        customerContact: customer.contact,
         customerAddress: customer.address,
       });
       setLastBill(res.data?.billing);
@@ -602,7 +602,7 @@ const BillingPage = () => {
   const handleNewBill = () => {
     setShowReceipt(false);
     setCartItems([]);
-    setCustomer({ name: "", phone: "", address: "" });
+    setCustomer({ name: "", contact: "", address: "" });
     setDiscount(0);
     setTax(0);
     setPaymentMethod("cash");
@@ -1338,9 +1338,9 @@ const BillingPage = () => {
                   <input
                     className="bp-input"
                     placeholder="03xx-xxxxxxx"
-                    value={customer.phone}
+                    value={customer.contact}
                     onChange={(e) =>
-                      setCustomer((p) => ({ ...p, phone: e.target.value }))
+                      setCustomer((p) => ({ ...p, contact: e.target.value }))
                     }
                     disabled={showReceipt}
                   />

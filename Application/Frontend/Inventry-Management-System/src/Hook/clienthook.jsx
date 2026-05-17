@@ -7,7 +7,7 @@ export default function ClientHook() {
   const loadClients = async () => {
     try {
       const data = await getAllClients();
-
+      console.log("Clients API response:", data);
       setClients(data.data || []);
     } catch (error) {
       console.error("Error loading clients:", error);

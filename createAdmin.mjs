@@ -23,7 +23,7 @@ async function seed() {
 
     adminData = {
       Name: "Admin",
-      email: "admin@mango.com",
+      email: "admin@manngo.com",
       password: hash,
       role: "admin",
       createdBy: "admin",
@@ -44,7 +44,7 @@ async function seed() {
 
     // Upsert admin
     const result = await usersCollection.updateOne(
-      { email: "admin@mango.com" },
+      { email: "admin@manngo.com" },
       { $set: adminData },
       { upsert: true },
     );

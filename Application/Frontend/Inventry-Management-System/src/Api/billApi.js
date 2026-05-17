@@ -2,10 +2,15 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:3000";
 
 const getToken = () => localStorage.getItem("accessToken");
 
+const getHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${getToken()}`,
+});
+
 export const searchProductByBarcode = async (barcode) => {
   const response = await fetch(
     `${API_BASE}/api/product/search/barcode?barcode=${encodeURIComponent(barcode)}`,
-    { method: "GET", headers: { "Content-Type": "application/json" } },
+    { method: "GET", headers: getHeaders() },
   );
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Product not found");
@@ -15,7 +20,7 @@ export const searchProductByBarcode = async (barcode) => {
 export const getAllProducts = async () => {
   const response = await fetch(`${API_BASE}/api/product`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Failed to fetch products");
@@ -25,10 +30,7 @@ export const getAllProducts = async () => {
 export const createScanSession = async () => {
   const response = await fetch(`${API_BASE}/api/scan`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
-    },
+    headers: getHeaders(),
     body: JSON.stringify({}),
   });
   const data = await response.json();
@@ -39,10 +41,7 @@ export const createScanSession = async () => {
 export const addProductToScan = async (sessionId, barcode, quantity = 1) => {
   const response = await fetch(`${API_BASE}/api/scan/${sessionId}/add`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
-    },
+    headers: getHeaders(),
     body: JSON.stringify({ sessionId, barcode, quantity }),
   });
   const data = await response.json();
@@ -53,10 +52,7 @@ export const addProductToScan = async (sessionId, barcode, quantity = 1) => {
 export const finalizeBill = async (sessionId, payload) => {
   const response = await fetch(`${API_BASE}/api/scan/${sessionId}/finalize`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
-    },
+    headers: getHeaders(),
     body: JSON.stringify(payload),
   });
   const data = await response.json();
@@ -67,7 +63,7 @@ export const finalizeBill = async (sessionId, payload) => {
 export const getAllBillings = async () => {
   const response = await fetch(`${API_BASE}/api/billing`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Failed to fetch bills");
