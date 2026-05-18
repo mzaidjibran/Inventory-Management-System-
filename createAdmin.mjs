@@ -14,7 +14,7 @@ async function seed() {
   try {
     const mongoURI =
       process.env.MONGO_URI ||
-      "mongodb://localhost:27017/inventory_management_system";
+      "mongodb+srv://mzaidjabran_db_user:njwcBy5V8bt1Wags@mangotechnologies.rlzdwgz.mongodb.net/?appName=MangoTechnologies";
     console.log("Connecting to MongoDB...", mongoURI);
 
     // Precompute password hash and admin payload
@@ -39,7 +39,7 @@ async function seed() {
     await client.connect();
     console.log("Connection Successful!");
 
-    const db = client.db("inventory_management_system");
+    const db = client.db("MangoTechnologies");
     const usersCollection = db.collection("users");
 
     // Upsert admin

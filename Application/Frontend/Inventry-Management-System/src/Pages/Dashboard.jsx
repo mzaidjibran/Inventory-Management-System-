@@ -264,6 +264,59 @@ export default function Dashboard() {
     );
   }
 
+  if (error) {
+    return (
+      <div id="layout-wrapper">
+        <Topbar />
+        <Sidebar />
+        <div className="main-content">
+          <div className="page-content">
+            <div className="container-fluid">
+              <div className="text-center py-5">
+                <div
+                  style={{
+                    background: "#fdecea",
+                    border: "1px solid #f5c6c6",
+                    borderRadius: 12,
+                    padding: 20,
+                    maxWidth: 500,
+                    margin: "0 auto",
+                  }}
+                >
+                  <i
+                    className="mdi mdi-alert-circle"
+                    style={{ fontSize: 40, color: "#c62828" }}
+                  />
+                  <p
+                    style={{
+                      color: "#c62828",
+                      fontFamily: "Nunito, sans-serif",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      margin: "12px 0 8px",
+                    }}
+                  >
+                    Error Loading Dashboard
+                  </p>
+                  <p
+                    style={{
+                      color: "#9a3d3d",
+                      fontFamily: "Nunito, sans-serif",
+                      fontSize: 13,
+                      margin: 0,
+                    }}
+                  >
+                    {error}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Shared style tokens ────────────────────────────────────────────────────
   const CARD = {
     background: "#fffdf9",

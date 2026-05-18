@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import UserModel from "../models/UserModel.js";
 import BillingModel from "../models/Bilingmodal.js";
 import ProductModel from "../models/Productmodal.js";
@@ -81,7 +82,7 @@ export const getDashboardStats = async (req, res) => {
         createdBy: userId,
       });
       const totalRevenue = await BillingModel.aggregate([
-        { $match: { createdBy: userId } },
+        { $match: { createdBy: new mongoose.Types.ObjectId(userId) } },
         { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       ]);
 
@@ -272,7 +273,7 @@ export const getDashboardStats = async (req, res) => {
         createdBy: userId,
       });
       const totalRevenue = await BillingModel.aggregate([
-        { $match: { createdBy: userId } },
+        { $match: { createdBy: new mongoose.Types.ObjectId(userId) } },
         { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       ]);
 

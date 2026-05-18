@@ -4,8 +4,9 @@
     "Name": "Admin",
     "email": "admin@manngo.com",
     "password": "$2b$10$oI0eZqocH4Ktifti.0wXcuGvYu57.yh0gRT8z2FbikxF19rfL7i8a",
-    "role": "admin"
+    "role": "admin",
+    "createdBy": "admin"
   },
   "passwordPlain": "admin123",
-  "mongoShellInsert": "db.users.insertOne({\n  \"Name\": \"Admin\",\n  \"email\": \"admin@manngo.com\",\n  \"password\": \"$2b$10$oI0eZqocH4Ktifti.0wXcuGvYu57.yh0gRT8z2FbikxF19rfL7i8a\",\n  \"role\": \"admin\"\n})"
+  "mongoShellInsert": "db.users.insertOne({\n  \"Name\": \"Admin\",\n  \"email\": \"admin@manngo.com\",\n  \"password\": \"$2b$10$oI0eZqocH4Ktifti.0wXcuGvYu57.yh0gRT8z2FbikxF19rfL7i8a\",\n  \"role\": \"admin\",\n  \"createdBy\": \"admin\"\n})"
 }
